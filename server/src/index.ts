@@ -1,15 +1,15 @@
-// src/index.ts
-import express, { Express, Request, Response } from "express";
+import express, { Application } from "express";
 import dotenv from "dotenv";
-import { testController } from "./controller";
+import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
 
-const app: Express = express();
-const port = process.env.PORT || 3000;
+const app: Application = express();
 
-app.get("/",testController);
+const PORT: number = parseInt(process.env.PORT || "3000", 10);
 
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+app.use(`${process.env.BASE_URL}/auth`,authRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
 });
