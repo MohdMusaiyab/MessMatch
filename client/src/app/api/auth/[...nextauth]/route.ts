@@ -8,33 +8,41 @@ const handler = NextAuth({
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required");
+        }
         try {
           const { email, password } = credentials;
 
           // API call to your backend to authenticate the user
           const response = await axios.post(
-            `${process.env.BACKEND_URL}/api/auth/login`,
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
             { email, password }
           );
 
-          const user = response.data;
-
-          // If no user is returned, throw an error
-          if (!user) {
-            throw new Error("Invalid credentials");
+          const { user, success } = response.data;
+          if (!success || !user) {
+            throw new Error(response.data.message || "Login failed");
           }
-
           // Return the user object
-          return { id: user.id, name: user.name, email: user.email, role: user.role };
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          };
         } catch (error) {
-          console.error("Authentication error:", error.response?.data || error.message);
-          throw new Error(error.response?.data?.message || "Login failed");
+          console.error(
+            "Authentication error:",
+            error?.response?.data || error?.message
+          );
+          throw new Error(error?.response?.data?.message || "Login failed");
         }
-      },
+      }, 
     }),
   ],
   pages: {
