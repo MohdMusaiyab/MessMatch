@@ -21,12 +21,22 @@ enum Role {
   OTHER
 }
 
+enum SecurityQuestion {
+  MOTHERS_MAIDEN_NAME
+  FIRST_PET_NAME
+  FAVORITE_CHILDHOOD_MEMORY
+  FAVORITE_TEACHER_NAME
+  BIRTH_TOWN_NAME
+}
+
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String           @id @default(uuid())
+  name             String
+  email            String           @unique
+  password         String
+  role             Role
+  securityQuestion SecurityQuestion 
+  securityAnswer   String 
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 }

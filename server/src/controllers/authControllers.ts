@@ -10,38 +10,50 @@ export const registerController = async (
 ): Promise<any> => {
   try {
     const parsedBody = registerSchema.parse(req.body);
-    const { email, password, name, role } = parsedBody;
+    const { email, password, name, role, securityQuestion, securityAnswer } = parsedBody;
+
+    // Check if the user already exists
     const user = await prisma.user.findUnique({
       where: {
         email: email,
       },
     });
+
     if (user) {
       return res
         .status(400)
         .json({ message: "User already exists", success: false });
     }
+
+    // Hash the password and security answer
     const hashedPassword = await hashPassword(password);
+    const hashedSecurityAnswer = await hashPassword(securityAnswer);
+
+    // Create the new user with security question and hashed answer
     await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
         role,
+        securityQuestion,
+        securityAnswer: hashedSecurityAnswer,
       },
     });
+
     return res.status(201).json({
-      message: "User created Successfully",
+      message: "User created successfully",
       success: true,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Error in creating user:", error);
     return res.status(500).json({
       message: "Error in creating User",
       success: false,
     });
   }
 };
+
 export const loginController = async (
   req: Request,
   res: Response

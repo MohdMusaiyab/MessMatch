@@ -7,6 +7,14 @@ export const registerSchema = z.object({
   role: z
     .enum(["COLLEGE", "CONTRACTOR", "CORPORATE", "ADMIN", "OTHER"])
     .default("OTHER"),
+  securityQuestion: z.enum([
+    "MOTHERS_MAIDEN_NAME",
+    "FIRST_PET_NAME",
+    "FAVORITE_CHILDHOOD_MEMORY",
+    "FAVORITE_TEACHER_NAME",
+    "BIRTH_TOWN_NAME",
+  ]),
+  securityAnswer: z.string().min(1, "Security answer is required"),
 });
 
 export type SignupInput = z.infer<typeof registerSchema>;
