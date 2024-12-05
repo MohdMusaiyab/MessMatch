@@ -1,6 +1,5 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
 import axios from "axios";
 
 const handler = NextAuth({
@@ -12,23 +11,28 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        // Check for missing credentials
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Email and password are required");
         }
+
         try {
           const { email, password } = credentials;
 
-          // API call to your backend to authenticate the user
+          // Authenticate with your backend
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
             { email, password }
           );
 
           const { user, success } = response.data;
+
+          // Ensure authentication succeeded
           if (!success || !user) {
             throw new Error(response.data.message || "Login failed");
           }
-          // Return the user object
+
+          // Return the user object for the JWT token
           return {
             id: user.id,
             name: user.name,
@@ -46,32 +50,37 @@ const handler = NextAuth({
     }),
   ],
   pages: {
-    signIn: "/auth/login", // Custom sign-in page (optional)
+    signIn: "/auth/login", // Optional: Custom sign-in page
   },
   session: {
     strategy: "jwt", // Use JWT for session management
   },
   callbacks: {
+    // Add user information to the token
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.name = user.name;
         token.email = user.email;
-        token.name=user.name;
+        token.role = user.role;
       }
-      return { ...user, ...token };
+      return token;
     },
+
+    // Pass the token to the session
     async session({ session, token }) {
       if (token) {
-        // session.user.id = token.id;
-        // session.user.email = token.email;
-        // session.user.role = token.role; // Include role in session if needed
-        // session.token = token;
-        session.user = token;
+        session.user = {
+          id: token.id,
+          name: token.name,
+          email: token.email,
+          role: token.role,
+        };
       }
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET, // Define your secret in .env
+  secret: process.env.NEXTAUTH_SECRET, // Ensure this is set in your .env file
 });
 
 export { handler as GET, handler as POST };
