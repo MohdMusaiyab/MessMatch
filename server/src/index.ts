@@ -2,16 +2,21 @@ import express, { Application } from "express";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import bodyparser from "body-parser";
+import cookieParser from "cookie-parser";
 import cors from "cors";
+import userRoutes from "./routes/userRoutes";
 dotenv.config();
 
 const app: Application = express();
 app.use(bodyparser.json());
 app.use(cors());
+app.use(cookieParser()); // Add cookie-parser middleware
 
 const PORT: number = parseInt(process.env.PORT || "4000", 10);
 
-app.use(`${process.env.BASE_URL}/auth`,authRoutes);
+app.use(`${process.env.BASE_URL}/auth`, authRoutes);
+
+app.use(`${process.env.BASE_URL}/user`, userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);

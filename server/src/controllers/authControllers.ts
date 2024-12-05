@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { loginSchema } from "../schemas/auth/loginSchema";
 import { registerSchema } from "../schemas/auth/registerSchema";
 import { comparePassword, hashPassword } from "../utils/auth";
+import { ZodError } from "zod";
 import prisma from "../utils/prisma";
 
 export const registerController = async (
@@ -10,7 +11,8 @@ export const registerController = async (
 ): Promise<any> => {
   try {
     const parsedBody = registerSchema.parse(req.body);
-    const { email, password, name, role, securityQuestion, securityAnswer } = parsedBody;
+    const { email, password, name, role, securityQuestion, securityAnswer } =
+      parsedBody;
 
     // Check if the user already exists
     const user = await prisma.user.findUnique({
@@ -46,6 +48,17 @@ export const registerController = async (
       success: true,
     });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        message: "Validation Error",
+        errors: error.errors.map((e) => ({
+          field: e.path.join("."),
+          message: e.message,
+        })),
+        success: false,
+      });
+    }
+
     console.error("Error in creating user:", error);
     return res.status(500).json({
       message: "Error in creating User",
@@ -87,9 +100,20 @@ export const loginController = async (
       success: true,
     });
   } catch (error) {
-    console.log(error);
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        message: "Validation Error",
+        errors: error.errors.map((e) => ({
+          field: e.path.join("."),
+          message: e.message,
+        })),
+        success: false,
+      });
+    }
+
+    console.error("Error in login:", error);
     return res
       .status(500)
-      .json({ message: "Something Went Wrong ! Try Again", success: false });
+      .json({ message: "Something went wrong! Try again.", success: false });
   }
 };

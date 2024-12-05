@@ -42,7 +42,7 @@ const handler = NextAuth({
           );
           throw new Error(error?.response?.data?.message || "Login failed");
         }
-      }, 
+      },
     }),
   ],
   pages: {
@@ -56,15 +56,17 @@ const handler = NextAuth({
       if (user) {
         token.id = user.id;
         token.email = user.email;
-        token.role = user.role; // If you need the user's role in the token
+        token.name=user.name;
       }
-      return token;
+      return { ...user, ...token };
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.role = token.role; // Include role in session if needed
+        // session.user.id = token.id;
+        // session.user.email = token.email;
+        // session.user.role = token.role; // Include role in session if needed
+        // session.token = token;
+        session.user = token;
       }
       return session;
     },
