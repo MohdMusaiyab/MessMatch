@@ -5,7 +5,7 @@ export const isSign = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+) :Promise<any>=> {
   try {
     const cookies = req.cookies;
     const token = cookies["next-auth.session-token"];

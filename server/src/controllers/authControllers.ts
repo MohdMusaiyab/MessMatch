@@ -32,7 +32,7 @@ export const registerController = async (
     const hashedSecurityAnswer = await hashPassword(securityAnswer);
 
     // Create the new user with security question and hashed answer
-    await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
@@ -42,6 +42,13 @@ export const registerController = async (
         securityAnswer: hashedSecurityAnswer,
       },
     });
+    if (role === "CONTRACTOR") {
+      await prisma.messContractor.create({
+        data: {
+          userId: newUser.id,
+        },
+      });
+    }
 
     return res.status(201).json({
       message: "User created successfully",
