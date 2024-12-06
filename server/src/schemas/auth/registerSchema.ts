@@ -15,6 +15,8 @@ export const registerSchema = z.object({
     "BIRTH_TOWN_NAME",
   ]),
   securityAnswer: z.string().min(1, "Security answer is required"),
+  address: z.string().min(1, "Address is required"),
+  contactNumber: z.string().min(1, "Contact number is required"),
 });
 
 export type SignupInput = z.infer<typeof registerSchema>;

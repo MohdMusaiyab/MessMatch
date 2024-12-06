@@ -11,7 +11,7 @@ export const registerController = async (
 ): Promise<any> => {
   try {
     const parsedBody = registerSchema.parse(req.body);
-    const { email, password, name, role, securityQuestion, securityAnswer } =
+    const { email, password, name, role, securityQuestion, securityAnswer ,address,contactNumber} =
       parsedBody;
 
     // Check if the user already exists
@@ -40,6 +40,8 @@ export const registerController = async (
         role,
         securityQuestion,
         securityAnswer: hashedSecurityAnswer,
+        address,
+        contactNumber
       },
     });
     if (role === "CONTRACTOR") {

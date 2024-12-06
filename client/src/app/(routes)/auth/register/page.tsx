@@ -11,6 +11,8 @@ interface FormData {
   role: "COLLEGE" | "CONTRACTOR" | "CORPORATE" | "ADMIN" | "OTHER";
   securityQuestion: string;
   securityAnswer: string;
+  contactNumber?: string;
+  address?: string;
 }
 
 // Map of user-friendly security questions to enums used in the backend
@@ -31,6 +33,8 @@ const RegisterPage: React.FC = () => {
     role: "OTHER", // Default role
     securityQuestion: "",
     securityAnswer: "",
+    contactNumber: "",
+    address: "",
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +43,9 @@ const RegisterPage: React.FC = () => {
 
   const router = useRouter();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
@@ -84,7 +90,10 @@ const RegisterPage: React.FC = () => {
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Name
             </label>
             <input
@@ -98,7 +107,10 @@ const RegisterPage: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -111,8 +123,12 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
+
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -126,7 +142,10 @@ const RegisterPage: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700"
+            >
               Role
             </label>
             <select

@@ -5,6 +5,7 @@ import bodyparser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes";
+import contractorRoutes from "./routes/contractorRoutes";
 dotenv.config();
 
 const app: Application = express();
@@ -17,6 +18,8 @@ const PORT: number = parseInt(process.env.PORT || "4000", 10);
 app.use(`${process.env.BASE_URL}/auth`, authRoutes);
 
 app.use(`${process.env.BASE_URL}/user`, userRoutes);
+
+app.use(`${process.env.BASE_URL}/contractor`, contractorRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);

@@ -6,8 +6,7 @@ export const menuSchema = z.object({
   name: z.string().min(1, "Menu name is required"), // e.g., "Breakfast Menu"
   items: z.array(z.string().min(1, "Item name cannot be empty")), // List of items in the menu
   pricePerHead: z.number().min(0, "Price per head must be non-negative"),
-  isVeg: z.boolean(), // If the menu is vegetarian-only
-  isNonVeg: z.boolean(), // If the menu is non-vegetarian
+  type: z.enum(['VEG', 'NON_VEG', 'BOTH']), // Use enum for menu type
 });
 
 export type Menu = z.infer<typeof menuSchema>;
