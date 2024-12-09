@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
-import { menuSchema } from "../schemas/menu/menuSchema";
+import { CreateMenuSchema } from "../schemas/schemas";
 
 export const createMenuController = async (
   req: Request,
@@ -12,7 +12,7 @@ export const createMenuController = async (
   }
   try {
     //Parse the request body
-    const menu = menuSchema.parse(req.body);
+    const menu = CreateMenuSchema.parse(req.body);
     //Create the menu simply
     const newMenu = await prisma.menu.create({
       data: {

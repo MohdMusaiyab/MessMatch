@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-import { loginSchema } from "../schemas/auth/loginSchema";
-import { registerSchema } from "../schemas/auth/registerSchema";
+import { CreateUserSchema ,LoginSchema} from "../schemas/schemas";
 import { comparePassword, hashPassword } from "../utils/auth";
 import { ZodError } from "zod";
 import prisma from "../utils/prisma";
@@ -10,7 +9,7 @@ export const registerController = async (
   res: Response
 ): Promise<any> => {
   try {
-    const parsedBody = registerSchema.parse(req.body);
+    const parsedBody = CreateUserSchema.parse(req.body);
     const { email, password, name, role, securityQuestion, securityAnswer ,address,contactNumber} =
       parsedBody;
 
@@ -83,7 +82,7 @@ export const loginController = async (
   try {
     //Parsing the body according to the schema
 
-    const parsedBody = loginSchema.parse(req.body);
+    const parsedBody = LoginSchema.parse(req.body);
     const { email, password } = parsedBody;
     const user = await prisma.user.findUnique({
       where: {

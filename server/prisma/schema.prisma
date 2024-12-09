@@ -56,19 +56,27 @@ model User {
   securityAnswer   String
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
-  contractor       MessContractor? // Optional relation for contractors
-  reviewsGiven     Review[]         @relation("ReviewsGiven") // Reviews written by the user
+
+  // Relations
+  contractor       MessContractor?       // Optional relation for contractors
+  reviewsGiven     Review[]              @relation("ReviewsGiven") // Reviews written by the user
+  auctionsCreated  Auction[]             @relation("AuctionsCreated") // Auctions created by the user
+  bidsPlaced       Bid[]                 // Bids placed by the user
+  chatsAsUser1     Chat[]                @relation("User1Chats")
+  chatsAsUser2     Chat[]                @relation("User2Chats")
+  messages         Message[]             // Messages sent by the user
+  videoConferences VideoConference[]     @relation("VideoConferenceParticipants")
 }
 
 model MessContractor {
   id             String        @id @default(uuid())
   userId         String        @unique
   user           User          @relation(fields: [userId], references: [id]) // Relation with User
-  menus          Menu[] // Array of menu items
-  numberOfPeople Int? // Approximate number of people they serve
+  menus          Menu[]        // Array of menu items
+  numberOfPeople Int?          // Approximate number of people they serve
   services       ServiceType[] // Enum list for predefined service types
-  ratings        Float? // Average rating
-  reviews        Review[] // Reviews received
+  ratings        Float?        // Average rating
+  reviews        Review[]      // Reviews received
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 }
@@ -77,10 +85,10 @@ model Menu {
   id           String         @id @default(uuid())
   contractorId String
   contractor   MessContractor @relation(fields: [contractorId], references: [id])
-  name         String // Menu name (e.g., "Breakfast Menu", "Wedding Menu")
-  items        String[] // Array of items in the menu
-  pricePerHead Float // Price per head for the menu
-  type         MenuType // Type of menu: VEG, NON_VEG, BOTH
+  name         String         // Menu name (e.g., "Breakfast Menu", "Wedding Menu")
+  items        String[]       // Array of items in the menu
+  pricePerHead Float          // Price per head for the menu
+  type         MenuType       // Type of menu: VEG, NON_VEG, BOTH
 }
 
 model Review {
@@ -89,7 +97,57 @@ model Review {
   reviewerId   String
   reviewer     User           @relation(fields: [reviewerId], references: [id], name: "ReviewsGiven")
   contractor   MessContractor @relation(fields: [contractorId], references: [id])
-  rating       Int // Rating out of 5
-  comment      String? // Optional comment
+  rating       Int            // Rating out of 5
+  comment      String?        // Optional comment
   createdAt    DateTime       @default(now())
+}
+
+model Auction {
+  id           String    @id @default(uuid())
+  creatorId    String    // User who created the auction
+  creator      User      @relation(fields: [creatorId], references: [id], name: "AuctionsCreated")
+  title        String
+  description  String
+  bids         Bid[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Bid {
+  id           String    @id @default(uuid())
+  auctionId    String
+  auction      Auction   @relation(fields: [auctionId], references: [id])
+  bidderId     String
+  bidder       User      @relation(fields: [bidderId], references: [id])
+  amount       Float
+  createdAt    DateTime  @default(now())
+}
+
+model Chat {
+  id           String    @id @default(uuid())
+  user1Id      String
+  user2Id      String
+  user1        User      @relation(fields: [user1Id], references: [id], name: "User1Chats")
+  user2        User      @relation(fields: [user2Id], references: [id], name: "User2Chats")
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+}
+
+model Message {
+  id           String    @id @default(uuid())
+  chatId       String
+  senderId     String
+  chat         Chat      @relation(fields: [chatId], references: [id])
+  sender       User      @relation(fields: [senderId], references: [id])
+  content      String
+  createdAt    DateTime  @default(now())
+}
+
+model VideoConference {
+  id           String    @id @default(uuid())
+  participants User[]    @relation("VideoConferenceParticipants")
+  startTime    DateTime
+  endTime      DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
