@@ -4,6 +4,7 @@ import React, { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
+// Define the shape of the form data
 interface FormData {
   name: string;
   email: string;
@@ -11,14 +12,13 @@ interface FormData {
   role: "COLLEGE" | "CONTRACTOR" | "CORPORATE" | "ADMIN" | "OTHER";
   securityQuestion: string;
   securityAnswer: string;
-  contactNumber?: string;
-  address?: string;
+  contactNumber: string;
+  address: string;
 }
 
-// Map of user-friendly security questions to enums used in the backend
-// Map of user-friendly security questions to enums used in the backend
+// Map of user-friendly security questions to backend enums
 const securityQuestionMap: Record<string, string> = {
-  "What is your mother's maiden name?": "MOTHERS_MAIDEN_NAME", // Correct enum
+  "What is your mother's maiden name?": "MOTHERS_MAIDEN_NAME",
   "What is the name of your first pet?": "FIRST_PET_NAME",
   "What was your favorite childhood memory?": "FAVORITE_CHILDHOOD_MEMORY",
   "What is your favorite teacher's name?": "FAVORITE_TEACHER_NAME",
@@ -30,7 +30,7 @@ const RegisterPage: React.FC = () => {
     name: "",
     email: "",
     password: "",
-    role: "OTHER", // Default role
+    role: "OTHER",
     securityQuestion: "",
     securityAnswer: "",
     contactNumber: "",
@@ -43,13 +43,15 @@ const RegisterPage: React.FC = () => {
 
   const router = useRouter();
 
+  // Handle input changes
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -57,7 +59,7 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // Map user-friendly security question to backend enum before sending
+      // Map security question to the backend enum
       const requestData = {
         ...formData,
         securityQuestion: securityQuestionMap[formData.securityQuestion],
@@ -67,6 +69,7 @@ const RegisterPage: React.FC = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
         requestData
       );
+
       setSuccess(response.data.message || "Registration successful!");
       setLoading(false);
 
@@ -74,7 +77,7 @@ const RegisterPage: React.FC = () => {
       router.push("/auth/login");
     } catch (err: any) {
       setLoading(false);
-      if (err.response) {
+      if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
         setError("An unexpected error occurred.");
@@ -89,11 +92,9 @@ const RegisterPage: React.FC = () => {
           Register
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name */}
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
               Name
             </label>
             <input
@@ -106,11 +107,10 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
+
+          {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
             </label>
             <input
@@ -124,11 +124,9 @@ const RegisterPage: React.FC = () => {
             />
           </div>
 
+          {/* Password */}
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
             <input
@@ -141,11 +139,10 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
+
+          {/* Role */}
           <div>
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
               Role
             </label>
             <select
@@ -163,6 +160,8 @@ const RegisterPage: React.FC = () => {
               <option value="OTHER">Other</option>
             </select>
           </div>
+
+          {/* Security Question */}
           <div>
             <label
               htmlFor="securityQuestion"
@@ -186,11 +185,10 @@ const RegisterPage: React.FC = () => {
               ))}
             </select>
           </div>
+
+          {/* Security Answer */}
           <div>
-            <label
-              htmlFor="securityAnswer"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="securityAnswer" className="block text-sm font-medium text-gray-700">
               Security Answer
             </label>
             <input
@@ -203,8 +201,43 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
+
+          {/* Contact Number */}
+          <div>
+            <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">
+              Contact Number
+            </label>
+            <input
+              type="text"
+              id="contactNumber"
+              name="contactNumber"
+              value={formData.contactNumber}
+              onChange={handleChange}
+              required
+              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
+            />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+              Address
+            </label>
+            <textarea
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              required
+              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
+            />
+          </div>
+
+          {/* Error and Success Messages */}
           {error && <p className="text-sm text-red-600">{error}</p>}
           {success && <p className="text-sm text-green-600">{success}</p>}
+
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
