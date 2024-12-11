@@ -94,7 +94,10 @@ const RegisterPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700"
+            >
               Name
             </label>
             <input
@@ -110,7 +113,10 @@ const RegisterPage: React.FC = () => {
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -126,7 +132,10 @@ const RegisterPage: React.FC = () => {
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -142,7 +151,10 @@ const RegisterPage: React.FC = () => {
 
           {/* Role */}
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700"
+            >
               Role
             </label>
             <select
@@ -188,7 +200,10 @@ const RegisterPage: React.FC = () => {
 
           {/* Security Answer */}
           <div>
-            <label htmlFor="securityAnswer" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="securityAnswer"
+              className="block text-sm font-medium text-gray-700"
+            >
               Security Answer
             </label>
             <input
@@ -204,7 +219,10 @@ const RegisterPage: React.FC = () => {
 
           {/* Contact Number */}
           <div>
-            <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="contactNumber"
+              className="block text-sm font-medium text-gray-700"
+            >
               Contact Number
             </label>
             <input
@@ -220,7 +238,10 @@ const RegisterPage: React.FC = () => {
 
           {/* Address */}
           <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="address"
+              className="block text-sm font-medium text-gray-700"
+            >
               Address
             </label>
             <textarea

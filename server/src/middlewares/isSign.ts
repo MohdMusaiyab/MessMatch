@@ -5,7 +5,7 @@ export const isSign = async (
   req: Request,
   res: Response,
   next: NextFunction
-) :Promise<any>=> {
+): Promise<any> => {
   try {
     const cookies = req.cookies;
     const token = cookies["next-auth.session-token"];
@@ -26,9 +26,9 @@ export const isSign = async (
         .status(401)
         .json({ error: "Unauthorized: Invalid session token" });
     }
-
+    console.log(decodedToken);
     req.userId = decodedToken.id as string;
-    console.log(req.userId);
+    req.role = decodedToken.role as string;
 
     next();
   } catch (error) {

@@ -1,20 +1,27 @@
 import express from "express";
 import {
   createMenuController,
+  getFilteredContractorsController,
   getSingleContractorController,
-  updateProfileController,
 } from "../controllers/contractorController";
 
 import { isSign } from "../middlewares/isSign";
+import { isContractor } from "../middlewares/isContractor";
 
 const contractorRoutes = express.Router();
 
-contractorRoutes.post("/create-menu", isSign, createMenuController);
-// =======For Updating the  Contractor Profile=======
-contractorRoutes.post("/update-profile/:id", isSign, updateProfileController);
-// ===================Routes that Dont Need Authorisation as Contractor===================
+contractorRoutes.post(
+  "/create-menu",
+  isSign,
+  isContractor,
+  createMenuController
+);
 
 // =======For Getting a Single Contractor=======
-
-contractorRoutes.get(":id", isSign, getSingleContractorController);
+// =================No Need to check if the user is Contractor or not=================
+contractorRoutes.get("/:id", isSign, getSingleContractorController);
 export default contractorRoutes;
+
+// ===================Filter for Contractores====================
+
+contractorRoutes.get("/", isSign, getFilteredContractorsController);
