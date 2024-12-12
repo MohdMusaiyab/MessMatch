@@ -13,7 +13,8 @@ export const createMenuController = async (
   }
   try {
     //Parse the request body
-    const menu = CreateMenuSchema.parse(req.body);
+
+    const menu = CreateMenuSchema.omit({ contractorId: true }).parse(req.body);
     //Create the menu simply
     const newMenu = await prisma.menu.create({
       data: {
@@ -29,6 +30,7 @@ export const createMenuController = async (
     });
   } catch (error) {
     if (error instanceof ZodError) {
+      console.log(error.errors);
       return res.status(400).json({
         message: "Invalid Data",
         success: false,
@@ -41,60 +43,38 @@ export const createMenuController = async (
       .json({ message: "Something Went Wrong", success: false });
   }
 };
-
-// ==========For Getting a Single Contractor==========
-
-export const getSingleContractorController = async (
+// ===================For Getting you Own Menu's============
+export const getMyMenusController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  const contractorId = req.params.id;
-  const requestUserId = req.userId;
-
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(401).json({ message: "Unauthorized", success: false });
+  }
   try {
-    // Fetch contractor details along with related data
-    const contractor = await prisma.messContractor.findUnique({
+    const menus = await prisma.menu.findMany({
       where: {
-        id: contractorId,
-      },
-      include: {
-        user: true, // Include full user details
-        menus: true, // Include all menus
-        reviews: {
-          include: {
-            reviewer: {
-              select: { name: true },
-            },
-          },
-        },
+        contractorId: userId,
       },
     });
-    if (!contractor) {
+    if (menus.length === 0) {
       return res
         .status(404)
-        .json({ message: "Contractor not found", success: false });
+        .json({ message: "No Menus Found", success: false });
     }
-
-    // Remove sensitive information if the requesting user is not the contractor
-    const isOwner = contractor.userId === requestUserId;
-    const responseContractor = {
-      ...contractor,
-      user: isOwner ? contractor.user : { name: contractor.user.name },
-    };
-
     return res.status(200).json({
-      message: "Contractor fetched successfully",
+      message: "Menus fetched successfully",
       success: true,
-      data: responseContractor,
+      data: menus,
     });
   } catch (error) {
-    console.error("Error fetching contractor:", error);
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Something Went Wrong", success: false });
   }
 };
-
 // ==========================Filter for Contractores==================
 
 // Controller for fetching filtered contractors with pagination and search
@@ -198,4 +178,3 @@ export const getFilteredContractorsController = async (
     });
   }
 };
-

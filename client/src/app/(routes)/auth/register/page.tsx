@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react"; // Import useSession
 
 // Define the shape of the form data
 interface FormData {
@@ -26,6 +27,7 @@ const securityQuestionMap: Record<string, string> = {
 };
 
 const RegisterPage: React.FC = () => {
+  const { data: session } = useSession(); // Get session data
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -36,12 +38,18 @@ const RegisterPage: React.FC = () => {
     contactNumber: "",
     address: "",
   });
-
+  
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const router = useRouter();
+
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (session) {
+      router.push("/"); // Redirect to home page
+    }
+  }, [session, router]);
 
   // Handle input changes
   const handleChange = (
@@ -64,12 +72,10 @@ const RegisterPage: React.FC = () => {
         ...formData,
         securityQuestion: securityQuestionMap[formData.securityQuestion],
       };
-
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
         requestData
       );
-
       setSuccess(response.data.message || "Registration successful!");
       setLoading(false);
 
@@ -94,10 +100,7 @@ const RegisterPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div>
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
               Name
             </label>
             <input
@@ -110,13 +113,9 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
-
           {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
             </label>
             <input
@@ -129,13 +128,9 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
-
           {/* Password */}
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
             <input
@@ -148,13 +143,9 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
-
           {/* Role */}
           <div>
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
               Role
             </label>
             <select
@@ -172,13 +163,9 @@ const RegisterPage: React.FC = () => {
               <option value="OTHER">Other</option>
             </select>
           </div>
-
           {/* Security Question */}
           <div>
-            <label
-              htmlFor="securityQuestion"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="securityQuestion" className="block text-sm font-medium text-gray-700">
               Security Question
             </label>
             <select
@@ -197,13 +184,9 @@ const RegisterPage: React.FC = () => {
               ))}
             </select>
           </div>
-
           {/* Security Answer */}
           <div>
-            <label
-              htmlFor="securityAnswer"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="securityAnswer" className="block text-sm font-medium text-gray-700">
               Security Answer
             </label>
             <input
@@ -216,13 +199,9 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
-
           {/* Contact Number */}
           <div>
-            <label
-              htmlFor="contactNumber"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">
               Contact Number
             </label>
             <input
@@ -235,13 +214,9 @@ const RegisterPage: React.FC = () => {
               className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
             />
           </div>
-
           {/* Address */}
           <div>
-            <label
-              htmlFor="address"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
               Address
             </label>
             <textarea
@@ -259,12 +234,10 @@ const RegisterPage: React.FC = () => {
           {success && <p className="text-sm text-green-600">{success}</p>}
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-2 px-4 text-white rounded ${
-              loading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"
-            }`}
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className={`w-full py-2 px-4 text-white rounded ${loading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
           >
             {loading ? "Registering..." : "Register"}
           </button>

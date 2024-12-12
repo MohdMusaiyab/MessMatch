@@ -10,7 +10,11 @@ dotenv.config();
 
 const app: Application = express();
 app.use(bodyparser.json());
-app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:3000", // Allow requests only from this origin
+  credentials: true, // Allow cookies and authorization headers
+};
+app.use(cors(corsOptions));
 app.use(cookieParser()); // Add cookie-parser middleware
 
 const PORT: number = parseInt(process.env.PORT || "4000", 10);

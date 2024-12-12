@@ -1,9 +1,11 @@
-import React from 'react'
-
+import React from "react";
+import Link from "next/link";
 const Searchbar = () => {
   return (
-    <div>Searchbar</div>
-  )
-}
+    <div>
+      Search Here
+    </div>
+  );
+};
 
-export default Searchbar
+export default Searchbar;

@@ -1,42 +1,16 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
-import axios from "axios";
+import React from "react";
+import Hero from "./components/General/Hero";
+import About from "./components/General/About";
+import Features from "./components/General/Features";
 
-const Page = () => {
-  const { data: session, status } = useSession();
-  const [response, setResponse] = useState("");
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Make a GET request to the backend
-        const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/user`,
-          {
-            withCredentials: true, // Include cookies in the request
-          }
-        );
-        setResponse(res.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setResponse(error.response?.data || "Error occurred");
-      }
-    };
-
-    if (status === "authenticated") {
-      fetchData();
-    }
-  }, [status]);
-
+const page = () => {
   return (
     <div>
-      <h1>User Session</h1>
-      <pre>{JSON.stringify(session?.user, null, 2)}</pre>
-      <h2>Backend Response</h2>
-      <pre>{JSON.stringify(response, null, 2)}</pre>
+      <Hero></Hero>
+      <About></About>
+      <Features></Features>
     </div>
   );
 };
 
-export default Page;
+export default page;

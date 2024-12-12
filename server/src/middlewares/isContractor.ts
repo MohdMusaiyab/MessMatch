@@ -1,20 +1,24 @@
 import { Request, Response, NextFunction } from "express";
-
+import prisma from "../utils/prisma";
 export const isContractor = async (
   req: Request,
   res: Response,
   next: NextFunction
-):Promise<any> => {
+): Promise<any> => {
   try {
-    const role = req?.role;
+    const userId = req.userId;
 
-    if (role === "CONTRACTOR") {
-      return next(); // Proceed to the next middleware or route handler
-    } else {
-      return res
-        .status(403)
-        .json({ error: "Forbidden: You are not a contractor", success: false });
+    const contractor = await prisma.messContractor.findUnique({
+      where: { userId: userId },
+    });
+    if (!contractor) {
+      return res.status(403).json({
+        error: "You are not a contractor",
+        success: false,
+      });
     }
+    req.userId = contractor.id;
+    next();
   } catch (error) {
     console.error("Error in isContractor middleware:", error);
     return res
