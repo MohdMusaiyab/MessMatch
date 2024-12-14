@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
-import { CreateMenuSchema } from "../schemas/schemas";
+import { CreateMenuSchema, MenuSchema } from "../schemas/schemas";
 import { ZodError } from "zod";
 
 export const createMenuController = async (
@@ -75,8 +75,143 @@ export const getMyMenusController = async (
       .json({ message: "Something Went Wrong", success: false });
   }
 };
-// ==========================Filter for Contractores==================
 
+export const updateMenuController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const menuId = req.params.id;
+  const userId = req.userId;
+  try {
+    const updatedMenuData = MenuSchema.omit({ contractorId: true })
+      .partial()
+      .parse(req.body);
+    const menu = await prisma.menu.findUnique({
+      where: {
+        id: menuId,
+      },
+    });
+    if (!menu) {
+      return res.status(404).json({
+        message: "Menu not found",
+        success: false,
+      });
+    }
+    // Ensure the logged-in contractor is the owner of the menu
+    if (menu.contractorId !== userId) {
+      return res.status(403).json({
+        message: "Forbidden: You do not have permission to update this menu",
+        success: false,
+      });
+    }
+    const updatedMenu = await prisma.menu.update({
+      where: {
+        id: menuId,
+      },
+      data: {
+        ...updatedMenuData,
+      },
+    });
+    return res.status(200).json({
+      message: "Menu updated successfully",
+      success: true,
+      data: updatedMenu,
+    });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: "Something Went Wrong", success: false });
+  }
+};
+
+// =========================For Getting a single Menu using its ID================
+export const getSingleMenuController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Menu ID is required.",
+    });
+  }
+
+  try {
+    const menu = await prisma.menu.findUnique({
+      where: { id },
+    });
+    if (!menu) {
+      return res.status(404).json({
+        success: false,
+        message: "Menu not found.",
+      });
+    }
+    // Send the menu details in the response
+    return res.status(200).json({
+      success: true,
+      message: "Menu fetched successfully.",
+      data: menu,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching the menu.",
+    });
+  }
+};
+
+// ===============For Deleting Your Own Menu=======================
+export const deleteYourMenuController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const userId = req?.userId;
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: "Menu ID is required.",
+    });
+  }
+  try {
+    const menu = await prisma.menu.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!menu) {
+      return res.status(404).json({
+        success: false,
+        message: "Menu not found.",
+      });
+    }
+    // Check if the menu belongs to the authenticated user
+    if (menu.contractorId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this menu.",
+      });
+    }
+    await prisma.menu.delete({
+      where: { id },
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Menu deleted successfully.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Error in Deleting Menu",
+      success: false,
+    });
+  }
+};
+
+// ==========================Filter for Contractores==================
+//Need Check
 // Controller for fetching filtered contractors with pagination and search
 export const getFilteredContractorsController = async (
   req: Request,
