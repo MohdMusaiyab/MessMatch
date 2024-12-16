@@ -5,6 +5,7 @@ const SideBarDashBoard = () => {
     <div>SideBarDashBoard
         <ul>
             <Link href="/dashboard/contractor/menu">My Menu</Link>
+            <Link href="/chats">My Chats</Link>
             
         </ul>
     </div>

@@ -1,9 +1,12 @@
-import React from 'react'
+import SideBarDashboard from "@/app/components/colleges/SideBarDashboard";
+import React from "react";
 
 const page = () => {
   return (
-    <div>page</div>
-  )
-}
+    <div>
+      <SideBarDashboard />
+    </div>
+  );
+};
 
-export default page
+export default page;
