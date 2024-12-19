@@ -2,13 +2,16 @@ import express from "express";
 import { isSign } from "../middlewares/isSign";
 import {
   getUserController,
+  getYourOwnProfileController,
   updateUserController,
 } from "../controllers/userControllers";
 
 const userRoutes = express.Router();
 
 userRoutes.put("/update", isSign, updateUserController);
-// ====================For Getting a Single User====================
+// ====================For Getting a Single User Profile====================
 userRoutes.get("/:id", isSign, getUserController);
+//============For Getting Your Own Profile====================
+userRoutes.get("/my-profile", isSign, getYourOwnProfileController);
 
 export default userRoutes;
