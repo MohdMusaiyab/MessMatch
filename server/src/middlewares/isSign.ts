@@ -26,7 +26,7 @@ export const isSign = async (
         .status(401)
         .json({ error: "Unauthorized: Invalid session token" });
     }
-    console.log(decodedToken);
+   // console.log(decodedToken);
     req.userId = decodedToken.id as string;
     req.role = decodedToken.role as string;
 

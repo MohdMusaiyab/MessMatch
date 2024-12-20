@@ -6,12 +6,14 @@ import {
   updateUserController,
 } from "../controllers/userControllers";
 
-const userRoutes = express.Router();
 
+const userRoutes = express.Router();
+// ================++For Updating User Profile====================
 userRoutes.put("/update", isSign, updateUserController);
+//============For Getting Your Own Profile====================
+
+userRoutes.get("/my-profile", isSign, getYourOwnProfileController);
 // ====================For Getting a Single User Profile====================
 userRoutes.get("/:id", isSign, getUserController);
-//============For Getting Your Own Profile====================
-userRoutes.get("/my-profile", isSign, getYourOwnProfileController);
 
 export default userRoutes;

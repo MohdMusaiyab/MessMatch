@@ -8,15 +8,21 @@ export const updateUserController = async (
   res: Response
 ): Promise<any> => {
   try {
-    const userid = req.userId;
-    const { name, email, password, role, securityQuestion, securityAnswer } =
-      req.body;
+    const userId = req.userId; // Extract userId from the request
+    const userRole = req.role; // Extract role from the request
+    const {
+      name,
+      email,
+      password,
+      securityQuestion,
+      securityAnswer,
+      contractorFields, // For contractor-specific fields
+    } = req.body;
 
     // Find the user in the database
     const user = await prisma.user.findUnique({
-      where: {
-        id: userid,
-      },
+      where: { id: userId },
+      include: { contractor: true }, // Include contractor if they exist
     });
 
     if (!user) {
@@ -26,21 +32,41 @@ export const updateUserController = async (
       });
     }
 
-    // Prepare the update object with only the fields that were provided
+    // Prepare the update object for the User table
     const updateData: any = {};
-
     if (name) updateData.name = name;
     if (email) updateData.email = email;
     if (password) updateData.password = await hashPassword(password); // Hashing the password
-    if (role) updateData.role = role; // Ensure you have role management logic if needed
     if (securityQuestion) updateData.securityQuestion = securityQuestion;
-    if (securityAnswer) updateData.securityAnswer = securityAnswer;
+    if (securityAnswer)
+      updateData.securityAnswer = await hashPassword(securityAnswer);
+
+    // Role-based additional updates
+    if (userRole === "CONTRACTOR" && contractorFields) {
+      const { numberOfPeople, services } = contractorFields;
+
+      // Ensure contractor record exists
+      if (!user.contractor) {
+        return res.status(400).json({
+          message: "Contractor record not found for this user",
+          success: false,
+        });
+      }
+
+      // Update contractor-specific fields
+      await prisma.messContractor.update({
+        where: { userId: userId },
+        data: {
+          numberOfPeople: numberOfPeople ?? user.contractor.numberOfPeople,
+          services: services ?? user.contractor.services,
+          updatedAt: new Date(),
+        },
+      });
+    }
 
     // Update the user in the database
     const updatedUser = await prisma.user.update({
-      where: {
-        id: userid,
-      },
+      where: { id: userId },
       data: updateData,
     });
 
@@ -52,7 +78,7 @@ export const updateUserController = async (
   } catch (error) {
     console.error(error);
 
-    // If the error is from a validation (e.g., Zod validation), handle it specifically
+    // Handle Zod validation errors specifically
     if (error instanceof ZodError) {
       return res.status(400).json({
         message: "Validation error",
@@ -90,12 +116,13 @@ export const getUserController = async (
   try {
     const user = await prisma.user.findUnique({
       where: { id },
-      include: {
-        contractor: {
-          include: {
-            menus: true,
-          },
-        },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        address: true,
+        contactNumber: true,
+        role: true,
       },
     });
 
@@ -121,12 +148,13 @@ export const getUserController = async (
 };
 
 // ==============================For Getting Your Own Profile====================
-
+//Need Edits
 export const getYourOwnProfileController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   const userId = req.userId;
+  
   if (!userId) {
     return res.status(400).json({
       message: "User not found",
@@ -137,10 +165,18 @@ export const getYourOwnProfileController = async (
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        address: true,
+        securityQuestion: true,
+        contactNumber: true,
+        role: true,
         contractor: {
-          include: {
-            menus: true,
+          select: {
+            numberOfPeople: true,
+            services: true,
           },
         },
       },
