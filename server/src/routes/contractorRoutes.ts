@@ -4,6 +4,7 @@ import {
   deleteYourMenuController,
   getFilteredContractorsController,
   getMyMenusController,
+  getOthersMenuController,
   getSingleMenuController,
   updateMenuController,
 } from "../controllers/contractorController";
@@ -21,6 +22,8 @@ contractorRoutes.post(
 );
 // ============For Getting all menus of yourself===============
 contractorRoutes.get("/your-menus", isSign, isContractor, getMyMenusController);
+// ============For getting the Menu of others================//
+contractorRoutes.get("/menus/:id",isSign,getOthersMenuController)
 
 //For Getting a single Menu using its ID================//
 contractorRoutes.get("/menu/:id", isSign, getSingleMenuController);

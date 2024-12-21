@@ -75,7 +75,67 @@ export const getMyMenusController = async (
       .json({ message: "Something Went Wrong", success: false });
   }
 };
+// =================+For Getting Others Menu==================
+export const getOthersMenuController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { id } = req.params;
 
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Contractor ID not provided",
+      });
+    }
+
+    const menus = await prisma.menu.findMany({
+      where: {
+        contractorId: id,
+      },
+      select: {
+        id: true,
+        name: true,
+        items: true,
+        pricePerHead: true,
+        type: true,
+        contractor: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!menus || menus.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No Menus found for this contractor",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Menus fetched successfully",
+      data: menus.map((menu) => ({
+        id: menu.id,
+        name: menu.name,
+        pricePerHead: menu.pricePerHead,
+        type: menu.type,
+        contractor: menu.contractor,
+      })),
+    });
+  } catch (error) {
+    console.error("Error fetching menus:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+// =================For Updating A Menu using its ID================
 export const updateMenuController = async (
   req: Request,
   res: Response

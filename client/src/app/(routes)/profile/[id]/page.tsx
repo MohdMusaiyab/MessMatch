@@ -1,23 +1,21 @@
 "use client";
 import React from "react";
-import UserInformation from "@/app/components/profile/UserInformation";
-
+import ShowMenu from "@/app/components/profile/ShowMenu";
 import { useParams } from "next/navigation";
 
-interface ProfilePageProps {
-  paramsId?: string;
-}
+const ProfileByIdPage = () => {
+  const { id } = useParams(); // Get the contractor ID from the URL
 
-const ProfilePage = ({ paramsId }: ProfilePageProps) => {
-  //Get the id from the params using enxt navigation
-  const { id } = useParams();
+  if (!id) {
+    return <div>Invalid contractor ID</div>;
+  }
 
   return (
     <div>
-      <h1>Profile Page</h1>
-      <UserInformation id={id as string} />
+      <h1>Contractor Profile</h1>
+      <ShowMenu contractorId={id as string} />
     </div>
   );
 };
 
-export default ProfilePage;
+export default ProfileByIdPage;
