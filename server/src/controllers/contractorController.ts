@@ -81,59 +81,62 @@ export const getOthersMenuController = async (
   res: Response
 ): Promise<any> => {
   try {
+    // Extract the user ID from the request parameters
     const { id } = req.params;
 
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "Contractor ID not provided",
+        message: "User ID not provided",
       });
     }
 
+    // Find the contractor associated with the given user ID
+    const contractor = await prisma.messContractor.findUnique({
+      where: { userId: id },
+      select: { id: true }, // Select only the contractor ID for efficiency
+    });
+
+    if (!contractor) {
+      return res.status(404).json({
+        success: false,
+        message: "Contractor not found for the given user ID",
+      });
+    }
+
+    // Fetch menus for the contractor
     const menus = await prisma.menu.findMany({
-      where: {
-        contractorId: id,
-      },
+      where: { contractorId: contractor.id },
       select: {
         id: true,
         name: true,
         items: true,
         pricePerHead: true,
         type: true,
-        contractor: {
-          select: {
-            id: true,
-          },
-        },
       },
     });
 
-    if (!menus || menus.length === 0) {
+    if (menus.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "No Menus found for this contractor",
+        message: "No menus found for this contractor",
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Menus fetched successfully",
-      data: menus.map((menu) => ({
-        id: menu.id,
-        name: menu.name,
-        pricePerHead: menu.pricePerHead,
-        type: menu.type,
-        contractor: menu.contractor,
-      })),
+      data: menus,
     });
   } catch (error) {
     console.error("Error fetching menus:", error);
     return res.status(500).json({
       success: false,
-      message: "Something went wrong",
+      message: "Internal server error",
     });
   }
 };
+
 
 // =================For Updating A Menu using its ID================
 export const updateMenuController = async (

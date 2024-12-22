@@ -1,12 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Link from "next/link"; // Import Link for navigation
 
 interface Menu {
   id: string;
   name: string;
   pricePerHead: number;
   type: string;
+  items: string;
 }
 
 interface ShowMenuProps {
@@ -35,7 +37,6 @@ const ShowMenu: React.FC<ShowMenuProps> = ({ contractorId }) => {
       } catch (err) {
         console.error(err);
         if (axios.isAxiosError(err)) {
-          // Axios specific error handling
           setError("Network error: Unable to fetch menus. Please try again later.");
         } else {
           setError("An unexpected error occurred. Please try again.");
@@ -68,7 +69,12 @@ const ShowMenu: React.FC<ShowMenuProps> = ({ contractorId }) => {
           <li key={menu.id}>
             <h3>{menu.name}</h3>
             <p>Price per head: ${menu.pricePerHead}</p>
+            <p>{menu?.items}</p>
             <p>Type: {menu.type}</p>
+            {/* Link to the update menu page */}
+            <Link href={`/dashboard/contractor/menu/update-menu/${menu.id}`}>
+              Update Menu
+            </Link>
           </li>
         ))}
       </ul>

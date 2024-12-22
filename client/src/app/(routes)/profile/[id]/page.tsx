@@ -2,6 +2,7 @@
 import React from "react";
 import ShowMenu from "@/app/components/profile/ShowMenu";
 import { useParams } from "next/navigation";
+import UserInformation from "@/app/components/profile/UserInformation";
 
 const ProfileByIdPage = () => {
   const { id } = useParams(); // Get the contractor ID from the URL
@@ -12,7 +13,7 @@ const ProfileByIdPage = () => {
 
   return (
     <div>
-      <h1>Contractor Profile</h1>
+      <UserInformation id={id as string} />
       <ShowMenu contractorId={id as string} />
     </div>
   );
