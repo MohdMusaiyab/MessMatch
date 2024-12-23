@@ -1,7 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Link from "next/link"; // Import Link for navigation
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 interface Menu {
   id: string;
@@ -13,9 +14,10 @@ interface Menu {
 
 interface ShowMenuProps {
   contractorId?: string;
+  isOwner: boolean; // New prop to determine ownership
 }
 
-const ShowMenu: React.FC<ShowMenuProps> = ({ contractorId }) => {
+const ShowMenu: React.FC<ShowMenuProps> = ({ contractorId, isOwner }) => {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,9 @@ const ShowMenu: React.FC<ShowMenuProps> = ({ contractorId }) => {
       } catch (err) {
         console.error(err);
         if (axios.isAxiosError(err)) {
-          setError("Network error: Unable to fetch menus. Please try again later.");
+          setError(
+            "Network error: Unable to fetch menus. Please try again later."
+          );
         } else {
           setError("An unexpected error occurred. Please try again.");
         }
@@ -50,7 +54,7 @@ const ShowMenu: React.FC<ShowMenuProps> = ({ contractorId }) => {
   }, [contractorId]);
 
   if (loading) {
-    return <div>Loading your menus...</div>;
+    return <div>Loading menus...</div>;
   }
 
   if (error) {
@@ -69,12 +73,13 @@ const ShowMenu: React.FC<ShowMenuProps> = ({ contractorId }) => {
           <li key={menu.id}>
             <h3>{menu.name}</h3>
             <p>Price per head: ${menu.pricePerHead}</p>
-            <p>{menu?.items}</p>
+            <p>{menu.items}</p>
             <p>Type: {menu.type}</p>
-            {/* Link to the update menu page */}
-            <Link href={`/dashboard/contractor/menu/update-menu/${menu.id}`}>
-              Update Menu
-            </Link>
+            {isOwner && (
+              <Link href={`/dashboard/contractor/menu/update-menu/${menu.id}`}>
+                Update Menu
+              </Link>
+            )}
           </li>
         ))}
       </ul>

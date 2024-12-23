@@ -14,7 +14,7 @@ const ProfileByIdPage = () => {
   return (
     <div>
       <UserInformation id={id as string} />
-      <ShowMenu contractorId={id as string} />
+      <ShowMenu contractorId={id as string} isOwner={false} />
     </div>
   );
 };
