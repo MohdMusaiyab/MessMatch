@@ -83,6 +83,10 @@ export const AuctionSchema = z.object({
   
   // Relations
   creator: UserSchema,
+//   creator: z.object({
+//     id: z.string().uuid(), // Creator ID
+//     name: z.string().min(1), // Creator name (optional, but good for context)
+// }),
 });
 
 export const BidSchema = z.object({
@@ -158,10 +162,10 @@ export const CreateReviewSchema = ReviewSchema.omit({
   createdAt: true 
 });
 
-export const CreateAuctionSchema = AuctionSchema.omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
+export const CreateAuctionSchema = z.object({
+  creatorId: z.string().uuid(),
+  title: z.string().min(1), 
+  description: z.string().min(1), 
 });
 
 export const CreateBidSchema = BidSchema.omit({ 

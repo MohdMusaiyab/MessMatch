@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes";
 import contractorRoutes from "./routes/contractorRoutes";
+import auctionRoutes from "./routes/auctionRoutes";
 dotenv.config();
 
 const app: Application = express();
@@ -24,6 +25,8 @@ app.use(`${process.env.BASE_URL}/auth`, authRoutes);
 app.use(`${process.env.BASE_URL}/user`, userRoutes);
 
 app.use(`${process.env.BASE_URL}/contractor`, contractorRoutes);
+
+app.use(`${process.env.BASE_URL}/auction`, auctionRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);

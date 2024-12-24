@@ -4,7 +4,9 @@ const SideBarDashboard = () => {
   return (
     <div>
       <ul>
-        <li>My Auctions</li>
+        <Link href="/dashboard/institution/my-auctions">My Auctions</Link>
+        <Link href="/dashboard/institution/create-auction">Create Auction</Link>
+        <li>My Chats</li>
       </ul>
     </div>
   );
