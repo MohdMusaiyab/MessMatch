@@ -26,4 +26,5 @@ auctionRoutes.get("/get/:id", isSign,getMySingleAuctionController);
 
 //For Updating an Auction of Yours
 auctionRoutes.put("/update/:id", isSign, updateAuctionController);
+
 export default auctionRoutes;

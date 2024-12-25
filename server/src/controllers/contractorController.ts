@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 import { CreateMenuSchema, MenuSchema } from "../schemas/schemas";
 import { ZodError } from "zod";
-
+import { Prisma } from "@prisma/client";
+import { ServiceType } from "@prisma/client";
 export const createMenuController = async (
   req: Request,
   res: Response
@@ -136,7 +137,6 @@ export const getOthersMenuController = async (
     });
   }
 };
-
 
 // =================For Updating A Menu using its ID================
 export const updateMenuController = async (
@@ -276,103 +276,168 @@ export const deleteYourMenuController = async (
 // ==========================Filter for Contractores==================
 //Need Check
 // Controller for fetching filtered contractors with pagination and search
-export const getFilteredContractorsController = async (
+
+
+export const getFiltersController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  const { search, menuType, serviceType, page = 1, limit = 10 } = req.query;
-
   try {
-    // Parse pagination query parameters
-    const pageNumber = parseInt(page as string);
-    const pageLimit = parseInt(limit as string);
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      serviceType,
+      menuType,
+      sortBy,
+      sortOrder = 'asc'
+    } = req.query;
 
-    // Validate and parse menuType to match Prisma enum
-    const validMenuTypes = ["VEG", "NON_VEG", "BOTH"]; // Enum values from Prisma schema
-    const menuTypeFilter =
-      typeof menuType === "string" && validMenuTypes.includes(menuType)
-        ? menuType
-        : undefined;
+    const parsedPage = parseInt(page as string, 10);
+    const parsedLimit = parseInt(limit as string, 10);
+    const skip = (parsedPage - 1) * parsedLimit;
 
-    // Validate and parse serviceType to match Prisma enum
-    const validServiceTypes = [
-      "HOSTELS",
-      "CORPORATE_EVENTS",
-      "CORPORATE_OFFICES",
-      "WEDDINGS",
-      "PARTIES",
-      "OTHER",
-    ];
-    const serviceTypeFilter =
-      typeof serviceType === "string" && validServiceTypes.includes(serviceType)
-        ? serviceType
-        : undefined;
+    // Initialize filters array
+    const filters: Prisma.MessContractorWhereInput[] = [];
 
-    // Initialize filter options
-    const filters: any = {
-      where: {
-        // Apply search if search term is provided (check name of contractor and menu items)
-        OR: search
-          ? [
-              {
-                user: {
-                  name: {
-                    contains: search as string,
-                    mode: "insensitive",
-                  },
-                },
-              },
-              {
-                menus: {
-                  some: {
+    // Search filter
+    if (search) {
+      filters.push({
+        OR: [
+          {
+            user: {
+              name: {
+                contains: search as string,
+                mode: 'insensitive'
+              }
+            }
+          },
+          {
+            menus: {
+              some: {
+                OR: [
+                  {
                     name: {
                       contains: search as string,
-                      mode: "insensitive",
-                    },
+                      mode: 'insensitive'
+                    }
                   },
-                },
-              },
-            ]
-          : [],
-        // Apply menuType filter if valid menuType is provided
-        ...(menuTypeFilter && { menus: { some: { type: menuTypeFilter } } }),
-        // Apply serviceType filter if valid serviceType is provided
-        ...(serviceTypeFilter && { serviceType: serviceTypeFilter }),
-      },
-      skip: (pageNumber - 1) * pageLimit, // Pagination (skip records based on page number)
-      take: pageLimit, // Limit the number of results per page
-      include: {
-        user: true, // Include user details (contractor's information)
-        menus: true, // Include menu details for contractors
-        reviews: true, // Include reviews associated with contractors
-      },
-    };
+                  {
+                    items: {
+                      hasSome: [search as string]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      });
+    }
 
-    // Fetch filtered contractors from the database
-    const contractors = await prisma.messContractor.findMany(filters);
+    // Create an array for OR conditions
+    const orConditions: Prisma.MessContractorWhereInput[] = [];
 
-    // Count total contractors based on filters for pagination
-    const totalContractors = await prisma.messContractor.count({
-      where: filters.where,
-    });
+    // Service type filter
+    if (Array.isArray(serviceType)) {
+      orConditions.push({
+        services: {
+          hasSome: serviceType.map(type => type as ServiceType) // Map to ServiceType enum
+        }
+      });
+    } else if (serviceType) {
+      orConditions.push({
+        services: {
+          hasSome: [serviceType as ServiceType] // Single value case
+        }
+      });
+    }
 
-    // Return paginated contractors along with pagination details
+    // Menu type filter
+    if (menuType) {
+      orConditions.push({
+        menus: {
+          some: {
+            type: menuType as any // Assuming menuType is an enum or string
+          }
+        }
+      });
+    }
+
+    // Combine OR conditions into the where clause
+    const where: Prisma.MessContractorWhereInput = orConditions.length > 0 
+      ? { OR: orConditions }
+      : {};
+
+    // Sorting
+    let orderBy: any = {};
+    if (sortBy) {
+      switch (sortBy) {
+        case 'rating':
+          orderBy.ratings = sortOrder;
+          break;
+        case 'price':
+          orderBy = {
+            menus: {
+              _min: {
+                pricePerHead: sortOrder
+              }
+            }
+          };
+          break;
+        default:
+          orderBy.createdAt = sortOrder;
+      }
+    }
+
+    const [contractors, total] = await Promise.all([
+      prisma.messContractor.findMany({
+        where,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              contactNumber: true,
+              address: true
+            }
+          },
+          menus: true,
+          reviews: {
+            include: {
+              reviewer: {
+                select: {
+                  name: true
+                }
+              }
+            }
+          }
+        },
+        skip,
+        take: parsedLimit,
+        orderBy
+      }),
+      prisma.messContractor.count({ where })
+    ]);
+
     return res.status(200).json({
-      message: "Contractors fetched successfully",
       success: true,
+      message: "Contractors fetched successfully",
       data: contractors,
       pagination: {
-        page: pageNumber,
-        limit: pageLimit,
-        totalPages: Math.ceil(totalContractors / pageLimit),
-        totalItems: totalContractors,
-      },
+        total,
+        page: parsedPage,
+        limit: parsedLimit,
+        totalPages: Math.ceil(total / parsedLimit)
+      }
     });
+
   } catch (error) {
-    console.error("Error fetching contractors:", error);
+    console.error('Filter controller error:', error);
     return res.status(500).json({
-      message: "Something went wrong",
       success: false,
+      message: "Error in fetching filters"
     });
   }
 };

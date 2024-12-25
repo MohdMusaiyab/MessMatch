@@ -6,9 +6,9 @@ const ExplorePage = () => {
   return (
     <div>
       <Searchbar></Searchbar>
-      <Sidebar></Sidebar>
+      
       <div>
-        Here i will render the rest of the components in style
+        This is the Seaech Page I will show to the Contractors
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import express from "express";
 import {
   createMenuController,
   deleteYourMenuController,
-  getFilteredContractorsController,
+  getFiltersController,
   getMyMenusController,
   getOthersMenuController,
   getSingleMenuController,
@@ -23,7 +23,7 @@ contractorRoutes.post(
 // ============For Getting all menus of yourself===============
 contractorRoutes.get("/your-menus", isSign, isContractor, getMyMenusController);
 // ============For getting the Menu of others================//
-contractorRoutes.get("/menus/:id",isSign,getOthersMenuController)
+contractorRoutes.get("/menus/:id", isSign, getOthersMenuController);
 
 //For Getting a single Menu using its ID================//
 contractorRoutes.get("/menu/:id", isSign, getSingleMenuController);
@@ -36,10 +36,15 @@ contractorRoutes.put(
 );
 
 // ================For Deleting your own Menu======================
-contractorRoutes.delete("/delete-menu/:id",isSign,isContractor,deleteYourMenuController);
+contractorRoutes.delete(
+  "/delete-menu/:id",
+  isSign,
+  isContractor,
+  deleteYourMenuController
+);
 
 // ===================Filter for Contractores====================
 //This below code needs checking
 
-contractorRoutes.get("/", isSign, getFilteredContractorsController);
+contractorRoutes.get("/filters",isSign,getFiltersController);
 export default contractorRoutes;
