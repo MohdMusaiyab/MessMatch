@@ -216,3 +216,55 @@ export const updateAuctionController = async (
     });
   }
 };
+
+// =================For Getting a Siingle Auction of Mine=================
+
+export const getMySingleAuctionController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(403).json({
+      message: "Please Login First",
+      success: false,
+    });
+  }
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({
+        message: "Please Provide an Id",
+        success: false,
+      });
+    }
+    const auction = await prisma.auction.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!auction) {
+      return res.status(404).json({
+        message: "Auction Not Found",
+        success: false,
+      });
+    }
+    if (auction.creatorId !== userId) {
+      return res.status(403).json({
+        message: "You are not authorized to view this auction",
+        success: false,
+      });
+    }
+    return res.status(200).json({
+      message: "Auction Fetched Successfully",
+      success: true,
+      data: auction,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
+  }
+};
