@@ -31,7 +31,7 @@ const CreateMenuPage: React.FC = () => {
 
     try {
       const res = await axios.post(
-        `${process.env.NEXT_PUBLIC__URL}/contractor/create-menu`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/contractor/create-menu`,
         {
           name,
           items,

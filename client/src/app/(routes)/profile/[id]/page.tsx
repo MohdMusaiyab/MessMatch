@@ -1,22 +1,135 @@
 "use client";
-import React from "react";
-import ShowMenu from "@/app/components/profile/ShowMenu";
-import { useParams } from "next/navigation";
-import UserInformation from "@/app/components/profile/UserInformation";
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation"; // For accessing URL parameters
+import axios from "axios";
 
-const ProfileByIdPage = () => {
-  const { id } = useParams(); // Get the contractor ID from the URL
+interface Menu {
+  id: string;
+  name: string;
+  pricePerHead: number;
+  type: string;
+  items: string[];
+}
 
-  if (!id) {
-    return <div>Invalid contractor ID</div>;
+interface Contractor {
+  numberOfPeople?: number;
+  services?: string[];
+  menus?: Menu[];
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  address: string;
+  contactNumber: string;
+  role: string;
+  contractor?: Contractor; // Optional contractor details
+}
+
+const UserProfilePage = () => {
+  const router = useRouter();
+  const { id } = useParams(); // Extracting ID from URL parameters
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      const fetchUserProfile = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/${id}`, // Adjust the endpoint as needed
+            { withCredentials: true }
+          );
+
+          if (response.data.success) {
+            setUser(response.data.data);
+          } else {
+            setError(
+              response.data.message || "Unable to fetch user information."
+            );
+          }
+        } catch (err) {
+          console.error(err);
+          setError("An error occurred while fetching user information.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchUserProfile();
+    }
+  }, [id]);
+
+  if (loading) {
+    return <div className="text-center">Loading user profile...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500 text-center">{error}</div>;
+  }
+
+  if (!user) {
+    return <div className="text-center">User not found.</div>;
   }
 
   return (
-    <div>
-      <UserInformation id={id as string} />
-      <ShowMenu contractorId={id as string} isOwner={false} />
+    <div className="max-w-2xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">User Profile</h1>
+      <div className="bg-white shadow-md rounded-lg p-6">
+        <p>
+          <strong>ID:</strong> {user.id}
+        </p>
+        <p>
+          <strong>Name:</strong> {user.name}
+        </p>
+        <p>
+          <strong>Email:</strong> {user.email}
+        </p>
+        <p>
+          <strong>Address:</strong> {user.address}
+        </p>
+        <p>
+          <strong>Contact Number:</strong> {user.contactNumber}
+        </p>
+        <p>
+          <strong>Role:</strong> {user.role}
+        </p>
+
+        {/* Render contractor details if applicable */}
+        {user.role === "CONTRACTOR" && user.contractor && (
+          <>
+            <h3 className="mt-4 text-lg font-semibold">Contractor Details</h3>
+            <p>
+              <strong>Number of People:</strong>{" "}
+              {user.contractor.numberOfPeople}
+            </p>
+            <p>
+              <strong>Services:</strong> {user.contractor.services?.join(", ")}
+            </p>
+
+            {/* Render menus if they exist */}
+            {user.contractor.menus && user.contractor.menus.length > 0 && (
+              <>
+                <h4 className="mt-4 text-md font-semibold">Menu List</h4>
+                <ul className="list-disc list-inside">
+                  {user.contractor.menus.map((menu) => (
+                    <li key={menu.id}>
+                      <h5 className="font-medium">{menu.name}</h5>
+                      <p>Price per head: ${menu.pricePerHead}</p>
+                      <p>Type: {menu.type}</p>
+                      <p>Items: {menu.items.join(", ")}</p>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
-export default ProfileByIdPage;
+export default UserProfilePage;

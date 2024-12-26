@@ -57,7 +57,7 @@ export const updateUserController = async (
       await prisma.messContractor.update({
         where: { userId: userId },
         data: {
-          numberOfPeople: numberOfPeople ?? user.contractor.numberOfPeople,
+          numberOfPeople: parseInt(numberOfPeople) ?? user.contractor.numberOfPeople,
           services: services ?? user.contractor.services,
           updatedAt: new Date(),
         },
@@ -99,21 +99,24 @@ export const getUserController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  const userId = req.userId;
+  const userId = req.userId; // The ID of the currently authenticated user
   if (!userId) {
-    return res.status(400).json({
-      message: "User not found",
+    return res.status(401).json({ // Changed to 401 Unauthorized
+      message: "Unauthorized access",
       success: false,
     });
   }
-  const { id } = req.params;
+
+  const { id } = req.params; // The ID of the user being requested
   if (!id) {
     return res.status(400).json({
-      message: "User not found",
+      message: "User ID not provided",
       success: false,
     });
   }
+
   try {
+    // Fetch the user and check if they are a contractor
     const user = await prisma.user.findUnique({
       where: { id },
       select: {
@@ -123,6 +126,21 @@ export const getUserController = async (
         address: true,
         contactNumber: true,
         role: true,
+        contractor: { // Include contractor relation
+          select: {
+            numberOfPeople: true,
+            services: true,
+            menus: { // Fetch menus if they exist
+              select: {
+                id: true,
+                name: true,
+                pricePerHead: true,
+                type: true,
+                items: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -133,10 +151,16 @@ export const getUserController = async (
       });
     }
 
+    // Prepare response data
+    const responseData = {
+      ...user, // Spread existing user data
+      contractorDetails: user.role === 'CONTRACTOR' ? user.contractor : null, // Add contractor details if applicable
+    };
+
     return res.status(200).json({
       message: "User found",
       success: true,
-      data: user,
+      data: responseData,
     });
   } catch (error) {
     console.error(error);
@@ -147,6 +171,7 @@ export const getUserController = async (
   }
 };
 
+
 // ==============================For Getting Your Own Profile====================
 //Need Edits
 export const getYourOwnProfileController = async (
@@ -154,7 +179,7 @@ export const getYourOwnProfileController = async (
   res: Response
 ): Promise<any> => {
   const userId = req.userId;
-  
+
   if (!userId) {
     return res.status(400).json({
       message: "User not found",
@@ -177,6 +202,15 @@ export const getYourOwnProfileController = async (
           select: {
             numberOfPeople: true,
             services: true,
+            menus: {
+              select: {
+                id: true,
+                name: true,
+                pricePerHead: true,
+                type: true,
+                items: true,
+              },
+            },
           },
         },
       },
