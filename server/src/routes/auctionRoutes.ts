@@ -5,8 +5,10 @@ import {
   deleteAuctionController,
   getMyAuctionsController,
   getMySingleAuctionController,
+  getOthersSingleAuctionController,
   updateAuctionController,
 } from "../controllers/auctionControllers";
+
 
 const auctionRoutes = express.Router();
 
@@ -22,9 +24,12 @@ auctionRoutes.get("/my-auctions", isSign, getMyAuctionsController);
 auctionRoutes.delete("/delete/:id", isSign, deleteAuctionController);
 
 //For Getting a single Auction of YourSelf mainly used for before updating
-auctionRoutes.get("/get/:id", isSign,getMySingleAuctionController);
+auctionRoutes.get("/get/:id", isSign, getMySingleAuctionController);
 
 //For Updating an Auction of Yours
 auctionRoutes.put("/update/:id", isSign, updateAuctionController);
+
+//For getting a single Auction of Other's
+auctionRoutes.get("/get-auction/:id", isSign, getOthersSingleAuctionController);
 
 export default auctionRoutes;

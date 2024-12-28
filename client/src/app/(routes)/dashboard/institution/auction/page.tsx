@@ -51,7 +51,7 @@ const MyAuctions = () => {
         <ul className="space-y-4">
           {auctions.map((auction) => (
             <li key={auction.id} className="border p-4 rounded shadow">
-              <Link href={`/dashboard/institution/auction/${auction?.id}`} className="text-xl font-semibold">{auction.title}</Link>
+              <Link href={`/dashboard/institution/auction/update/${auction?.id}`} className="text-xl font-semibold">{auction.title}</Link>
               <p>{auction.description}</p>
               <p className="text-gray-500">Created on: {new Date(auction.createdAt).toLocaleDateString()}</p>
               <button

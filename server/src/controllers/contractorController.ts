@@ -277,7 +277,6 @@ export const deleteYourMenuController = async (
 //Need Check
 // Controller for fetching filtered contractors with pagination and search
 
-
 export const getFiltersController = async (
   req: Request,
   res: Response
@@ -290,7 +289,7 @@ export const getFiltersController = async (
       serviceType,
       menuType,
       sortBy,
-      sortOrder = 'asc'
+      sortOrder = "asc",
     } = req.query;
 
     const parsedPage = parseInt(page as string, 10);
@@ -308,9 +307,13 @@ export const getFiltersController = async (
             user: {
               name: {
                 contains: search as string,
-                mode: 'insensitive'
-              }
-            }
+                mode: "insensitive",
+              },
+              address: {
+                contains: search as string,
+                mode: "insensitive",
+              },
+            },
           },
           {
             menus: {
@@ -319,19 +322,19 @@ export const getFiltersController = async (
                   {
                     name: {
                       contains: search as string,
-                      mode: 'insensitive'
-                    }
+                      mode: "insensitive",
+                    },
                   },
                   {
                     items: {
-                      hasSome: [search as string]
-                    }
-                  }
-                ]
-              }
-            }
-          }
-        ]
+                      hasSome: [search as string],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
       });
     }
 
@@ -342,14 +345,14 @@ export const getFiltersController = async (
     if (Array.isArray(serviceType)) {
       orConditions.push({
         services: {
-          hasSome: serviceType.map(type => type as ServiceType) // Map to ServiceType enum
-        }
+          hasSome: serviceType.map((type) => type as ServiceType), // Map to ServiceType enum
+        },
       });
     } else if (serviceType) {
       orConditions.push({
         services: {
-          hasSome: [serviceType as ServiceType] // Single value case
-        }
+          hasSome: [serviceType as ServiceType], // Single value case
+        },
       });
     }
 
@@ -358,31 +361,33 @@ export const getFiltersController = async (
       orConditions.push({
         menus: {
           some: {
-            type: menuType as any // Assuming menuType is an enum or string
-          }
-        }
+            type: menuType as any, // Assuming menuType is an enum or string
+          },
+        },
       });
     }
 
     // Combine OR conditions into the where clause
-    const where: Prisma.MessContractorWhereInput = orConditions.length > 0 
-      ? { OR: orConditions }
-      : {};
+    const where: Prisma.MessContractorWhereInput = {
+      AND: filters.length > 0 ? filters : undefined,
+      OR: orConditions.length > 0 ? orConditions : undefined,
+    };
+    
 
     // Sorting
     let orderBy: any = {};
     if (sortBy) {
       switch (sortBy) {
-        case 'rating':
+        case "rating":
           orderBy.ratings = sortOrder;
           break;
-        case 'price':
+        case "price":
           orderBy = {
             menus: {
               _min: {
-                pricePerHead: sortOrder
-              }
-            }
+                pricePerHead: sortOrder,
+              },
+            },
           };
           break;
         default:
@@ -400,26 +405,18 @@ export const getFiltersController = async (
               name: true,
               email: true,
               contactNumber: true,
-              address: true
-            }
+              address: true,
+            },
           },
           menus: true,
-          reviews: {
-            include: {
-              reviewer: {
-                select: {
-                  name: true
-                }
-              }
-            }
-          }
         },
         skip,
         take: parsedLimit,
-        orderBy
+        orderBy,
       }),
-      prisma.messContractor.count({ where })
+      prisma.messContractor.count({ where }),
     ]);
+    
 
     return res.status(200).json({
       success: true,
@@ -429,15 +426,14 @@ export const getFiltersController = async (
         total,
         page: parsedPage,
         limit: parsedLimit,
-        totalPages: Math.ceil(total / parsedLimit)
-      }
+        totalPages: Math.ceil(total / parsedLimit),
+      },
     });
-
   } catch (error) {
-    console.error('Filter controller error:', error);
+    console.error("Filter controller error:", error);
     return res.status(500).json({
       success: false,
-      message: "Error in fetching filters"
+      message: "Error in fetching filters",
     });
   }
 };

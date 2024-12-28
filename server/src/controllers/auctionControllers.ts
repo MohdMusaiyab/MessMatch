@@ -249,6 +249,7 @@ export const getMySingleAuctionController = async (
         success: false,
       });
     }
+
     if (auction.creatorId !== userId) {
       return res.status(403).json({
         message: "You are not authorized to view this auction",
@@ -269,4 +270,79 @@ export const getMySingleAuctionController = async (
   }
 };
 
+// ==================For Getting Some One's Else Acution --Single====================
+
+export const getOthersSingleAuctionController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(403).json({
+      message: "Please Login First",
+      success: false,
+    });
+  }
+  
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({
+      message: "Please Provide an Id",
+      success: false,
+    });
+  }
+
+  try {
+    const auction = await prisma.auction.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        title: true,
+        description: true,
+        creator: {
+          select: {
+            id: true, // Include creator ID
+            name: true,
+            email: true,
+          },
+        },
+        bids: true, // Fetch bids to calculate the count, but do not return them in the response
+      },
+    });
+
+    // Check if auction exists
+    if (!auction) {
+      return res.status(404).json({
+        message: "Auction Not Found",
+        success: false,
+      });
+    }
+
+    // Calculate the number of bids on this auction
+    const numberOfBids = auction.bids.length; // Count of bids
+
+    // Return auction details without including the bids
+    return res.status(200).json({
+      message: "Auction Fetched Successfully",
+      success: true,
+      data: {
+        title: auction.title,
+        description: auction.description,
+        creator: {
+          id: auction.creator.id, // Include creator ID
+          name: auction.creator.name,
+          email: auction.creator.email,
+        },
+        numberOfBids, // Return only the count of bids
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
+  }
+};
 
