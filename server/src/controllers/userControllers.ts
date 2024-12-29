@@ -57,7 +57,8 @@ export const updateUserController = async (
       await prisma.messContractor.update({
         where: { userId: userId },
         data: {
-          numberOfPeople: parseInt(numberOfPeople) ?? user.contractor.numberOfPeople,
+          numberOfPeople:
+            parseInt(numberOfPeople) ?? user.contractor.numberOfPeople,
           services: services ?? user.contractor.services,
           updatedAt: new Date(),
         },
@@ -101,7 +102,8 @@ export const getUserController = async (
 ): Promise<any> => {
   const userId = req.userId; // The ID of the currently authenticated user
   if (!userId) {
-    return res.status(401).json({ // Changed to 401 Unauthorized
+    return res.status(401).json({
+      // Changed to 401 Unauthorized
       message: "Unauthorized access",
       success: false,
     });
@@ -126,11 +128,13 @@ export const getUserController = async (
         address: true,
         contactNumber: true,
         role: true,
-        contractor: { // Include contractor relation
+        contractor: {
+          // Include contractor relation
           select: {
             numberOfPeople: true,
             services: true,
-            menus: { // Fetch menus if they exist
+            menus: {
+              // Fetch menus if they exist
               select: {
                 id: true,
                 name: true,
@@ -139,6 +143,13 @@ export const getUserController = async (
                 items: true,
               },
             },
+          },
+        },
+        auctionsCreated: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
           },
         },
       },
@@ -154,7 +165,7 @@ export const getUserController = async (
     // Prepare response data
     const responseData = {
       ...user, // Spread existing user data
-      contractorDetails: user.role === 'CONTRACTOR' ? user.contractor : null, // Add contractor details if applicable
+      contractorDetails: user.role === "CONTRACTOR" ? user.contractor : null, // Add contractor details if applicable
     };
 
     return res.status(200).json({
@@ -170,7 +181,6 @@ export const getUserController = async (
     });
   }
 };
-
 
 // ==============================For Getting Your Own Profile====================
 //Need Edits
@@ -211,6 +221,14 @@ export const getYourOwnProfileController = async (
                 items: true,
               },
             },
+          },
+        },
+        auctionsCreated: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            bids: true,
           },
         },
       },

@@ -307,6 +307,7 @@ export const getOthersSingleAuctionController = async (
             email: true,
           },
         },
+        createdAt: true,
         bids: true, // Fetch bids to calculate the count, but do not return them in the response
       },
     });
@@ -329,6 +330,7 @@ export const getOthersSingleAuctionController = async (
       data: {
         title: auction.title,
         description: auction.description,
+        createdAt: auction.createdAt,
         creator: {
           id: auction.creator.id, // Include creator ID
           name: auction.creator.name,

@@ -49,7 +49,7 @@ const AuctionDetail = () => {
         <h1 className="text-2xl font-bold mb-4">{auction.title}</h1>
         <p>{auction.description}</p>
         <p className="text-gray-500">
-          Created on: {new Date(auction.createdAt).toLocaleDateString()}
+          Created on: {auction.createdAt}
         </p>
       </div>
 

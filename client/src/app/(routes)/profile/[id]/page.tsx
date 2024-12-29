@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation"; // For accessing URL parameters
 import axios from "axios";
+import Link from "next/link";
 
 interface Menu {
   id: string;
@@ -9,6 +10,12 @@ interface Menu {
   pricePerHead: number;
   type: string;
   items: string[];
+}
+
+interface Auction {
+  id: string;
+  title: string;
+  description: string;
 }
 
 interface Contractor {
@@ -25,6 +32,7 @@ interface User {
   contactNumber: string;
   role: string;
   contractor?: Contractor; // Optional contractor details
+  auctionsCreated?: Auction[]; // Add auctionsCreated to User interface
 }
 
 const UserProfilePage = () => {
@@ -124,6 +132,31 @@ const UserProfilePage = () => {
                   ))}
                 </ul>
               </>
+            )}
+          </>
+        )}
+
+        {/* Render auctions created by the user if they are not a contractor */}
+        {user.role !== "CONTRACTOR" && user.auctionsCreated && (
+          <>
+            <h3 className="mt-4 text-lg font-semibold">Auctions Created</h3>
+            {user.auctionsCreated.length > 0 ? (
+              <ul className="list-disc list-inside">
+                {user.auctionsCreated.map((auction) => (
+                  <li key={auction.id}>
+                    <Link
+                      href={`/dashboard/institution/auction/${auction?.id}`}
+                      className="font-medium"
+                    >
+                      {auction.title}
+                    </Link>
+                    <p>{auction.description}</p>
+                    {/* You can add more auction details or links here */}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div>No auctions created by this user.</div>
             )}
           </>
         )}
