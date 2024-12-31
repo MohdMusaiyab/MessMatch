@@ -6,6 +6,7 @@ import {
   getMyAuctionsController,
   getMySingleAuctionController,
   getOthersSingleAuctionController,
+  placeBidController,
   updateAuctionController,
 } from "../controllers/auctionControllers";
 
@@ -31,5 +32,8 @@ auctionRoutes.put("/update/:id", isSign, updateAuctionController);
 
 //For getting a single Auction of Other's
 auctionRoutes.get("/get-auction/:id", isSign, getOthersSingleAuctionController);
+
+//For Placing the Bid on an Auction
+auctionRoutes.post("/place-bid/:id",isSign,placeBidController);
 
 export default auctionRoutes;

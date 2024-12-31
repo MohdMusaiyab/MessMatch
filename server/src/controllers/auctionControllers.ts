@@ -283,7 +283,7 @@ export const getOthersSingleAuctionController = async (
       success: false,
     });
   }
-  
+
   const { id } = req.params;
   if (!id) {
     return res.status(400).json({
@@ -308,7 +308,13 @@ export const getOthersSingleAuctionController = async (
           },
         },
         createdAt: true,
-        bids: true, // Fetch bids to calculate the count, but do not return them in the response
+        bids: {
+          select: {
+            id: true,
+            amount: true, // Select only the amount field
+            bidderId: true, // Include bidderId to filter later
+          },
+        }, // Fetch bids to calculate the count, but do not return them in the response
       },
     });
 
@@ -320,8 +326,12 @@ export const getOthersSingleAuctionController = async (
       });
     }
 
+    // Filter bids to include only the user's bid
+    const userBids = auction.bids.filter((bid) => bid.bidderId === userId);
+    
+
     // Calculate the number of bids on this auction
-    const numberOfBids = auction.bids.length; // Count of bids
+    const numberOfBids = userBids.length; // Count of bids
 
     // Return auction details without including the bids
     return res.status(200).json({
@@ -337,6 +347,7 @@ export const getOthersSingleAuctionController = async (
           email: auction.creator.email,
         },
         numberOfBids, // Return only the count of bids
+        userBids,
       },
     });
   } catch (error) {
@@ -348,3 +359,72 @@ export const getOthersSingleAuctionController = async (
   }
 };
 
+// ==================For Placing the Bid on an Auction====================
+
+export const placeBidController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(403).json({
+      message: "Please Login First",
+      success: false,
+    });
+  }
+  const { id } = req.params;
+  const { amount } = req.body;
+  if (!id) {
+    return res.status(400).json({
+      message: "Please Provide an Auction ID",
+      success: false,
+    });
+  }
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({
+      message: "Please Provide a Valid Bid Amount",
+      success: false,
+    });
+  }
+  try {
+    const auction = await prisma.auction.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!auction) {
+      return res.status(404).json({
+        message: "Auction Not Found",
+        success: false,
+      });
+    }
+    const existingBid = await prisma.bid.findFirst({
+      where: {
+        auctionId: id,
+        bidderId: userId,
+      },
+    });
+
+    if (existingBid) {
+      return res.status(400).json({
+        message: "You have already placed a bid on this auction",
+        success: false,
+      });
+    }
+
+    const newBid = await prisma.bid.create({
+      data: {
+        auctionId: id,
+        bidderId: userId,
+        amount,
+      },
+    });
+
+    return res.status(201).json({
+      message: "Bid Placed Successfully",
+      success: true,
+      data: newBid,
+    });
+  } catch (error) {}
+};
