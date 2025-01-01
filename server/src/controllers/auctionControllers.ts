@@ -327,11 +327,12 @@ export const getOthersSingleAuctionController = async (
     }
 
     // Filter bids to include only the user's bid
-    const userBids = auction.bids.filter((bid) => bid.bidderId === userId);
-    
+    const userBids = auction.bids.find((bid) => bid.bidderId === userId) as
+      | { id: string; amount: number }
+      | undefined;
 
     // Calculate the number of bids on this auction
-    const numberOfBids = userBids.length; // Count of bids
+    const totalBids = auction.bids.length;
 
     // Return auction details without including the bids
     return res.status(200).json({
@@ -342,12 +343,12 @@ export const getOthersSingleAuctionController = async (
         description: auction.description,
         createdAt: auction.createdAt,
         creator: {
-          id: auction.creator.id, // Include creator ID
+          id: auction.creator.id,
           name: auction.creator.name,
           email: auction.creator.email,
         },
-        numberOfBids, // Return only the count of bids
-        userBids,
+        totalBids,
+        userBid: userBids ? { id: userBids.id, amount: userBids.amount } : null,
       },
     });
   } catch (error) {
@@ -427,4 +428,127 @@ export const placeBidController = async (
       data: newBid,
     });
   } catch (error) {}
+};
+
+// ===================For Updating the Bid if Bid is already Placed====================
+
+export const updateYourBidController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(403).json({
+      message: "Please login first",
+      success: false,
+    });
+  }
+
+  const { id } = req.params;
+  const { amount } = req.body;
+
+  if (!id || !amount) {
+    return res.status(400).json({
+      message: "Please provide all required details (id, amount)",
+      success: false,
+    });
+  }
+
+  try {
+    // Check if the bid exists for the given user and auction
+    const existingBid = await prisma.bid.findFirst({
+      where: {
+        auctionId: id,
+        bidderId: userId,
+      },
+    });
+
+    if (!existingBid) {
+      return res.status(404).json({
+        message: "Bid not found for this auction",
+        success: false,
+      });
+    }
+
+    // Update the bid with the new amount
+    const updatedBid = await prisma.bid.update({
+      where: {
+        id: existingBid.id,
+      },
+      data: {
+        amount,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Bid updated successfully",
+      success: true,
+      data: updatedBid,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
+
+// ===================For Deleting Your Own Bid Controller=============
+
+export const deleteYourBidController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(403).json({
+      message: "Please login first",
+      success: false,
+    });
+  }
+
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({
+      message: "Please provide the bid ID",
+      success: false,
+    });
+  }
+
+  try {
+    // Check if the bid exists and belongs to the user
+    const existingBid = await prisma.bid.findFirst({
+      where: {
+        id,
+        bidderId: userId,
+      },
+    });
+
+    if (!existingBid) {
+      return res.status(404).json({
+        message: "Bid not found or you do not have permission to delete this bid",
+        success: false,
+      });
+    }
+
+    // Delete the bid
+    await prisma.bid.delete({
+      where: {
+        id: existingBid.id,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Bid deleted successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
 };

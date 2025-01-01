@@ -3,13 +3,14 @@ import { isSign } from "../middlewares/isSign";
 import {
   createAuctionController,
   deleteAuctionController,
+  deleteYourBidController,
   getMyAuctionsController,
   getMySingleAuctionController,
   getOthersSingleAuctionController,
   placeBidController,
   updateAuctionController,
+  updateYourBidController,
 } from "../controllers/auctionControllers";
-
 
 const auctionRoutes = express.Router();
 
@@ -34,6 +35,13 @@ auctionRoutes.put("/update/:id", isSign, updateAuctionController);
 auctionRoutes.get("/get-auction/:id", isSign, getOthersSingleAuctionController);
 
 //For Placing the Bid on an Auction
-auctionRoutes.post("/place-bid/:id",isSign,placeBidController);
+auctionRoutes.post("/place-bid/:id", isSign, placeBidController);
 
+//For Updating the Bid if Bid is already Placed
+
+auctionRoutes.put("/update-bid/:id", isSign, updateYourBidController);
+
+
+//For Deleting Your Own Bid Which is Placed on an auction
+auctionRoutes.delete("/delete-bid/:id", isSign, deleteYourBidController);
 export default auctionRoutes;
