@@ -5,6 +5,7 @@ import {
   deleteAuctionController,
   deleteYourBidController,
   getMyAuctionsController,
+  getMyBidsController,
   getMySingleAuctionController,
   getOthersSingleAuctionController,
   placeBidController,
@@ -44,4 +45,7 @@ auctionRoutes.put("/update-bid/:id", isSign, updateYourBidController);
 
 //For Deleting Your Own Bid Which is Placed on an auction
 auctionRoutes.delete("/delete-bid/:id", isSign, deleteYourBidController);
+
+//For Getting the List of Auctions By the Mess Conrtractor
+auctionRoutes.get("/my-bids",isSign,getMyBidsController);
 export default auctionRoutes;

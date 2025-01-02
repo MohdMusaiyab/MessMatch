@@ -528,7 +528,8 @@ export const deleteYourBidController = async (
 
     if (!existingBid) {
       return res.status(404).json({
-        message: "Bid not found or you do not have permission to delete this bid",
+        message:
+          "Bid not found or you do not have permission to delete this bid",
         success: false,
       });
     }
@@ -546,6 +547,47 @@ export const deleteYourBidController = async (
     });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
+
+// ============For Getting the List of Bids By the Mess Conrtractor====================
+export const getMyBidsController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const contractorId = req?.userId;
+  if (!contractorId) {
+    return res.status(403).json({
+      message: "Please login first",
+      success: false,
+    });
+  }
+  try {
+    const myBids = await prisma.bid.findMany({
+      where: {
+        bidderId: contractorId,
+      },
+      include: {
+        auction: true, // Include auction details
+      },
+    });
+    if (!myBids.length) {
+      return res.status(404).json({
+        message: "No bids found for this contractor.",
+        success: false,
+      });
+    }
+    return res.status(200).json({
+      message: "Bids retrieved successfully.",
+      success: true,
+      data: myBids,
+    });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({
       message: "Internal server error",
       success: false,
