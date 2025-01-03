@@ -48,4 +48,8 @@ auctionRoutes.delete("/delete-bid/:id", isSign, deleteYourBidController);
 
 //For Getting the List of Auctions By the Mess Conrtractor
 auctionRoutes.get("/my-bids",isSign,getMyBidsController);
+
+//For Accepting the Bid of a User
+
+//For Closign the Auction   
 export default auctionRoutes;

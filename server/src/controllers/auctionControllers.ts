@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
-import { AuctionSchema, CreateAuctionSchema } from "../schemas/schemas";
+import { CreateAuctionSchema } from "../schemas/schemas";
 
 import { z } from "zod";
 export const createAuctionController = async (
@@ -32,6 +32,7 @@ export const createAuctionController = async (
       creatorId: userId,
       title: req.body.title,
       description: req.body.description,
+      isOpen: true,
     });
 
     // Create the auction using validated data
@@ -100,7 +101,7 @@ export const getMyAuctionsController = async (
   }
 };
 
-// =====================For Deleting an Auction of Yours====================
+// =====================For Deleting/ an Auction of Yours====================
 export const deleteAuctionController = async (
   req: Request,
   res: Response
@@ -241,6 +242,20 @@ export const getMySingleAuctionController = async (
     const auction = await prisma.auction.findUnique({
       where: {
         id,
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        createdAt: true,
+        bids: {
+          select: {
+            id: true,
+            amount: true,
+            bidderId: true,
+          },
+        },
+        creatorId: true,
       },
     });
     if (!auction) {

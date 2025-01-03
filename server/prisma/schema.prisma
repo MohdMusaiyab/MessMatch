@@ -108,6 +108,7 @@ model Auction {
   creator      User      @relation(fields: [creatorId], references: [id], name: "AuctionsCreated")
   title        String
   description  String
+  isOpen    Boolean   @default(true)
   bids         Bid[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
