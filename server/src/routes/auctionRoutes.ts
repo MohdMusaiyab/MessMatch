@@ -1,6 +1,7 @@
 import express from "express";
 import { isSign } from "../middlewares/isSign";
 import {
+  acceptBidAcontroller,
   createAuctionController,
   deleteAuctionController,
   deleteYourBidController,
@@ -8,6 +9,7 @@ import {
   getMyBidsController,
   getMySingleAuctionController,
   getOthersSingleAuctionController,
+  openAuctionController,
   placeBidController,
   updateAuctionController,
   updateYourBidController,
@@ -42,14 +44,17 @@ auctionRoutes.post("/place-bid/:id", isSign, placeBidController);
 
 auctionRoutes.put("/update-bid/:id", isSign, updateYourBidController);
 
-
 //For Deleting Your Own Bid Which is Placed on an auction
 auctionRoutes.delete("/delete-bid/:id", isSign, deleteYourBidController);
 
 //For Getting the List of Auctions By the Mess Conrtractor
-auctionRoutes.get("/my-bids",isSign,getMyBidsController);
+auctionRoutes.get("/my-bids", isSign, getMyBidsController);
 
-//For Accepting the Bid of a User
+//For  Opening an auction Again
+auctionRoutes.put("/open-auction/:id", isSign, openAuctionController);
 
-//For Closign the Auction   
+//For Accepting the Bid of a User and Declaring Winner
+
+auctionRoutes.put("/accept-bid", isSign, acceptBidAcontroller);
+
 export default auctionRoutes;

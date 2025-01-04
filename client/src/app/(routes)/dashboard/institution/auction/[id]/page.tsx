@@ -134,61 +134,81 @@ const AuctionDetail = () => {
         <p>{auction.description}</p>
         <p className="text-gray-500">Created on: {new Date(auction.createdAt).toLocaleDateString()}</p>
         <p className="text-gray-500">Total Bids: {auction.totalBids}</p>
+        
+        {/* Auction Status */}
+        {auction.isOpen ? (
+          <p className="text-green-500 font-semibold">Status: Open</p>
+        ) : (
+          <p className="text-red-500 font-semibold">Status: Closed</p>
+        )}
 
-        {/* Place or Update Bid Section */}
-        {auction.userBid ? (
-          <div className="mt-6">
-            <h2 className="text-lg font-bold mb-2">Manage Your Bid</h2>
-            <p className="text-green-500 font-semibold">
-              Your current bid: ₹{auction.userBid.amount}
-            </p>
-            <input
-              type="number"
-              className="border rounded p-2 w-full mb-4"
-              placeholder="Enter new bid amount"
-              value={bidAmount}
-              onChange={(e) => setBidAmount(Number(e.target.value))}
-            />
-            <div className="flex space-x-4">
+        {/* Bid Management Section */}
+        {auction.isOpen ? (
+          auction.userBid ? (
+            <div className="mt-6">
+              <h2 className="text-lg font-bold mb-2">Manage Your Bid</h2>
+              <p className="text-green-500 font-semibold">
+                Your current bid: ₹{auction.userBid.amount}
+              </p>
+              <input
+                type="number"
+                className="border rounded p-2 w-full mb-4"
+                placeholder="Enter new bid amount"
+                value={bidAmount}
+                onChange={(e) => setBidAmount(Number(e.target.value))}
+              />
+              <div className="flex space-x-4">
+                <button
+                  onClick={handleUpdateBid}
+                  className={`bg-blue-500 text-white px-4 py-2 rounded ${
+                    updatingBid ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={updatingBid}
+                >
+                  {updatingBid ? "Updating Bid..." : "Update Bid"}
+                </button>
+                <button
+                  onClick={handleDeleteBid}
+                  className={`bg-red-500 text-white px-4 py-2 rounded ${
+                    deletingBid ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={deletingBid}
+                >
+                  {deletingBid ? "Deleting Bid..." : "Delete Bid"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-6">
+              <h2 className="text-lg font-bold mb-2">Place Your Bid</h2>
+              <input
+                type="number"
+                className="border rounded p-2 w-full mb-4"
+                placeholder="Enter bid amount"
+                value={bidAmount}
+                onChange={(e) => setBidAmount(Number(e.target.value))}
+              />
               <button
-                onClick={handleUpdateBid}
+                onClick={handlePlaceBid}
                 className={`bg-blue-500 text-white px-4 py-2 rounded ${
-                  updatingBid ? "opacity-50 cursor-not-allowed" : ""
+                  placingBid ? "opacity-50 cursor-not-allowed" : ""
                 }`}
-                disabled={updatingBid}
+                disabled={placingBid}
               >
-                {updatingBid ? "Updating Bid..." : "Update Bid"}
-              </button>
-              <button
-                onClick={handleDeleteBid}
-                className={`bg-red-500 text-white px-4 py-2 rounded ${
-                  deletingBid ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={deletingBid}
-              >
-                {deletingBid ? "Deleting Bid..." : "Delete Bid"}
+                {placingBid ? "Placing Bid..." : "Place Bid"}
               </button>
             </div>
-          </div>
+          )
         ) : (
           <div className="mt-6">
-            <h2 className="text-lg font-bold mb-2">Place Your Bid</h2>
-            <input
-              type="number"
-              className="border rounded p-2 w-full mb-4"
-              placeholder="Enter bid amount"
-              value={bidAmount}
-              onChange={(e) => setBidAmount(Number(e.target.value))}
-            />
-            <button
-              onClick={handlePlaceBid}
-              className={`bg-blue-500 text-white px-4 py-2 rounded ${
-                placingBid ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={placingBid}
-            >
-              {placingBid ? "Placing Bid..." : "Place Bid"}
-            </button>
+            {auction.userBid ? (
+              <>
+                <h2 className="text-lg font-bold mb-2">Your Bid</h2>
+                <p>Your current bid was ₹{auction.userBid.amount}.</p>
+              </>
+            ) : (
+              <h2 className="text-lg font-bold mb-2">No Bid Placed By You </h2>
+            )}
           </div>
         )}
       </div>
@@ -196,10 +216,7 @@ const AuctionDetail = () => {
       {/* Creator Details Card */}
       <div className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md ml-4">
         <h2 className="text-lg font-bold mb-2">Creator Details</h2>
-        <Link
-          href={`/profile/${auction.creator.id}`}
-          className="font-semibold"
-        >
+        <Link href={`/profile/${auction.creator.id}`} className="font-semibold">
           Name: {auction.creator.name}
         </Link>
         <p>Email: {auction.creator.email}</p>

@@ -85,6 +85,13 @@ export const getMyAuctionsController = async (
       where: {
         creatorId: userId,
       },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        createdAt: true,
+        isOpen: true,
+      },
     });
 
     return res.status(200).json({
@@ -132,9 +139,12 @@ export const deleteAuctionController = async (
         success: false,
       });
     }
-    await prisma.auction.delete({
+    await prisma.auction.update({
       where: {
         id,
+      },
+      data: {
+        isOpen: false,
       },
     });
     return res.status(200).json({
@@ -247,12 +257,30 @@ export const getMySingleAuctionController = async (
         id: true,
         title: true,
         description: true,
+        isOpen: true,
+        winner: {
+          select: {
+            id: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
         createdAt: true,
         bids: {
           select: {
             id: true,
             amount: true,
-            bidderId: true,
+            bidder: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
           },
         },
         creatorId: true,
@@ -315,6 +343,7 @@ export const getOthersSingleAuctionController = async (
       select: {
         title: true,
         description: true,
+        isOpen: true,
         creator: {
           select: {
             id: true, // Include creator ID
@@ -357,6 +386,7 @@ export const getOthersSingleAuctionController = async (
         title: auction.title,
         description: auction.description,
         createdAt: auction.createdAt,
+        isOpen: auction.isOpen,
         creator: {
           id: auction.creator.id,
           name: auction.creator.name,
@@ -415,6 +445,12 @@ export const placeBidController = async (
         success: false,
       });
     }
+    if (auction?.isOpen === false) {
+      return res.status(400).json({
+        message: "Auction is Closed",
+        success: false,
+      });
+    }
     const existingBid = await prisma.bid.findFirst({
       where: {
         auctionId: id,
@@ -442,7 +478,13 @@ export const placeBidController = async (
       success: true,
       data: newBid,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+      success: false,
+    });
+  }
 };
 
 // ===================For Updating the Bid if Bid is already Placed====================
@@ -476,11 +518,27 @@ export const updateYourBidController = async (
         auctionId: id,
         bidderId: userId,
       },
+      select: {
+        id: true,
+        amount: true,
+        bidderId: true,
+        auction: {
+          select: {
+            isOpen: true,
+          },
+        },
+      },
     });
 
     if (!existingBid) {
       return res.status(404).json({
         message: "Bid not found for this auction",
+        success: false,
+      });
+    }
+    if (existingBid.auction.isOpen === false) {
+      return res.status(400).json({
+        message: "Auction is Closed",
         success: false,
       });
     }
@@ -539,12 +597,26 @@ export const deleteYourBidController = async (
         id,
         bidderId: userId,
       },
+      select: {
+        id: true,
+        auction: {
+          select: {
+            isOpen: true,
+          },
+        },
+      },
     });
 
     if (!existingBid) {
       return res.status(404).json({
         message:
           "Bid not found or you do not have permission to delete this bid",
+        success: false,
+      });
+    }
+    if (existingBid.auction.isOpen === false) {
+      return res.status(400).json({
+        message: "Auction is Closed",
         success: false,
       });
     }
@@ -587,9 +659,17 @@ export const getMyBidsController = async (
         bidderId: contractorId,
       },
       include: {
-        auction: true, // Include auction details
+        auction: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            winnerId: true, // Include winnerId from auction
+          },
+        },
       },
     });
+
     if (!myBids.length) {
       return res.status(404).json({
         message: "No bids found for this contractor.",
@@ -600,6 +680,180 @@ export const getMyBidsController = async (
       message: "Bids retrieved successfully.",
       success: true,
       data: myBids,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
+
+// ===============For Opeing the Auction Again===================
+
+export const openAuctionController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(403).json({
+      success: false,
+      message: "Please Login First",
+    });
+  }
+  const { id } = req?.params;
+  if (!id) {
+    return res.status(400).json({
+      message: "Please provide an auction ID",
+      success: false,
+    });
+  }
+  try {
+    const auction = await prisma.auction.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        creatorId: true,
+      },
+    });
+
+    if (!auction) {
+      return res.status(404).json({
+        message: "Auction not found",
+        success: false,
+      });
+    }
+
+    if (auction.creatorId !== userId) {
+      return res.status(403).json({
+        message: "You are not authorized to open this auction",
+        success: false,
+      });
+    }
+
+    await prisma.auction.update({
+      where: {
+        id,
+      },
+      data: {
+        isOpen: true,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Auction opened successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
+
+// ===========For Accepting the Bid of a User=============
+
+export const acceptBidAcontroller = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const userId = req.userId;
+    const { auctionId, bidId } = req.body;
+
+    if (!userId) {
+      return res.status(403).json({
+        message: "Please login first",
+        success: false,
+      });
+    }
+
+    if (!auctionId || !bidId) {
+      return res.status(400).json({
+        message: "Please provide auction ID and bid ID",
+        success: false,
+      });
+    }
+
+    const auction = await prisma.auction.findUnique({
+      where: {
+        id: auctionId,
+      },
+      select: {
+        creatorId: true,
+        isOpen: true,
+      },
+    });
+
+    if (!auction) {
+      return res.status(404).json({
+        message: "Auction not found",
+        success: false,
+      });
+    }
+
+    if (auction.creatorId !== userId) {
+      return res.status(403).json({
+        message: "You are not authorized to accept bids for this auction",
+        success: false,
+      });
+    }
+
+    if (!auction.isOpen) {
+      return res.status(400).json({
+        message: "Auction is closed",
+        success: false,
+      });
+    }
+
+    const bid = await prisma.bid.findUnique({
+      where: {
+        id: bidId,
+      },
+      select: {
+        auctionId: true,
+        bidderId: true,
+      },
+    });
+
+    if (!bid || bid.auctionId !== auctionId) {
+      return res.status(404).json({
+        message: "Bid not found for this auction",
+        success: false,
+      });
+    }
+    
+    //Find the Contractor associated with the Bid
+    const contractor = await prisma.messContractor.findUnique({
+      where: {
+        userId: bid.bidderId,
+      },
+    });
+      
+    if (!contractor) {
+      return res.status(404).json({
+        message: "Contractor not found",
+        success: false,
+      });
+    }
+    await prisma.auction.update({
+      where: {
+        id: auctionId,
+      },
+      data: {
+        isOpen: false,
+        winnerId: contractor.id,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Bid accepted successfully",
+      success: true,
     });
   } catch (error) {
     console.log(error);

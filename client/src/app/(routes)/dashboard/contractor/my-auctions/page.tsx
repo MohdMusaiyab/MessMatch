@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Link from "next/link";
 
 const MyBids = () => {
   const [bids, setBids] = useState<any[]>([]);
@@ -21,7 +22,8 @@ const MyBids = () => {
         setBids(response.data.data); // Populate bids
       } catch (err: any) {
         // Extract message from error response
-        const errorMessage = err.response?.data?.message || "Something went wrong.";
+        const errorMessage =
+          err.response?.data?.message || "Something went wrong.";
         setError(errorMessage);
       } finally {
         setLoading(false);
@@ -41,14 +43,9 @@ const MyBids = () => {
       <ul>
         {bids.map((bid) => (
           <li key={bid.id} className="border p-4 mb-2">
-            <h2 className="font-semibold">{bid.auction.title}</h2>
+            <Link href={`/dashboard/institution/auction/${bid.auction.id}`} className="font-semibold">{bid.auction.title}</Link>
             <p>{bid.auction.description}</p>
-            <p className="text-gray-500">
-              Bid Amount: ₹{bid.amount}
-            </p>
-            <p className="text-gray-500">
-              Auction Created: {new Date(bid.auction.createdAt).toLocaleDateString()}
-            </p>
+            <p className="text-gray-500">Bid Amount: ₹{bid.amount}</p>
           </li>
         ))}
       </ul>
