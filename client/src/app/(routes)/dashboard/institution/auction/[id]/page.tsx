@@ -127,6 +127,8 @@ const AuctionDetail = () => {
   if (error) return <div className="text-red-500">{error}</div>;
   if (!auction) return <div>No auction found.</div>;
 
+  const isUserWinner = auction.winner && session?.user.id === auction.winner.id;
+
   return (
     <div className="container mx-auto p-4 flex">
       <div className="flex-grow p-4">
@@ -134,13 +136,28 @@ const AuctionDetail = () => {
         <p>{auction.description}</p>
         <p className="text-gray-500">Created on: {new Date(auction.createdAt).toLocaleDateString()}</p>
         <p className="text-gray-500">Total Bids: {auction.totalBids}</p>
-        
+
         {/* Auction Status */}
         {auction.isOpen ? (
           <p className="text-green-500 font-semibold">Status: Open</p>
         ) : (
           <p className="text-red-500 font-semibold">Status: Closed</p>
         )}
+
+        {/* Winner Details */}
+        <div className="mt-6">
+          <h2 className="text-lg font-bold mb-2">Winner Information</h2>
+          {isUserWinner ? (
+            <p className="text-green-500">🎉 You are the winner of this auction!</p>
+          ) : auction.winner ? (
+            <>
+              <p>Name: {auction.winner.name}</p>
+              <p>Email: {auction.winner.email}</p>
+            </>
+          ) : (
+            <p>No winner declared yet.</p>
+          )}
+        </div>
 
         {/* Bid Management Section */}
         {auction.isOpen ? (
@@ -220,6 +237,7 @@ const AuctionDetail = () => {
           Name: {auction.creator.name}
         </Link>
         <p>Email: {auction.creator.email}</p>
+        <p>Phone: {auction.creator.phone}</p>
       </div>
     </div>
   );

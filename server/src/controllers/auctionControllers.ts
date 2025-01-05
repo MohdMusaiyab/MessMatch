@@ -353,12 +353,28 @@ export const getOthersSingleAuctionController = async (
         },
         createdAt: true,
         bids: {
+          where:{
+            bidderId: userId
+          },
           select: {
             id: true,
             amount: true, // Select only the amount field
-            bidderId: true, // Include bidderId to filter later
           },
-        }, // Fetch bids to calculate the count, but do not return them in the response
+        },
+        _count: {
+          select: { bids: true }, // Count all bids on this auction
+        },
+        winner: {
+          select: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+                id: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -371,12 +387,10 @@ export const getOthersSingleAuctionController = async (
     }
 
     // Filter bids to include only the user's bid
-    const userBids = auction.bids.find((bid) => bid.bidderId === userId) as
-      | { id: string; amount: number }
-      | undefined;
+    
 
     // Calculate the number of bids on this auction
-    const totalBids = auction.bids.length;
+    const totalBids = auction._count.bids; // Total number of bids
 
     // Return auction details without including the bids
     return res.status(200).json({
@@ -393,7 +407,14 @@ export const getOthersSingleAuctionController = async (
           email: auction.creator.email,
         },
         totalBids,
-        userBid: userBids ? { id: userBids.id, amount: userBids.amount } : null,
+        userBid: auction.bids[0] || null, // Return the user's bid if available
+        winner: auction.winner
+          ? {
+              id: auction.winner.user.id,
+              name: auction.winner.user.name,
+              email: auction.winner.user.email,
+            }
+          : null,
       },
     });
   } catch (error) {
@@ -827,14 +848,14 @@ export const acceptBidAcontroller = async (
         success: false,
       });
     }
-    
+
     //Find the Contractor associated with the Bid
     const contractor = await prisma.messContractor.findUnique({
       where: {
         userId: bid.bidderId,
       },
     });
-      
+
     if (!contractor) {
       return res.status(404).json({
         message: "Contractor not found",
