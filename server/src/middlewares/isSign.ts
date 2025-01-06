@@ -29,7 +29,7 @@ export const isSign = async (
    // console.log(decodedToken);
     req.userId = decodedToken.id as string;
     req.role = decodedToken.role as string;
-
+    
     next();
   } catch (error) {
     console.error("Error in isSign middleware:", error);

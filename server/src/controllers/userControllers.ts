@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { hashPassword } from "../utils/auth";
 import prisma from "../utils/prisma";
+import { Prisma } from "@prisma/client";
 
 export const updateUserController = async (
   req: Request,
@@ -254,3 +255,150 @@ export const getYourOwnProfileController = async (
     });
   }
 };
+
+// ================For Filtering the Users +Acution=====================
+
+export const getAuctionsAndContractorsController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      search,
+      maxBids,
+      auctionStatus, // 'open' or 'closed'
+    } = req.query;
+
+    const parsedPage = parseInt(page as string, 10);
+    const parsedLimit = parseInt(limit as string, 10);
+    const skip = (parsedPage - 1) * parsedLimit;
+
+    // Initialize filters array
+    const auctionFilters: any[] = [];
+
+    // Search filter for auctions
+    if (search) {
+      auctionFilters.push({
+        title: {
+          contains: search as string,
+          mode: 'insensitive',
+        },
+      });
+    }
+
+    // Auction status filter
+    if (auctionStatus === 'open') {
+      auctionFilters.push({
+        isOpen: true,
+      });
+    } else if (auctionStatus === 'closed') {
+      auctionFilters.push({
+        isOpen: false,
+      });
+    }
+
+    // Combine conditions for auctions
+    const auctionWhere = auctionFilters.length > 0 ? { AND: auctionFilters } : {};
+
+    // Fetch auctions based on filters
+    let auctions: any[] = [];
+    let totalAuctions = 0;
+
+    // Max bids filter handled after fetching data
+    if (maxBids) {
+      const maxBidsInt = parseInt(maxBids as string, 10);
+      const allAuctions = await prisma.auction.findMany({
+        where: auctionWhere,
+        include: {
+          bids: true, // Include bids for filtering
+          creator: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              contactNumber: true,
+            },
+          },
+        },
+      });
+
+      // Filter auctions based on the count of bids
+      auctions = allAuctions.filter((auction) => auction.bids.length <= maxBidsInt);
+
+      // Paginate filtered auctions
+      totalAuctions = auctions.length;
+      auctions = auctions.slice(skip, skip + parsedLimit);
+    } else {
+      // If no maxBids filter, fetch directly with pagination
+      [auctions, totalAuctions] = await Promise.all([
+        prisma.auction.findMany({
+          where: auctionWhere,
+          include: {
+            bids: true,
+            creator: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                contactNumber: true,
+              },
+            },
+          },
+          skip,
+          take: parsedLimit,
+        }),
+        prisma.auction.count({ where: auctionWhere }),
+      ]);
+    }
+
+    // Fetch mess contractors based on search key
+    let contractors: any = [];
+    if (search) {
+      contractors = await prisma.messContractor.findMany({
+        where: {
+          user: {
+            name: {
+              contains: search as string,
+              mode: 'insensitive',
+            },
+            role: 'CONTRACTOR', // Ensure role is CONTRACTOR
+          },
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              contactNumber: true,
+            },
+          },
+        },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Auctions and contractors fetched successfully",
+      data: {
+        auctions,
+        contractors,
+      },
+      pagination: {
+        totalAuctions,
+        page: parsedPage,
+        limit: parsedLimit,
+        totalPages: Math.ceil(totalAuctions / parsedLimit),
+      },
+    });
+  } catch (error) {
+    console.error("Auction and contractor filter error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error in fetching auctions and contractors",
+    });
+  }
+};
+
