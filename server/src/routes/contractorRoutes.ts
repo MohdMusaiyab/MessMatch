@@ -3,6 +3,7 @@ import {
   createMenuController,
   deleteYourMenuController,
   getFiltersController,
+  getLatestAuctionsController,
   getMyMenusController,
   getOthersMenuController,
   getSingleMenuController,
@@ -11,6 +12,7 @@ import {
 
 import { isSign } from "../middlewares/isSign";
 import { isContractor } from "../middlewares/isContractor";
+import { format } from "node:path/win32";
 
 const contractorRoutes = express.Router();
 // ===============For Creating Menus=========================
@@ -47,4 +49,8 @@ contractorRoutes.delete(
 //This below code needs checking
 
 contractorRoutes.get("/filters",isSign,getFiltersController);
+
+// ==========For Getting Latest 3 Auctions where he had Placedd Bid + 3 of hi latets Menu's==========
+
+ contractorRoutes.get("/latest-things",isSign,isContractor,getLatestAuctionsController);
 export default contractorRoutes;

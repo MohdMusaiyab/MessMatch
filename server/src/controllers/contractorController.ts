@@ -372,7 +372,6 @@ export const getFiltersController = async (
       AND: filters.length > 0 ? filters : undefined,
       OR: orConditions.length > 0 ? orConditions : undefined,
     };
-    
 
     // Sorting
     let orderBy: any = {};
@@ -416,7 +415,6 @@ export const getFiltersController = async (
       }),
       prisma.messContractor.count({ where }),
     ]);
-    
 
     return res.status(200).json({
       success: true,
@@ -434,6 +432,69 @@ export const getFiltersController = async (
     return res.status(500).json({
       success: false,
       message: "Error in fetching filters",
+    });
+  }
+};
+
+// ============For Getting Latesst 3 Auctions where he had Placed Bid + 3 of his Latest Menu's================
+
+export const getLatestAuctionsController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const contractorId = req.userId;
+    if (!contractorId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+        success: false,
+      });
+    }
+    //Find the Menu's of the contractor latest 3
+    const menus = await prisma.menu.findMany({
+      where: {
+        contractorId,
+      },
+
+      take: 3,
+    });
+
+    //Find the Auctions where he had placed bid
+    //We randmly fetch him 3 latest auctions
+    const auctions = await prisma.auction.findMany({
+      where: {},
+      select: {
+        id: true,
+        createdAt: true,
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            contactNumber: true,
+            address: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 3,
+    });
+    //Now merge the response and give to them
+    return res.status(200).json({
+      message: "Data fetched successfully",
+      success: true,
+      data: {
+        menus,
+        auctions,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Error in fetching latest auctions",
+      success: false,
     });
   }
 };
