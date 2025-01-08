@@ -77,63 +77,70 @@ export const getMyMenusController = async (
   }
 };
 // =================+For Getting Others Menu==================
-export const getOthersMenuController = async (
+export const getOthersSingleMenuController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(401).json({
+      message: "Unauthorized",
+      success: false,
+    });
+  }
   try {
-    // Extract the user ID from the request parameters
     const { id } = req.params;
-
     if (!id) {
       return res.status(400).json({
         success: false,
-        message: "User ID not provided",
+        message: "Menu ID is required.",
       });
     }
-
-    // Find the contractor associated with the given user ID
-    const contractor = await prisma.messContractor.findUnique({
-      where: { userId: id },
-      select: { id: true }, // Select only the contractor ID for efficiency
-    });
-
-    if (!contractor) {
-      return res.status(404).json({
-        success: false,
-        message: "Contractor not found for the given user ID",
-      });
-    }
-
-    // Fetch menus for the contractor
-    const menus = await prisma.menu.findMany({
-      where: { contractorId: contractor.id },
+    const menu = await prisma.menu.findUnique({
+      where: {
+        id,
+      },
       select: {
-        id: true,
+        contractorId: true,
         name: true,
+
         items: true,
         pricePerHead: true,
         type: true,
+        createdAt: true,
+        updatedAt: true,
+        contractor: {
+          select: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                contactNumber: true,
+                address: true,
+              },
+            },
+          },
+        },
       },
     });
-
-    if (menus.length === 0) {
+    if (!menu) {
       return res.status(404).json({
         success: false,
-        message: "No menus found for this contractor",
+        message: "Menu not found.",
       });
     }
-
+    // Send the menu details in the response
     return res.status(200).json({
       success: true,
-      message: "Menus fetched successfully",
-      data: menus,
+      message: "Menu fetched successfully.",
+      data: menu,
     });
   } catch (error) {
-    console.error("Error fetching menus:", error);
+    console.log(error);
     return res.status(500).json({
+      message: "Something Went Wrong",
       success: false,
-      message: "Internal server error",
     });
   }
 };
