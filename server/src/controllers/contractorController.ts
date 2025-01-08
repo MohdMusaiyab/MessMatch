@@ -455,6 +455,9 @@ export const getLatestAuctionsController = async (
       where: {
         contractorId,
       },
+      orderBy: {
+        createdAt: "desc",
+      },
 
       take: 3,
     });

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import SideBarDashBoard from '@/app/components/contractor/SideBarDashBoard';
+import Link from 'next/link';
 
 interface Menu {
   id: number;
@@ -66,7 +67,7 @@ const Page = () => {
           {data?.menus.length ? (
             <ul className="list-disc pl-5">
               {data.menus.map(menu => (
-                <li key={menu.id} className="mt-2">{menu.name}</li>
+                <Link href={`/dashboard/contractor/menu/${menu.id}`} key={menu.id} className="mt-2">{menu.name}</Link>
               ))}
             </ul>
           ) : (

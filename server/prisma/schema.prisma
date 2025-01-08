@@ -90,6 +90,8 @@ model Menu {
   items        String[] // Array of items in the menu
   pricePerHead Float // Price per head for the menu
   type         MenuType // Type of menu: VEG, NON_VEG, BOTH
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model Review {

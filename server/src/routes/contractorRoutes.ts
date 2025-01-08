@@ -24,7 +24,7 @@ contractorRoutes.post(
 );
 // ============For Getting all menus of yourself===============
 contractorRoutes.get("/your-menus", isSign, isContractor, getMyMenusController);
-// ============For getting the Menu of others================//
+// ============For getting the Menu of others Signle One================//
 contractorRoutes.get("/menus/:id", isSign, getOthersMenuController);
 
 //For Getting a single Menu using its ID================//
