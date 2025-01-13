@@ -3,9 +3,10 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react"; // Import useSession
+import { useSession } from "next-auth/react";
+import { motion } from "framer-motion";
 
-// Define the shape of the form data
+// Keep existing interfaces and security question map
 interface FormData {
   name: string;
   email: string;
@@ -17,7 +18,6 @@ interface FormData {
   address: string;
 }
 
-// Map of user-friendly security questions to backend enums
 const securityQuestionMap: Record<string, string> = {
   "What is your mother's maiden name?": "MOTHERS_MAIDEN_NAME",
   "What is the name of your first pet?": "FIRST_PET_NAME",
@@ -26,8 +26,19 @@ const securityQuestionMap: Record<string, string> = {
   "What city were you born in?": "BIRTH_TOWN_NAME",
 };
 
+const DiamondIcon = () => (
+  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M12 2L2 9L12 22L22 9L12 2Z"
+      className="stroke-yellow-500"
+      strokeWidth="2"
+    />
+  </svg>
+);
+
 const RegisterPage: React.FC = () => {
-  const { data: session } = useSession(); // Get session data
+  // Keep existing state management
+  const { data: session } = useSession();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
@@ -38,20 +49,18 @@ const RegisterPage: React.FC = () => {
     contactNumber: "",
     address: "",
   });
-  
+
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Redirect to home if already authenticated
   useEffect(() => {
     if (session) {
-      router.push("/"); // Redirect to home page
+      router.push("/");
     }
   }, [session, router]);
 
-  // Handle input changes
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -59,7 +68,6 @@ const RegisterPage: React.FC = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
@@ -67,7 +75,6 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // Map security question to the backend enum
       const requestData = {
         ...formData,
         securityQuestion: securityQuestionMap[formData.securityQuestion],
@@ -78,170 +85,262 @@ const RegisterPage: React.FC = () => {
       );
       setSuccess(response.data.message || "Registration successful!");
       setLoading(false);
-
-      // Redirect to the login page
       router.push("/auth/login");
     } catch (err: any) {
       setLoading(false);
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else {
-        setError("An unexpected error occurred.");
-      }
+      setError(err.response?.data?.message || "An unexpected error occurred.");
     }
   };
 
+  const inputClasses =
+    "w-full p-3 mt-1 bg-neutral-900 border border-yellow-900/20 rounded-lg focus:ring-2 focus:ring-yellow-500/50 focus:outline-none text-neutral-300 placeholder-neutral-500";
+  const labelClasses = "block text-sm font-medium text-neutral-300";
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white rounded shadow-md">
-        <h1 className="text-2xl font-semibold text-gray-800 text-center mb-6">
-          Register
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
-            />
-          </div>
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
-            />
-          </div>
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
-            />
-          </div>
-          {/* Role */}
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-              Role
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
-            >
-              <option value="COLLEGE">College</option>
-              <option value="CONTRACTOR">Contractor</option>
-              <option value="CORPORATE">Corporate</option>
-              <option value="ADMIN">Admin</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
-          {/* Security Question */}
-          <div>
-            <label htmlFor="securityQuestion" className="block text-sm font-medium text-gray-700">
-              Security Question
-            </label>
-            <select
-              id="securityQuestion"
-              name="securityQuestion"
-              value={formData.securityQuestion}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
-            >
-              <option value="">Select a security question</option>
-              {Object.keys(securityQuestionMap).map((question) => (
-                <option key={question} value={question}>
-                  {question}
-                </option>
-              ))}
-            </select>
-          </div>
-          {/* Security Answer */}
-          <div>
-            <label htmlFor="securityAnswer" className="block text-sm font-medium text-gray-700">
-              Security Answer
-            </label>
-            <input
-              type="text"
-              id="securityAnswer"
-              name="securityAnswer"
-              value={formData.securityAnswer}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
-            />
-          </div>
-          {/* Contact Number */}
-          <div>
-            <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">
-              Contact Number
-            </label>
-            <input
-              type="text"
-              id="contactNumber"
-              name="contactNumber"
-              value={formData.contactNumber}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
-            />
-          </div>
-          {/* Address */}
-          <div>
-            <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-              Address
-            </label>
-            <textarea
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-              className="w-full p-2 mt-1 border rounded focus:ring focus:ring-indigo-200 focus:outline-none"
-            />
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
+      <div className="container mx-auto px-4 py-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-2xl mx-auto"
+        >
+          <div className="bg-neutral-900/50 backdrop-blur-lg p-8 rounded-xl shadow-2xl border border-yellow-900/20">
+            <div className="flex items-center justify-center mb-8 space-x-2">
+              <DiamondIcon />
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
+                Create Account
+              </h1>
+              <DiamondIcon />
+            </div>
 
-          {/* Error and Success Messages */}
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {success && <p className="text-sm text-green-600">{success}</p>}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label htmlFor="name" className={labelClasses}>
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className={inputClasses}
+                  />
+                </motion.div>
 
-          {/* Submit Button */}
-          <button 
-            type="submit" 
-            disabled={loading} 
-            className={`w-full py-2 px-4 text-white rounded ${loading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-700"}`}
-          >
-            {loading ? "Registering..." : "Register"}
-          </button>
-        </form>
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label htmlFor="email" className={labelClasses}>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className={inputClasses}
+                  />
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label htmlFor="password" className={labelClasses}>
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className={inputClasses}
+                  />
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label htmlFor="role" className={labelClasses}>
+                    Role
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    required
+                    className={inputClasses}
+                  >
+                    <option value="COLLEGE">College</option>
+                    <option value="CONTRACTOR">Contractor</option>
+                    <option value="CORPORATE">Corporate</option>
+                    <option value="ADMIN">Admin</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label htmlFor="securityQuestion" className={labelClasses}>
+                    Security Question
+                  </label>
+                  <select
+                    id="securityQuestion"
+                    name="securityQuestion"
+                    value={formData.securityQuestion}
+                    onChange={handleChange}
+                    required
+                    className={inputClasses}
+                  >
+                    <option value="">Select a security question</option>
+                    {Object.keys(securityQuestionMap).map((question) => (
+                      <option key={question} value={question}>
+                        {question}
+                      </option>
+                    ))}
+                  </select>
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label htmlFor="securityAnswer" className={labelClasses}>
+                    Security Answer
+                  </label>
+                  <input
+                    type="text"
+                    id="securityAnswer"
+                    name="securityAnswer"
+                    value={formData.securityAnswer}
+                    onChange={handleChange}
+                    required
+                    className={inputClasses}
+                  />
+                </motion.div>
+
+                <motion.div
+                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <label htmlFor="contactNumber" className={labelClasses}>
+                    Contact Number
+                  </label>
+                  <input
+                    type="text"
+                    id="contactNumber"
+                    name="contactNumber"
+                    value={formData.contactNumber}
+                    onChange={handleChange}
+                    required
+                    className={inputClasses}
+                  />
+                </motion.div>
+              </div>
+
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: 0.2 }}
+              >
+                <label htmlFor="address" className={labelClasses}>
+                  Address
+                </label>
+                <textarea
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  className={`${inputClasses} h-24 resize-none`}
+                />
+              </motion.div>
+
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-red-500"
+                >
+                  {error}
+                </motion.p>
+              )}
+
+              {success && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm text-green-500"
+                >
+                  {success}
+                </motion.p>
+              )}
+
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`w-full py-3 px-4 rounded-lg bg-gradient-to-r from-yellow-600 to-yellow-700 text-white font-medium 
+                  ${
+                    loading
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:from-yellow-500 hover:to-yellow-600"
+                  }
+                  transition-all duration-300 shadow-lg hover:shadow-yellow-500/20`}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Registering...
+                  </span>
+                ) : (
+                  "Create Account"
+                )}
+              </motion.button>
+            </form>
+            <p className="text-neutral-300 text-sm mt-4 text-center">
+              Already have an account?{" "}
+              <a href="/auth/login" className="text-yellow-500 hover:underline">
+                Sign In
+              </a>
+            </p>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
