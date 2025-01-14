@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { securityQuestions } from "@/app/types/securtyQuestions"; // Import security questions
+import { motion } from "framer-motion";
+import { securityQuestions } from "@/app/types/securtyQuestions";
 
-// Define your ServiceType enum
 enum ServiceType {
   HOSTELS = "HOSTELS",
   CORPORATE_EVENTS = "CORPORATE_EVENTS",
@@ -29,15 +29,14 @@ const UpdateUserInformation: React.FC = () => {
     password: "",
     contractorFields: {
       numberOfPeople: undefined,
-      services: [] as string[], // Initialize as an empty array for multiple selections
+      services: [] as string[],
     },
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isContractor, setIsContractor] = useState(false); // Determine if the user is a contractor
+  const [isContractor, setIsContractor] = useState(false);
 
-  // Fetch user data when the component mounts
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -46,8 +45,6 @@ const UpdateUserInformation: React.FC = () => {
           { withCredentials: true }
         );
         const user = response.data.data;
-
-        // Set form data based on fetched user data
         setFormData({
           name: user?.name ?? "",
           email: user?.email ?? "",
@@ -55,28 +52,23 @@ const UpdateUserInformation: React.FC = () => {
           contactNumber: user?.contactNumber ?? "",
           securityQuestion: user?.securityQuestion ?? securityQuestions.MOTHERS_MAIDEN_NAME,
           securityAnswer: user?.securityAnswer ?? "",
-          password: "", // No password shown, empty for updating
+          password: "",
           contractorFields: {
             numberOfPeople: user.contractor?.numberOfPeople,
-            services: user.contractor?.services ?? [], // Set initial services
+            services: user.contractor?.services ?? [],
           },
         });
-
-        // Check if the user is a contractor
         setIsContractor(user.role === "CONTRACTOR");
       } catch (err) {
         console.error(err);
         setError("Failed to load user data");
       }
     };
-
     fetchUserData();
   }, []);
 
-  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-
     if (name.startsWith("contractorFields.")) {
       const fieldName = name.split(".")[1];
       setFormData((prevData) => ({
@@ -91,13 +83,11 @@ const UpdateUserInformation: React.FC = () => {
     }
   };
 
-  // Handle service selection
   const handleServiceChange = (serviceType: string) => {
     setFormData((prevData) => {
       const services = prevData.contractorFields.services.includes(serviceType)
-        ? prevData.contractorFields.services.filter(service => service !== serviceType) // Remove service if already selected
-        : [...prevData.contractorFields.services, serviceType]; // Add service if not selected
-
+        ? prevData.contractorFields.services.filter(service => service !== serviceType)
+        : [...prevData.contractorFields.services, serviceType];
       return {
         ...prevData,
         contractorFields: {
@@ -108,13 +98,10 @@ const UpdateUserInformation: React.FC = () => {
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent default form submission
-
+    e.preventDefault();
     setLoading(true);
     setError(null);
-
     try {
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/update`,
@@ -132,152 +119,183 @@ const UpdateUserInformation: React.FC = () => {
     }
   };
 
+  const inputClasses = "mt-1 block w-full bg-neutral-900/50 border border-yellow-900/20 rounded-lg shadow-sm focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-600/40 p-3 text-neutral-300 placeholder-neutral-500 transition-all duration-300";
+  const labelClasses = "block text-sm font-medium text-neutral-300 mb-1";
+
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">Update Your Information</h2>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-
-      <form onSubmit={handleSubmit}>
-        {/* Name Field */}
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-          />
-        </div>
-
-        {/* Email Field */}
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-          />
-        </div>
-
-        {/* Address Field */}
-        <div className="mb-4">
-          <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-          />
-        </div>
-
-        {/* Contact Number Field */}
-        <div className="mb-4">
-          <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">Contact Number</label>
-          <input
-            type="text"
-            id="contactNumber"
-            name="contactNumber"
-            value={formData.contactNumber}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-          />
-        </div>
-
-        {/* Security Question Field */}
-        <div className="mb-4">
-          <label htmlFor="securityQuestion" className="block text-sm font-medium text-gray-700">Security Question</label>
-          <select
-            id="securityQuestion"
-            name="securityQuestion"
-            value={formData.securityQuestion}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 py-12 px-4 sm:px-6"
+    >
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="max-w-2xl mx-auto backdrop-blur-md bg-neutral-900/30 p-8 rounded-xl border border-yellow-900/20 shadow-xl"
+      >
+        <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
+          Update Your Information
+        </h2>
+        
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-red-900/20 border border-red-500/20 rounded-lg text-red-400"
           >
-            {Object.entries(securityQuestions).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Security Answer Field */}
-        <div className="mb-4">
-          <label htmlFor="securityAnswer" className="block text-sm font-medium text-gray-700">Security Answer</label>
-          <input
-            type="text"
-            id="securityAnswer"
-            name="securityAnswer"
-            value={formData.securityAnswer}
-            onChange={handleChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-          />
-        </div>
-
-        {/* Contractor-specific fields */}
-        {isContractor && (
-          <>
-            <h3 className="text-lg font-semibold mt-6 mb-2">Contractor Details</h3>
-            
-            {/* Number of People Field */}
-            <div className="mb-4">
-              <label htmlFor="contractorFields.numberOfPeople" className="block text-sm font-medium text-gray-700">Number of People</label>
-              <input
-                type="number"
-                id="contractorFields.numberOfPeople"
-                name="contractorFields.numberOfPeople"
-                value={formData.contractorFields.numberOfPeople || ""}
-                onChange={handleChange}
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-              />
-            </div>
-
-            {/* Services Selection using Checkboxes */}
-            <h3 className="font-semibold mb-2">Services</h3>
-            {Object.values(ServiceType).map((service) => (
-              <div key={service} className="flex items-center mb-2">
-                <input
-                  type="checkbox"
-                  id={service}
-                  value={service}
-                  checked={formData.contractorFields.services.includes(service)} // Check if this service is selected
-                  onChange={() => handleServiceChange(service)} // Handle checkbox change
-                  className="mr-2"
-                />
-                <label htmlFor={service} className="text-sm">{service}</label>
-              </div>
-            ))}
-          </>
+            {error}
+          </motion.div>
         )}
 
-        {/* Password Field */}
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">New Password (optional)</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className={`mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2 ${loading ? 'opacity-50 cursor-notallowed' : ''}`}
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label htmlFor="name" className={labelClasses}>Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className={inputClasses}
+            />
+          </div>
 
-        {/* Submit Button */}
-        <button 
-          type="submit" 
-          disabled={loading} 
-          className={`w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 transition duration-200 ${loading ? 'opacity-50 cursor-notallowed' : ''}`}
-        >
-          {loading ? "Updating..." : "Update Information"}
-        </button>
-      </form>
-    </div>
+          <div>
+            <label htmlFor="email" className={labelClasses}>Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={inputClasses}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="address" className={labelClasses}>Address</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className={inputClasses}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="contactNumber" className={labelClasses}>Contact Number</label>
+            <input
+              type="text"
+              id="contactNumber"
+              name="contactNumber"
+              value={formData.contactNumber}
+              onChange={handleChange}
+              className={inputClasses}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="securityQuestion" className={labelClasses}>Security Question</label>
+            <select
+              id="securityQuestion"
+              name="securityQuestion"
+              value={formData.securityQuestion}
+              onChange={handleChange}
+              className={inputClasses}
+            >
+              {Object.entries(securityQuestions).map(([key, label]) => (
+                <option key={key} value={key} className="bg-neutral-900">{label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="securityAnswer" className={labelClasses}>Security Answer</label>
+            <input
+              type="text"
+              id="securityAnswer"
+              name="securityAnswer"
+              value={formData.securityAnswer}
+              onChange={handleChange}
+              className={inputClasses}
+            />
+          </div>
+
+          {isContractor && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="pt-6 border-t border-yellow-900/20"
+            >
+              <h3 className="text-xl font-semibold mb-6 text-yellow-500">Contractor Details</h3>
+              
+              <div className="mb-6">
+                <label htmlFor="contractorFields.numberOfPeople" className={labelClasses}>
+                  Number of People
+                </label>
+                <input
+                  type="number"
+                  id="contractorFields.numberOfPeople"
+                  name="contractorFields.numberOfPeople"
+                  value={formData.contractorFields.numberOfPeople || ""}
+                  onChange={handleChange}
+                  className={inputClasses}
+                />
+              </div>
+
+              <div>
+                <h4 className="text-lg font-medium text-neutral-300 mb-4">Services</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {Object.values(ServiceType).map((service) => (
+                    <motion.div
+                      key={service}
+                      whileHover={{ scale: 1.02 }}
+                      className="flex items-center"
+                    >
+                      <input
+                        type="checkbox"
+                        id={service}
+                        value={service}
+                        checked={formData.contractorFields.services.includes(service)}
+                        onChange={() => handleServiceChange(service)}
+                        className="w-4 h-4 rounded border-yellow-900/20 text-yellow-600 focus:ring-yellow-500/20 bg-neutral-900/50"
+                      />
+                      <label htmlFor={service} className="ml-3 text-sm text-neutral-300">
+                        {service.replace(/_/g, " ")}
+                      </label>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          <div>
+            <label htmlFor="password" className={labelClasses}>New Password (optional)</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={inputClasses}
+            />
+          </div>
+
+          <motion.button
+            type="submit"
+            disabled={loading}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={`w-full py-3 px-4 bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-100 font-semibold rounded-lg shadow-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {loading ? "Updating..." : "Update Information"}
+          </motion.button>
+        </form>
+      </motion.div>
+    </motion.div>
   );
 };
 

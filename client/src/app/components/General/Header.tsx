@@ -2,13 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import {
-  Diamond,
-  Menu,
-  X,
-  ChevronDown,
-  LogOut,
-} from "lucide-react";
+import { Diamond, Menu, X, ChevronDown, LogOut } from "lucide-react";
 
 // Component Definition
 const Header: React.FC = () => {
@@ -85,6 +79,7 @@ const Header: React.FC = () => {
 
                   {/* Dropdown */}
                   <div className="absolute right-0 mt-2 w-48 py-2 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                    <Link href="/profile" className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors">Profile</Link>
                     <button
                       onClick={() => signOut()}
                       className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors"
@@ -168,7 +163,10 @@ const Header: React.FC = () => {
                     </button>
                   </>
                 ) : (
-                  <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link
+                    href="/auth/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
                     <button className="w-full px-6 py-2 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white rounded-lg transition-all">
                       Login
                     </button>

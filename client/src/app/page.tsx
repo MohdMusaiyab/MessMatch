@@ -7,7 +7,9 @@ const page = () => {
   return (
     <div>
       <Hero></Hero>
-      <About></About>
+
+      <About />
+
       <Features></Features>
     </div>
   );

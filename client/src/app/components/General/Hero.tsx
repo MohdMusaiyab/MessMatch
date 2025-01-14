@@ -42,9 +42,12 @@ const Hero = () => {
               <span className="text-white font-semibold">Get Started</span>
               <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button className="px-8 py-4 border border-yellow-700/50 hover:border-yellow-600 rounded-lg text-yellow-500 hover:text-yellow-400 font-semibold transition-colors">
+            <Link
+              href="#about"
+              className="px-8 py-4 border border-yellow-700/50 hover:border-yellow-600 rounded-lg text-yellow-500 hover:text-yellow-400 font-semibold transition-colors"
+            >
               Learn More
-            </button>
+            </Link>
           </div>
 
           {/* Trust indicators */}

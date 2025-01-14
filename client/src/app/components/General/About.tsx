@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 // Functional component with TypeScript
 const About: React.FC = () => {
   return (
-    <div className="py-16 bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
+    <div id="about" className="py-16 bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
       <div className="container mx-auto text-center px-4">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
