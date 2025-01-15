@@ -113,7 +113,7 @@ const ProfilePage = () => {
           className="backdrop-blur-md bg-neutral-900/50 rounded-xl p-6 border border-yellow-900/20 shadow-xl mb-8"
         >
           <h2 className="text-2xl font-semibold text-neutral-300 mb-6">User Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InfoItem label="Name" value={user.name} />
             <InfoItem label="Email" value={user.email} />
             <InfoItem label="Address" value={user.address} />

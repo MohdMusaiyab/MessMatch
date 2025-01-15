@@ -1,104 +1,130 @@
-"use client";
+"use client"
 import React, { useState } from 'react';
-import axios from 'axios';
+import { motion } from 'framer-motion';
+import { Send, Phone, Mail, MapPin } from 'lucide-react';
 
-const Contact: React.FC = () => {
-  const [formData, setFormData] = useState({
+const ContactPage = () => {
+  const [formState, setFormState] = useState({
     name: '',
     email: '',
-    message: '',
+    subject: '',
+    message: ''
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
-  // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+  const handleSubmit = (e:any) => {
+    e.preventDefault();
+    // Handle form submission logic here
   };
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/contact`, formData);
-      if (response.status === 200) {
-        setSuccess("Your message has been sent successfully!");
-        setFormData({ name: '', email: '', message: '' }); // Reset form
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to send your message. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  const fadeIn = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.3 }
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      {success && <p className="text-green-500 mb-4">{success}</p>}
-
-      <form onSubmit={handleSubmit}>
-        {/* Name Field */}
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-          />
-        </div>
-
-        {/* Email Field */}
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-          />
-        </div>
-
-        {/* Message Field */}
-        <div className="mb-4">
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message</label>
-          <textarea
-            id="message"
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            required
-            rows={4}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-200 focus:border-blue-500 p-2"
-          />
-        </div>
-
-        {/* Submit Button */}
-        <button 
-          type="submit" 
-          disabled={loading} 
-          className={`w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 transition duration-200 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
+      <div className="max-w-7xl mx-auto px-4 py-24 md:px-6">
+        {/* Header Section */}
+        <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          {loading ? "Sending..." : "Send Message"}
-        </button>
-      </form>
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-4">
+            Get in Touch
+          </h1>
+          <p className="text-neutral-300 text-lg max-w-2xl mx-auto">
+            We're here to help bring your vision to life. Reach out to us through any of our channels below.
+          </p>
+        </motion.div>
+
+        {/* Contact Info Cards */}
+        <div className="grid md:grid-cols-3 gap-6 mb-16">
+          {[
+            { icon: Phone, title: "Call Us", info: "+1 (555) 123-4567" },
+            { icon: Mail, title: "Email Us", info: "contact@luxury.com" },
+            { icon: MapPin, title: "Visit Us", info: "123 Luxury Ave, New York" }
+          ].map((item, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+              className="bg-neutral-900/50 backdrop-blur-lg border border-yellow-900/20 rounded-lg p-6 hover:bg-neutral-900/70 transition-all duration-300"
+            >
+              <item.icon className="w-8 h-8 text-yellow-500 mb-4" />
+              <h3 className="text-neutral-300 text-lg font-semibold mb-2">{item.title}</h3>
+              <p className="text-neutral-400">{item.info}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Contact Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="max-w-3xl mx-auto"
+        >
+          <div className="bg-neutral-900/50 backdrop-blur-lg border border-yellow-900/20 rounded-lg p-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-neutral-300 mb-2">Name</label>
+                  <input
+                    type="text"
+                    className="w-full bg-neutral-950/50 border border-yellow-900/20 rounded-lg px-4 py-3 text-neutral-300 focus:outline-none focus:border-yellow-500/50 transition-colors duration-300"
+                    value={formState.name}
+                    onChange={(e) => setFormState({...formState, name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-neutral-300 mb-2">Email</label>
+                  <input
+                    type="email"
+                    className="w-full bg-neutral-950/50 border border-yellow-900/20 rounded-lg px-4 py-3 text-neutral-300 focus:outline-none focus:border-yellow-500/50 transition-colors duration-300"
+                    value={formState.email}
+                    onChange={(e) => setFormState({...formState, email: e.target.value})}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-neutral-300 mb-2">Subject</label>
+                <input
+                  type="text"
+                  className="w-full bg-neutral-950/50 border border-yellow-900/20 rounded-lg px-4 py-3 text-neutral-300 focus:outline-none focus:border-yellow-500/50 transition-colors duration-300"
+                  value={formState.subject}
+                  onChange={(e) => setFormState({...formState, subject: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <label className="block text-neutral-300 mb-2">Message</label>
+                <textarea
+                  rows={6}
+                  className="w-full bg-neutral-950/50 border border-yellow-900/20 rounded-lg px-4 py-3 text-neutral-300 focus:outline-none focus:border-yellow-500/50 transition-colors duration-300"
+                  value={formState.message}
+                  onChange={(e) => setFormState({...formState, message: e.target.value})}
+                />
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-950 font-semibold py-4 rounded-lg flex items-center justify-center gap-2 hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300"
+              >
+                <Send className="w-5 h-5" />
+                Send Message
+              </motion.button>
+            </form>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };
 
-export default Contact;
+export default ContactPage;
