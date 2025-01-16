@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Minus, Utensils } from "lucide-react";
 
 const CreateMenuPage: React.FC = () => {
   const { data: session } = useSession();
-  // State for form inputs
-
   const [name, setName] = useState("");
   const [items, setItems] = useState<string[]>([""]);
   const [pricePerHead, setPricePerHead] = useState<number | string>("");
@@ -38,9 +38,7 @@ const CreateMenuPage: React.FC = () => {
           pricePerHead: Number(pricePerHead),
           type,
         },
-        {
-          withCredentials: true, // Include cookies in the request
-        }
+        { withCredentials: true }
       );
 
       if (res.status === 201) {
@@ -59,88 +57,111 @@ const CreateMenuPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Create Menu</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Name */}
-        <div>
-          <label className="block font-semibold">Menu Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="border rounded px-4 py-2 w-full"
-            required
-          />
-        </div>
-
-        {/* Items */}
-        <div>
-          <label className="block font-semibold">Menu Items</label>
-          {items.map((item, index) => (
-            <div key={index} className="flex items-center space-x-2 mb-2">
-              <input
-                type="text"
-                value={item}
-                onChange={(e) => handleItemChange(index, e.target.value)}
-                className="border rounded px-4 py-2 flex-1"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => handleRemoveItem(index)}
-                className="text-red-500 font-bold"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={handleAddItem}
-            className="text-blue-500 font-bold"
-          >
-            + Add Item
-          </button>
-        </div>
-
-        {/* Price per head */}
-        <div>
-          <label className="block font-semibold">Price Per Head</label>
-          <input
-            type="number"
-            value={pricePerHead}
-            onChange={(e) => setPricePerHead(e.target.value)}
-            className="border rounded px-4 py-2 w-full"
-            required
-          />
-        </div>
-
-        {/* Type */}
-        <div>
-          <label className="block font-semibold">Menu Type</label>
-          <select
-            value={type}
-            onChange={(e) =>
-              setType(e.target.value as "VEG" | "NON_VEG" | "BOTH")
-            }
-            className="border rounded px-4 py-2 w-full"
-            required
-          >
-            <option value="VEG">Veg</option>
-            <option value="NON_VEG">Non-Veg</option>
-            <option value="BOTH">Both</option>
-          </select>
-        </div>
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="bg-blue-500 text-white font-bold py-2 px-6 rounded"
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 p-4 md:p-6 lg:p-8">
+      <div className="max-w-3xl mx-auto">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent flex items-center gap-3"
         >
+          <Utensils className="w-8 h-8" />
           Create Menu
-        </button>
-      </form>
+        </motion.h1>
+
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          onSubmit={handleSubmit}
+          className="space-y-6 bg-neutral-900/50 backdrop-blur border border-yellow-900/20 rounded-lg p-6 shadow-lg"
+        >
+          <div>
+            <label className="block text-neutral-200 font-medium mb-2">Menu Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-neutral-800 border border-yellow-900/20 rounded-md px-4 py-2 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-neutral-200 font-medium mb-2">Menu Items</label>
+            <AnimatePresence>
+              {items.map((item, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="flex items-center gap-2 mb-2"
+                >
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={(e) => handleItemChange(index, e.target.value)}
+                    className="flex-1 bg-neutral-800 border border-yellow-900/20 rounded-md px-4 py-2 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+                    required
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={() => handleRemoveItem(index)}
+                    className="p-2 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors"
+                  >
+                    <Minus className="w-5 h-5" />
+                  </motion.button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={handleAddItem}
+              className="flex items-center gap-2 text-yellow-500 hover:text-yellow-400 font-medium transition-colors mt-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Item
+            </motion.button>
+          </div>
+
+          <div>
+            <label className="block text-neutral-200 font-medium mb-2">Price Per Head</label>
+            <input
+              type="number"
+              value={pricePerHead}
+              onChange={(e) => setPricePerHead(e.target.value)}
+              className="w-full bg-neutral-800 border border-yellow-900/20 rounded-md px-4 py-2 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-neutral-200 font-medium mb-2">Menu Type</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value as "VEG" | "NON_VEG" | "BOTH")}
+              className="w-full bg-neutral-800 border border-yellow-900/20 rounded-md px-4 py-2 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+              required
+            >
+              <option value="VEG">Veg</option>
+              <option value="NON_VEG">Non-Veg</option>
+              <option value="BOTH">Both</option>
+            </select>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="submit"
+            className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-lg hover:shadow-yellow-500/20"
+          >
+            Create Menu
+          </motion.button>
+        </motion.form>
+      </div>
     </div>
   );
 };

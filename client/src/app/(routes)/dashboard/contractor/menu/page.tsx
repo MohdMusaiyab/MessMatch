@@ -1,8 +1,11 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2 } from "lucide-react";
 
 interface Menu {
   id: string;
@@ -60,59 +63,115 @@ const Page = () => {
   }, [session, status]);
 
   if (status === "loading") {
-    return <div className="text-center text-lg">Loading...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
+        <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
+      </div>
+    );
   }
 
   if (status === "unauthenticated") {
     return (
-      <div className="text-red-500 text-center">
-        Please sign in to view your menus
+      <div className="h-screen flex items-center justify-center bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
+        <span className="text-red-400 text-lg font-medium">
+          Please sign in to view your menus
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Your Menus</h1>
-      {loading && <p>Loading menus...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {menus.length === 0 && !loading && <p>No menus available.</p>}
-      <div className="space-y-4">
-        {menus.map((menu) => (
-          <div
-            key={menu.id}
-            className="border rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow flex justify-between items-start"
-          >
-            <div>
-              <Link href={`/dashboard/contractor/menu/update-menu/${menu.id}`}>
-                <h3 className="text-xl font-semibold hover:underline">
-                  {menu.name}
-                </h3>
-              </Link>
-              <p>Price per head: ${menu.pricePerHead.toFixed(2)}</p>
-              <p>Type: {menu.type}</p>
-              <ul className="list-disc pl-5">
-                {menu.items.map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <button
-              onClick={() => deleteMenu(menu.id)}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors"
-            >
-              Delete
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="mt-4">
-        <Link
-          href="/dashboard/contractor/menu/create-menu"
-          className="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 p-4 md:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-2xl md:text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent"
         >
-          Create New Menu
-        </Link>
+          Your Menus
+        </motion.h1>
+
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
+          </div>
+        )}
+
+        {error && (
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-red-400 mb-4"
+          >
+            {error}
+          </motion.p>
+        )}
+
+        {menus.length === 0 && !loading && (
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-neutral-300"
+          >
+            No menus available.
+          </motion.p>
+        )}
+
+        <AnimatePresence>
+          <div className="space-y-6">
+            {menus.map((menu) => (
+              <motion.div
+                key={menu.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="bg-neutral-900/50 backdrop-blur border border-yellow-900/20 rounded-lg p-6 shadow-lg hover:shadow-yellow-500/5 transition-all duration-300"
+              >
+                <div className="flex flex-col md:flex-row justify-between gap-4">
+                  <div className="flex-1">
+                    <Link href={`/dashboard/contractor/menu/update-menu/${menu.id}`}>
+                      <h3 className="text-xl font-semibold text-neutral-100 hover:text-yellow-500 transition-colors duration-300">
+                        {menu.name}
+                      </h3>
+                    </Link>
+                    <p className="text-neutral-300 mt-2">
+                      Price per head: <span className="text-yellow-500">${menu.pricePerHead.toFixed(2)}</span>
+                    </p>
+                    <p className="text-neutral-400 mb-4">Type: {menu.type}</p>
+                    <ul className="space-y-2 pl-5">
+                      {menu.items.map((item, index) => (
+                        <li key={index} className="text-neutral-300 list-disc">
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => deleteMenu(menu.id)}
+                    className="bg-gradient-to-r from-red-600 to-red-700 text-white font-medium py-2 px-6 rounded-md hover:from-red-700 hover:to-red-800 transition-all duration-300 self-start"
+                  >
+                    Delete
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </AnimatePresence>
+
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-8"
+        >
+          <Link
+            href="/dashboard/contractor/menu/create-menu"
+            className="inline-block bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-lg hover:shadow-yellow-500/20"
+          >
+            Create New Menu
+          </Link>
+        </motion.div>
       </div>
     </div>
   );
