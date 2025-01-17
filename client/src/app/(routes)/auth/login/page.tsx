@@ -171,6 +171,15 @@ export default function SignIn() {
                 Register Here
               </Link>
             </p>
+
+            <p className="text-center">
+              <Link
+                href="/auth/forgot-password"
+                className=" text-yellow-500  hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </p>
           </motion.div>
         </div>
       </motion.div>

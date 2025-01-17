@@ -83,7 +83,7 @@ const Page = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 p-4 md:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-2xl md:text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent"
@@ -98,7 +98,7 @@ const Page = () => {
         )}
 
         {error && (
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-red-400 mb-4"
@@ -108,7 +108,7 @@ const Page = () => {
         )}
 
         {menus.length === 0 && !loading && (
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-neutral-300"
@@ -129,13 +129,18 @@ const Page = () => {
               >
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   <div className="flex-1">
-                    <Link href={`/dashboard/contractor/menu/update-menu/${menu.id}`}>
+                    <Link
+                      href={`/dashboard/contractor/menu/update-menu/${menu.id}`}
+                    >
                       <h3 className="text-xl font-semibold text-neutral-100 hover:text-yellow-500 transition-colors duration-300">
                         {menu.name}
                       </h3>
                     </Link>
                     <p className="text-neutral-300 mt-2">
-                      Price per head: <span className="text-yellow-500">${menu.pricePerHead.toFixed(2)}</span>
+                      Price per head:{" "}
+                      <span className="text-yellow-500">
+                        ${menu.pricePerHead.toFixed(2)}
+                      </span>
                     </p>
                     <p className="text-neutral-400 mb-4">Type: {menu.type}</p>
                     <ul className="space-y-2 pl-5">
@@ -160,7 +165,7 @@ const Page = () => {
           </div>
         </AnimatePresence>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="mt-8"

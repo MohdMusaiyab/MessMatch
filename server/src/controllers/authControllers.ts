@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CreateUserSchema ,LoginSchema} from "../schemas/schemas";
+import { CreateUserSchema, LoginSchema } from "../schemas/schemas";
 import { comparePassword, hashPassword } from "../utils/auth";
 import { ZodError } from "zod";
 import prisma from "../utils/prisma";
@@ -10,8 +10,16 @@ export const registerController = async (
 ): Promise<any> => {
   try {
     const parsedBody = CreateUserSchema.parse(req.body);
-    const { email, password, name, role, securityQuestion, securityAnswer ,address,contactNumber} =
-      parsedBody;
+    const {
+      email,
+      password,
+      name,
+      role,
+      securityQuestion,
+      securityAnswer,
+      address,
+      contactNumber,
+    } = parsedBody;
 
     // Check if the user already exists
     const user = await prisma.user.findUnique({
@@ -40,7 +48,7 @@ export const registerController = async (
         securityQuestion,
         securityAnswer: hashedSecurityAnswer,
         address,
-        contactNumber
+        contactNumber,
       },
     });
     if (role === "CONTRACTOR") {
@@ -120,6 +128,64 @@ export const loginController = async (
     }
 
     console.error("Error in login:", error);
+    return res
+      .status(500)
+      .json({ message: "Something went wrong! Try again.", success: false });
+  }
+};
+
+export const forgotPasswordController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { email, securityQuestion, securityAnswer, newPassword } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "User does not exists", success: false });
+    }
+
+    if (user.securityQuestion !== securityQuestion) {
+      return res
+        .status(400)
+        .json({ message: "Invalid security question", success: false });
+    }
+
+    const isAnswerValid = await comparePassword(
+      securityAnswer,
+      user.securityAnswer
+    );
+
+    if (!isAnswerValid) {
+      return res
+        .status(400)
+        .json({ message: "Invalid security answer", success: false });
+    }
+
+    const hashedPassword = await hashPassword(newPassword);
+
+    await prisma.user.update({
+      where: {
+        email: email,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Password updated successfully", success: true });
+  } catch (error) {
+    console.error("Error in forgot password:", error);
     return res
       .status(500)
       .json({ message: "Something went wrong! Try again.", success: false });
