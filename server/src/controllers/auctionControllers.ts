@@ -353,8 +353,8 @@ export const getOthersSingleAuctionController = async (
         },
         createdAt: true,
         bids: {
-          where:{
-            bidderId: userId
+          where: {
+            bidderId: userId,
           },
           select: {
             id: true,
@@ -387,7 +387,6 @@ export const getOthersSingleAuctionController = async (
     }
 
     // Filter bids to include only the user's bid
-    
 
     // Calculate the number of bids on this auction
     const totalBids = auction._count.bids; // Total number of bids
@@ -674,6 +673,7 @@ export const getMyBidsController = async (
       success: false,
     });
   }
+
   try {
     const myBids = await prisma.bid.findMany({
       where: {
@@ -693,7 +693,7 @@ export const getMyBidsController = async (
 
     if (!myBids.length) {
       return res.status(404).json({
-        message: "No bids found for this contractor.",
+        message: "You Have Not Placed any bid till now.",
         success: false,
       });
     }

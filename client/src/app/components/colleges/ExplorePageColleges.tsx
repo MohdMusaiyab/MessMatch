@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { motion } from "framer-motion";
+import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 
-// Define ServiceType enum
 enum ServiceType {
   HOSTELS = "HOSTELS",
   CORPORATE_EVENTS = "CORPORATE_EVENTS",
@@ -12,7 +13,6 @@ enum ServiceType {
   OTHER = "OTHER",
 }
 
-// Define types for contractor and menu
 interface Menu {
   id: string;
   name: string;
@@ -47,6 +47,7 @@ const ContractorsPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<string>("asc");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(true);
 
   const fetchContractors = async () => {
     setLoading(true);
@@ -96,121 +97,215 @@ const ContractorsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex">
-      <aside className="w-1/4 p-4 bg-gray-100">
-        <h2 className="text-lg font-bold">Filters</h2>
-
-        <form onSubmit={handleSearchSubmit} className="mb-4">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded mb-2"
-          />
-          <button type="submit" className="w-full p-2 bg-blue-600 text-white rounded">
-            Search
-          </button>
-        </form>
-
-        <h3 className="font-semibold">Service Type</h3>
-        <div className="mb-4">
-          {Object.values(ServiceType).map((service) => (
-            <div key={service} className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                id={service}
-                value={service}
-                checked={serviceTypes.includes(service)}
-                onChange={handleServiceTypeChange}
-                className="mr-2"
-              />
-              <label htmlFor={service} className="text-sm">
-                {service}
-              </label>
-            </div>
-          ))}
-        </div>
-
-        <h3 className="font-semibold">Menu Type</h3>
-        <select
-          value={menuType}
-          onChange={(e) => setMenuType(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-4"
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
+      <div className="flex flex-col lg:flex-row">
+        {/* Filters Sidebar */}
+        <motion.aside 
+          initial={{ x: -100, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          className={`lg:w-1/4 p-6 bg-gradient-to-b from-neutral-900 to-neutral-950 border-r border-yellow-900/20
+                     ${isFilterOpen ? 'block' : 'hidden lg:block'}`}
         >
-          <option value="">Select Menu Type</option>
-          <option value="VEG">Vegetarian</option>
-          <option value="NON_VEG">Non-Vegetarian</option>
-          <option value="BOTH">Both</option>
-        </select>
+          <div className="sticky top-6">
+            <h2 className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-6">
+              Filters
+            </h2>
 
-        <h3 className="font-semibold">Sort By</h3>
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-4"
-        >
-          <option value="">Default</option>
-          <option value="rating">Rating</option>
-          <option value="price">Price</option>
-        </select>
-      </aside>
+            <form onSubmit={handleSearchSubmit} className="mb-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-500/50" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search contractors..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-neutral-900 border border-yellow-900/20 rounded-lg
+                           text-neutral-300 focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500/40
+                           transition-all duration-300"
+                />
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="submit"
+                className="w-full mt-3 px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-700
+                         text-white font-medium rounded-lg hover:shadow-lg hover:shadow-yellow-600/20
+                         transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <Filter size={20} />
+                Apply Filters
+              </motion.button>
+            </form>
 
-      <main className="flex-grow p-4">
-        <h1 className="text-xl font-bold mb-4">Contractors</h1>
-
-        {loading ? (
-          <p>Loading contractors...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 gap-4">
-              {contractors.map((contractor) => (
-                <div key={contractor.id} className="p-4 border rounded-lg shadow">
-                  <h2 className="text-lg font-semibold">{contractor.user.name}</h2>
-                  <p>Email: {contractor.user.email}</p>
-                  <p>Contact: {contractor.user.contactNumber}</p>
-                  <p>Address: {contractor.user.address}</p>
-
-                  {contractor.menus.length > 0 ? (
-                    <>
-                      <h3 className="font-semibold mt-4">Menus:</h3>
-                      {contractor.menus.map((menu) => (
-                        <div key={menu.id} className="mt-2 p-2 border rounded bg-gray-50">
-                          <h4 className="font-bold">{menu.name}</h4>
-                          <p>Items: {menu.items.join(", ")}</p>
-                          <p>Price per Head: ₹{menu.pricePerHead}</p>
-                          <p>Type: {menu.type}</p>
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <p>No menus available.</p>
-                  )}
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-neutral-300 font-semibold mb-3">Service Type</h3>
+                <div className="space-y-2">
+                  {Object.values(ServiceType).map((service) => (
+                    <div key={service} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id={service}
+                        value={service}
+                        checked={serviceTypes.includes(service)}
+                        onChange={handleServiceTypeChange}
+                        className="w-4 h-4 rounded border-yellow-900/20 text-yellow-600 
+                                 focus:ring-yellow-500/20 bg-neutral-900"
+                      />
+                      <label htmlFor={service} className="ml-3 text-sm text-neutral-400">
+                        {service.replace(/_/g, " ")}
+                      </label>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
 
-            <div className="mt-4 flex justify-between">
-              <button
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                disabled={page === 1}
-              >
-                Previous
-              </button>
-              <span>
-                Page {page} of {Math.ceil(total / limit)}
-              </span>
-              <button
-                onClick={() => setPage((prev) => Math.min(prev + 1, Math.ceil(total / limit)))}
-              >
-                Next
-              </button>
+              <div>
+                <h3 className="text-neutral-300 font-semibold mb-3">Menu Type</h3>
+                <select
+                  value={menuType}
+                  onChange={(e) => setMenuType(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-900 border border-yellow-900/20 rounded-lg
+                           text-neutral-300 focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500/40
+                           transition-all duration-300"
+                >
+                  <option value="">All Types</option>
+                  <option value="VEG">Vegetarian</option>
+                  <option value="NON_VEG">Non-Vegetarian</option>
+                  <option value="BOTH">Both</option>
+                </select>
+              </div>
+
+              <div>
+                <h3 className="text-neutral-300 font-semibold mb-3">Sort By</h3>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-900 border border-yellow-900/20 rounded-lg
+                           text-neutral-300 focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500/40
+                           transition-all duration-300"
+                >
+                  <option value="">Default</option>
+                  <option value="rating">Rating</option>
+                  <option value="price">Price</option>
+                </select>
+              </div>
             </div>
-          </>
-        )}
-      </main>
+          </div>
+        </motion.aside>
+
+        {/* Main Content */}
+        <main className="flex-grow p-6">
+          <motion.h1
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-8"
+          >
+            Premium Contractors
+          </motion.h1>
+
+          {loading ? (
+            <div className="flex justify-center items-center min-h-[400px]">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="w-12 h-12 border-t-2 border-r-2 border-yellow-500 rounded-full"
+              />
+            </div>
+          ) : error ? (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-red-500 text-center py-12"
+            >
+              {error}
+            </motion.p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-6">
+                {contractors.map((contractor, index) => (
+                  <motion.div
+                    key={contractor.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="p-6 bg-gradient-to-b from-neutral-900 to-neutral-950 
+                             border border-yellow-900/20 rounded-lg shadow-xl 
+                             hover:shadow-2xl hover:shadow-yellow-900/10 
+                             transition-all duration-300"
+                  >
+                    <h2 className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 
+                                 bg-clip-text text-transparent">
+                      {contractor.user.name}
+                    </h2>
+                    <div className="mt-4 space-y-2 text-neutral-400">
+                      <p>Email: {contractor.user.email}</p>
+                      <p>Contact: {contractor.user.contactNumber}</p>
+                      <p>Address: {contractor.user.address}</p>
+                    </div>
+
+                    {contractor.menus.length > 0 ? (
+                      <div className="mt-6">
+                        <h3 className="text-lg font-semibold text-neutral-300 mb-4">Available Menus</h3>
+                        <div className="grid gap-4">
+                          {contractor.menus.map((menu) => (
+                            <div
+                              key={menu.id}
+                              className="p-4 bg-neutral-900/50 border border-yellow-900/10 rounded-lg"
+                            >
+                              <h4 className="font-bold text-yellow-500 mb-2">{menu.name}</h4>
+                              <p className="text-neutral-400">Items: {menu.items.join(", ")}</p>
+                              <p className="text-neutral-300 mt-2">
+                                Price per Head: 
+                                <span className="text-yellow-500 font-semibold ml-2">
+                                  ₹{menu.pricePerHead.toLocaleString()}
+                                </span>
+                              </p>
+                              <p className="text-neutral-400">Type: {menu.type}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="mt-4 text-neutral-500">No menus available.</p>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+
+              <div className="mt-8 flex justify-between items-center">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={page === 1}
+                  className="px-6 py-2 flex items-center gap-2 bg-neutral-800 text-neutral-300 
+                           rounded-lg hover:bg-neutral-700 transition-all duration-300
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft size={20} />
+                  Previous
+                </motion.button>
+                <span className="text-neutral-400">
+                  Page {page} of {Math.ceil(total / limit)}
+                </span>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setPage((prev) => Math.min(prev + 1, Math.ceil(total / limit)))}
+                  disabled={page === Math.ceil(total / limit)}
+                  className="px-6 py-2 flex items-center gap-2 bg-neutral-800 text-neutral-300 
+                           rounded-lg hover:bg-neutral-700 transition-all duration-300
+                           disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                  <ChevronRight size={20} />
+                </motion.button>
+              </div>
+            </>
+          )}
+        </main>
+      </div>
     </div>
   );
 };

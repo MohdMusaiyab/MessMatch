@@ -1,6 +1,8 @@
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion } from 'framer-motion';
+import { Search, Filter } from 'lucide-react';
 
 interface Auction {
   id: string;
@@ -26,7 +28,6 @@ interface Auction {
 }
 
 const ExplorePage = () => {
-  // State management
   const [auctions, setAuctions] = useState<Auction[]>([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, totalPages: 1 });
   const [search, setSearch] = useState('');
@@ -34,7 +35,6 @@ const ExplorePage = () => {
   const [maxBids, setMaxBids] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch Auctions
   const fetchAuctions = async (page: number) => {
     setLoading(true);
     try {
@@ -57,7 +57,6 @@ const ExplorePage = () => {
     }
   };
 
-  // Event handlers
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
@@ -76,9 +75,10 @@ const ExplorePage = () => {
 
   const formatCurrency = (amount: number | null) => {
     if (amount === null) return 'No bids';
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR',
+      maximumFractionDigits: 0
     }).format(amount);
   };
 
@@ -87,127 +87,176 @@ const ExplorePage = () => {
   }, [pagination.page, search, status, maxBids]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between gap-4 mb-8">
-        <div className="flex flex-col md:flex-row gap-4">
-          <input
-            type="text"
-            className="px-4 py-2 border rounded-md w-full md:w-64"
-            placeholder="Search auctions or creators"
-            value={search}
-            onChange={handleSearchChange}
-          />
-          
-          <select
-            className="px-4 py-2 border rounded-md"
-            value={status}
-            onChange={handleStatusChange}
-          >
-            <option value="all">All Statuses</option>
-            <option value="open">Open</option>
-            <option value="closed">Closed</option>
-          </select>
-
-          <select
-            className="px-4 py-2 border rounded-md"
-            value={maxBids}
-            onChange={handleMaxBidsChange}
-          >
-            <option value="">All Bid Counts</option>
-            <option value="5">Up to 5 Bids</option>
-            <option value="10">Up to 10 Bids</option>
-            <option value="15">Up to 15 Bids</option>
-            <option value="20">Up to 20 Bids</option>
-            <option value="20+">More than 20 Bids</option>
-          </select>
-        </div>
-        
-        <button
-          className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-          onClick={() => fetchAuctions(1)}
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 px-6 py-12">
+      <div className="max-w-7xl mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row justify-between gap-6 mb-12"
         >
-          Apply Filters
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="flex justify-center items-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        </div>
-      ) : (
-        <div>
-          {auctions.length > 0 ? (
-            <div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {auctions.map((auction) => (
-                  <div key={auction.id} className="border p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-xl font-semibold">{auction.title}</h3>
-                      <span className={`px-3 py-1 rounded-full text-sm ${
-                        auction.isOpen ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {auction.isOpen ? 'Open' : 'Closed'}
-                      </span>
-                    </div>
-                    
-                    <p className="text-gray-600 mb-4">{auction.description}</p>
-                    
-                    <div className="space-y-2 text-sm">
-                      <p className="flex justify-between">
-                        <span className="text-gray-500">Created by:</span>
-                        <span className="font-medium">{auction.creator.name}</span>
-                      </p>
-                      <p className="flex justify-between">
-                        <span className="text-gray-500">Total Bids:</span>
-                        <span className="font-medium">{auction.bidCount}</span>
-                      </p>
-                      <p className="flex justify-between">
-                        <span className="text-gray-500">Highest Bid:</span>
-                        <span className="font-medium">{formatCurrency(auction.highestBid)}</span>
-                      </p>
-                      {auction.highestBidder && (
-                        <p className="flex justify-between">
-                          <span className="text-gray-500">Highest Bidder:</span>
-                          <span className="font-medium">{auction.highestBidder}</span>
-                        </p>
-                      )}
-                      <p className="flex justify-between">
-                        <span className="text-gray-500">Created:</span>
-                        <span className="font-medium">{formatDate(auction.createdAt)}</span>
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Pagination Controls */}
-              <div className="flex justify-between items-center mt-8">
-                <button
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => fetchAuctions(pagination.page - 1)}
-                  disabled={pagination.page === 1}
-                >
-                  Previous
-                </button>
-                <span className="text-gray-600">
-                  Page {pagination.page} of {pagination.totalPages}
-                </span>
-                <button
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => fetchAuctions(pagination.page + 1)}
-                  disabled={pagination.page === pagination.totalPages}
-                >
-                  Next
-                </button>
-              </div>
-
+          <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-500/50" size={20} />
+              <input
+                type="text"
+                className="pl-10 pr-4 py-3 w-full md:w-64 bg-neutral-900 border border-yellow-900/20 rounded-lg
+                         text-neutral-300 focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500/40
+                         transition-all duration-300"
+                placeholder="Search auctions or creators"
+                value={search}
+                onChange={handleSearchChange}
+              />
             </div>
-          ) : (
-            // No auctions found message
-            <div className="text-center py-12 text-gray-500">No auctions found matching your criteria</div>
-          )}
-        </div>
-      )}
+            
+            <select
+              className="px-4 py-3 bg-neutral-900 border border-yellow-900/20 rounded-lg
+                       text-neutral-300 focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500/40
+                       transition-all duration-300"
+              value={status}
+              onChange={handleStatusChange}
+            >
+              <option value="all">All Statuses</option>
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+            </select>
+
+            <select
+              className="px-4 py-3 bg-neutral-900 border border-yellow-900/20 rounded-lg
+                       text-neutral-300 focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500/40
+                       transition-all duration-300"
+              value={maxBids}
+              onChange={handleMaxBidsChange}
+            >
+              <option value="">All Bid Counts</option>
+              <option value="5">Up to 5 Bids</option>
+              <option value="10">Up to 10 Bids</option>
+              <option value="15">Up to 15 Bids</option>
+              <option value="20">Up to 20 Bids</option>
+              <option value="20+">More than 20 Bids</option>
+            </select>
+          </div>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-8 py-3 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white font-medium
+                     rounded-lg hover:shadow-lg hover:shadow-yellow-600/20 transition-all duration-300
+                     flex items-center justify-center gap-2"
+            onClick={() => fetchAuctions(1)}
+          >
+            <Filter size={20} />
+            Apply Filters
+          </motion.button>
+        </motion.div>
+
+        {loading ? (
+          <div className="flex justify-center items-center min-h-[400px]">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 border-t-2 border-r-2 border-yellow-500 rounded-full"
+            />
+          </div>
+        ) : (
+          <div>
+            {auctions.length > 0 ? (
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {auctions.map((auction, index) => (
+                    <motion.div
+                      key={auction.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="bg-gradient-to-b from-neutral-900 to-neutral-950 
+                               border border-yellow-900/20 rounded-lg p-6 
+                               hover:shadow-xl hover:shadow-yellow-900/10 
+                               transition-all duration-300"
+                    >
+                      <div className="flex justify-between items-start mb-6">
+                        <h3 className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 
+                                     bg-clip-text text-transparent">
+                          {auction.title}
+                        </h3>
+                        <span className={`px-4 py-1 rounded-full text-sm ${
+                          auction.isOpen 
+                            ? 'bg-green-900/20 text-green-500' 
+                            : 'bg-red-900/20 text-red-500'
+                        }`}>
+                          {auction.isOpen ? 'Open' : 'Closed'}
+                        </span>
+                      </div>
+                      
+                      <p className="text-neutral-400 mb-6">{auction.description}</p>
+                      
+                      <div className="space-y-3 text-sm">
+                        <div className="flex justify-between items-center py-2 border-t border-yellow-900/10">
+                          <span className="text-neutral-500">Created by</span>
+                          <span className="text-neutral-300">{auction.creator.name}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-t border-yellow-900/10">
+                          <span className="text-neutral-500">Total Bids</span>
+                          <span className="text-neutral-300">{auction.bidCount}</span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-t border-yellow-900/10">
+                          <span className="text-neutral-500">Highest Bid</span>
+                          <span className="text-yellow-500 font-medium">{formatCurrency(auction.highestBid)}</span>
+                        </div>
+                        {auction.highestBidder && (
+                          <div className="flex justify-between items-center py-2 border-t border-yellow-900/10">
+                            <span className="text-neutral-500">Highest Bidder</span>
+                            <span className="text-neutral-300">{auction.highestBidder}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between items-center py-2 border-t border-yellow-900/10">
+                          <span className="text-neutral-500">Created</span>
+                          <span className="text-neutral-300">{formatDate(auction.createdAt)}</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div className="flex justify-between items-center mt-12">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-6 py-2 bg-neutral-800 text-neutral-300 rounded-lg
+                             hover:bg-neutral-700 transition-all duration-300
+                             disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => fetchAuctions(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                  >
+                    Previous
+                  </motion.button>
+                  <span className="text-neutral-400">
+                    Page {pagination.page} of {pagination.totalPages}
+                  </span>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-6 py-2 bg-neutral-800 text-neutral-300 rounded-lg
+                             hover:bg-neutral-700 transition-all duration-300
+                             disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => fetchAuctions(pagination.page + 1)}
+                    disabled={pagination.page === pagination.totalPages}
+                  >
+                    Next
+                  </motion.button>
+                </div>
+              </div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center py-12 text-neutral-500"
+              >
+                No auctions found matching your criteria
+              </motion.div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

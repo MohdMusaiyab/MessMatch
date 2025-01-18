@@ -308,7 +308,9 @@ export const getAuctionsAndContractorsController = async (
 
     // Max bids filter handled after fetching data
     if (maxBids) {
-      const maxBidsInt = parseInt(maxBids as string, 10);
+      const isMoreThan20 = maxBids === "20+";
+      const maxBidsInt = isMoreThan20 ? null : parseInt(maxBids as string, 10);
+    
       const allAuctions = await prisma.auction.findMany({
         where: auctionWhere,
         include: {
@@ -323,14 +325,19 @@ export const getAuctionsAndContractorsController = async (
           },
         },
       });
-
+    
       // Filter auctions based on the count of bids
-      auctions = allAuctions.filter((auction) => auction.bids.length <= maxBidsInt);
-
+      if (isMoreThan20) {
+        auctions = allAuctions.filter((auction) => auction.bids.length > 20);
+      } else {
+        auctions = allAuctions.filter((auction) => auction.bids.length <= maxBidsInt!);
+      }
+    
       // Paginate filtered auctions
       totalAuctions = auctions.length;
       auctions = auctions.slice(skip, skip + parsedLimit);
-    } else {
+    }
+    else {
       // If no maxBids filter, fetch directly with pagination
       [auctions, totalAuctions] = await Promise.all([
         prisma.auction.findMany({

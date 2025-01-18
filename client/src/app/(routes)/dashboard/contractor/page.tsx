@@ -91,7 +91,7 @@ const Page = () => {
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-neutral-300">Your Menus</h2>
-              <Link href="/dashboard/contractor/menu/create">
+              <Link href="/dashboard/contractor/menu/create-menu">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
