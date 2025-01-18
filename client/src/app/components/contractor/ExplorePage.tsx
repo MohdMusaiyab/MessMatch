@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Search, Filter } from 'lucide-react';
+import Link from 'next/link';
 
 interface Auction {
   id: string;
@@ -174,10 +175,10 @@ const ExplorePage = () => {
                                transition-all duration-300"
                     >
                       <div className="flex justify-between items-start mb-6">
-                        <h3 className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 
+                        <Link href={`/dashboard/institution/auction/${auction?.id}`} className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 
                                      bg-clip-text text-transparent">
                           {auction.title}
-                        </h3>
+                        </Link>
                         <span className={`px-4 py-1 rounded-full text-sm ${
                           auction.isOpen 
                             ? 'bg-green-900/20 text-green-500' 

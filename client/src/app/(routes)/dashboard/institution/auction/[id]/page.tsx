@@ -7,17 +7,16 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 const AuctionDetail = () => {
-  const { id } = useParams(); // Extract auction ID
-  const { data: session } = useSession(); // Use session for user authentication
+  const { id } = useParams();
+  const { data: session } = useSession();
   const [auction, setAuction] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [bidAmount, setBidAmount] = useState<number | "">("");
-  const [placingBid, setPlacingBid] = useState(false); // For placing bid loader
-  const [updatingBid, setUpdatingBid] = useState(false); // For updating bid loader
-  const [deletingBid, setDeletingBid] = useState(false); // For deleting bid loader
+  const [placingBid, setPlacingBid] = useState(false);
+  const [updatingBid, setUpdatingBid] = useState(false);
+  const [deletingBid, setDeletingBid] = useState(false);
 
-  // Fetch auction details when the component mounts or when ID changes
   useEffect(() => {
     const fetchAuction = async () => {
       if (!id) return;
@@ -32,7 +31,7 @@ const AuctionDetail = () => {
 
         const data = response.data.data;
         setAuction(data);
-        if (data.userBid) setBidAmount(data.userBid.amount); // Pre-fill bid amount if user has already placed a bid
+        if (data.userBid) setBidAmount(data.userBid.amount);
       } catch (err) {
         setError("Failed to fetch auction. Please try again later.");
       } finally {
@@ -43,7 +42,6 @@ const AuctionDetail = () => {
     fetchAuction();
   }, [id]);
 
-  // Handle placing a new bid
   const handlePlaceBid = async () => {
     if (!bidAmount || bidAmount <= 0) {
       alert("Please enter a valid bid amount.");
@@ -60,8 +58,8 @@ const AuctionDetail = () => {
       alert("Bid placed successfully!");
       setAuction((prev: any) => ({
         ...prev,
-        userBid: { amount: bidAmount }, // Update bid details locally
-        totalBids: prev.totalBids + 1, // Increment total bids count
+        userBid: { amount: bidAmount },
+        totalBids: prev.totalBids + 1,
       }));
     } catch (err) {
       alert("Failed to place bid. Please try again.");
@@ -70,7 +68,6 @@ const AuctionDetail = () => {
     }
   };
 
-  // Handle updating an existing bid
   const handleUpdateBid = async () => {
     if (!bidAmount || bidAmount <= 0) {
       alert("Please enter a valid bid amount.");
@@ -87,7 +84,7 @@ const AuctionDetail = () => {
       alert("Bid updated successfully!");
       setAuction((prev: any) => ({
         ...prev,
-        userBid: { amount: response.data.data.amount }, // Update bid details locally
+        userBid: { amount: response.data.data.amount },
       }));
     } catch (err) {
       alert("Failed to update bid. Please try again.");
@@ -96,7 +93,6 @@ const AuctionDetail = () => {
     }
   };
 
-  // Handle deleting a bid
   const handleDeleteBid = async () => {
     if (!auction?.userBid) {
       alert("No bid to delete.");
@@ -112,10 +108,10 @@ const AuctionDetail = () => {
       alert("Bid deleted successfully!");
       setAuction((prev: any) => ({
         ...prev,
-        userBid: null, // Remove user bid from state
-        totalBids: Math.max(prev.totalBids - 1, 0), // Decrement total bids count
+        userBid: null,
+        totalBids: Math.max(prev.totalBids - 1, 0),
       }));
-      setBidAmount(""); // Reset bid input field
+      setBidAmount("");
     } catch (err) {
       alert("Failed to delete bid. Please try again.");
     } finally {
@@ -123,121 +119,174 @@ const AuctionDetail = () => {
     }
   };
 
-  if (loading) return <div className="text-center">Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-  if (!auction) return <div>No auction found.</div>;
+  if (loading) return (
+    <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
+      <div className="text-yellow-500 text-lg">Loading...</div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
+      <div className="text-red-500 bg-neutral-900/50 p-6 rounded-lg border border-red-500/20">
+        {error}
+      </div>
+    </div>
+  );
+
+  if (!auction) return (
+    <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
+      <div className="text-neutral-300 bg-neutral-900/50 p-6 rounded-lg border border-yellow-500/20">
+        No auction found.
+      </div>
+    </div>
+  );
 
   const isUserWinner = auction.winner && session?.user.id === auction.winner.id;
 
   return (
-    <div className="container mx-auto p-4 flex">
-      <div className="flex-grow p-4">
-        <h1 className="text-2xl font-bold mb-4">{auction.title}</h1>
-        <p>{auction.description}</p>
-        <p className="text-gray-500">Created on: {new Date(auction.createdAt).toLocaleDateString()}</p>
-        <p className="text-gray-500">Total Bids: {auction.totalBids}</p>
-
-        {/* Auction Status */}
-        {auction.isOpen ? (
-          <p className="text-green-500 font-semibold">Status: Open</p>
-        ) : (
-          <p className="text-red-500 font-semibold">Status: Closed</p>
-        )}
-
-        {/* Winner Details */}
-        <div className="mt-6">
-          <h2 className="text-lg font-bold mb-2">Winner Information</h2>
-          {isUserWinner ? (
-            <p className="text-green-500">🎉 You are the winner of this auction!</p>
-          ) : auction.winner ? (
-            <>
-              <p>Name: {auction.winner.name}</p>
-              <p>Email: {auction.winner.email}</p>
-            </>
-          ) : (
-            <p>No winner declared yet.</p>
-          )}
-        </div>
-
-        {/* Bid Management Section */}
-        {auction.isOpen ? (
-          auction.userBid ? (
-            <div className="mt-6">
-              <h2 className="text-lg font-bold mb-2">Manage Your Bid</h2>
-              <p className="text-green-500 font-semibold">
-                Your current bid: ₹{auction.userBid.amount}
+    <div className="min-h-screen bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 py-8">
+      <div className="container mx-auto px-4 lg:px-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Content Section */}
+          <div className="flex-grow backdrop-blur-lg bg-neutral-900/50 rounded-xl border border-yellow-900/20 p-6 lg:p-8">
+            {/* Header Section */}
+            <h1 className="text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
+              {auction.title}
+            </h1>
+            
+            <p className="text-neutral-300 mb-6">{auction.description}</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <p className="text-neutral-400">
+                Created on: {new Date(auction.createdAt).toLocaleDateString()}
               </p>
-              <input
-                type="number"
-                className="border rounded p-2 w-full mb-4"
-                placeholder="Enter new bid amount"
-                value={bidAmount}
-                onChange={(e) => setBidAmount(Number(e.target.value))}
-              />
-              <div className="flex space-x-4">
-                <button
-                  onClick={handleUpdateBid}
-                  className={`bg-blue-500 text-white px-4 py-2 rounded ${
-                    updatingBid ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  disabled={updatingBid}
-                >
-                  {updatingBid ? "Updating Bid..." : "Update Bid"}
-                </button>
-                <button
-                  onClick={handleDeleteBid}
-                  className={`bg-red-500 text-white px-4 py-2 rounded ${
-                    deletingBid ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  disabled={deletingBid}
-                >
-                  {deletingBid ? "Deleting Bid..." : "Delete Bid"}
-                </button>
-              </div>
+              <p className="text-neutral-400">Total Bids: {auction.totalBids}</p>
             </div>
-          ) : (
-            <div className="mt-6">
-              <h2 className="text-lg font-bold mb-2">Place Your Bid</h2>
-              <input
-                type="number"
-                className="border rounded p-2 w-full mb-4"
-                placeholder="Enter bid amount"
-                value={bidAmount}
-                onChange={(e) => setBidAmount(Number(e.target.value))}
-              />
-              <button
-                onClick={handlePlaceBid}
-                className={`bg-blue-500 text-white px-4 py-2 rounded ${
-                  placingBid ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-                disabled={placingBid}
-              >
-                {placingBid ? "Placing Bid..." : "Place Bid"}
-              </button>
+
+            {/* Status Badge */}
+            <div className="mb-8">
+              {auction.isOpen ? (
+                <span className="bg-yellow-500/10 text-yellow-500 px-4 py-2 rounded-full text-sm font-semibold">
+                  Status: Open
+                </span>
+              ) : (
+                <span className="bg-neutral-800 text-neutral-400 px-4 py-2 rounded-full text-sm font-semibold">
+                  Status: Closed
+                </span>
+              )}
             </div>
-          )
-        ) : (
-          <div className="mt-6">
-            {auction.userBid ? (
-              <>
-                <h2 className="text-lg font-bold mb-2">Your Bid</h2>
-                <p>Your current bid was ₹{auction.userBid.amount}.</p>
-              </>
+
+            {/* Winner Section */}
+            <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6 mb-8">
+              <h2 className="text-xl font-bold mb-4 text-neutral-200">
+                Winner Information
+              </h2>
+              {isUserWinner ? (
+                <div className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg">
+                  🏆 Congratulations! You won this auction!
+                </div>
+              ) : auction.winner ? (
+                <div className="space-y-2">
+                  <p className="text-neutral-300">Name: {auction.winner.name}</p>
+                  <p className="text-neutral-300">Email: {auction.winner.email}</p>
+                </div>
+              ) : (
+                <p className="text-neutral-400">No winner declared yet.</p>
+              )}
+            </div>
+
+            {/* Bidding Section */}
+            {auction.isOpen ? (
+              auction.userBid ? (
+                <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
+                  <h2 className="text-xl font-bold mb-4 text-neutral-200">
+                    Manage Your Bid
+                  </h2>
+                  <p className="text-yellow-500 font-semibold mb-4">
+                    Your current bid: ₹{auction.userBid.amount}
+                  </p>
+                  <input
+                    type="number"
+                    className="w-full mb-6 bg-neutral-800 border border-yellow-900/20 rounded-lg p-3 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+                    placeholder="Enter new bid amount"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(Number(e.target.value))}
+                  />
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <button
+                      onClick={handleUpdateBid}
+                      disabled={updatingBid}
+                      className={`flex-1 bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-200 px-6 py-3 rounded-lg transition-all duration-300 hover:from-yellow-500 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {updatingBid ? "Updating Bid..." : "Update Bid"}
+                    </button>
+                    <button
+                      onClick={handleDeleteBid}
+                      disabled={deletingBid}
+                      className={`flex-1 bg-neutral-800 text-neutral-300 px-6 py-3 rounded-lg transition-colors hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {deletingBid ? "Deleting Bid..." : "Delete Bid"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
+                  <h2 className="text-xl font-bold mb-4 text-neutral-200">
+                    Place Your Bid
+                  </h2>
+                  <input
+                    type="number"
+                    className="w-full mb-6 bg-neutral-800 border border-yellow-900/20 rounded-lg p-3 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
+                    placeholder="Enter bid amount"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(Number(e.target.value))}
+                  />
+                  <button
+                    onClick={handlePlaceBid}
+                    disabled={placingBid}
+                    className={`w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-200 px-6 py-3 rounded-lg transition-all duration-300 hover:from-yellow-500 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {placingBid ? "Placing Bid..." : "Place Bid"}
+                  </button>
+                </div>
+              )
             ) : (
-              <h2 className="text-lg font-bold mb-2">No Bid Placed By You </h2>
+              <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
+                {auction.userBid ? (
+                  <>
+                    <h2 className="text-xl font-bold mb-4 text-neutral-200">
+                      Your Bid
+                    </h2>
+                    <p className="text-neutral-300">
+                      Your final bid was ₹{auction.userBid.amount}
+                    </p>
+                  </>
+                ) : (
+                  <h2 className="text-xl font-bold text-neutral-300">
+                    No Bid Placed By You
+                  </h2>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
 
-      {/* Creator Details Card */}
-      <div className="w-1/4 p-4 bg-gray-100 rounded-lg shadow-md ml-4">
-        <h2 className="text-lg font-bold mb-2">Creator Details</h2>
-        <Link href={`/profile/${auction.creator.id}`} className="font-semibold">
-          Name: {auction.creator.name}
-        </Link>
-        <p>Email: {auction.creator.email}</p>
-        <p>Phone: {auction.creator.phone}</p>
+          {/* Creator Details Sidebar */}
+          <div className="lg:w-1/4 h-fit backdrop-blur-lg bg-neutral-900/50 rounded-xl border border-yellow-900/20 p-6">
+            <h2 className="text-xl font-bold mb-6 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
+              Creator Details
+            </h2>
+            <div className="space-y-4">
+              <Link
+                href={`/profile/${auction.creator.id}`}
+                className="block text-yellow-500 hover:text-yellow-400 transition-colors duration-300"
+              >
+                {auction.creator.name}
+              </Link>
+              <p className="text-neutral-400">Email: {auction.creator.email}</p>
+              <p className="text-neutral-400">Phone: {auction.creator.phone}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
