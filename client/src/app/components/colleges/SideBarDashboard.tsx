@@ -1,15 +1,127 @@
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { Menu as MenuIcon, X } from "lucide-react";
+
 const SideBarDashboard = () => {
-  return (
-    <div>
-      <ul>
-        <Link href="/dashboard/institution/auction/">My Auctions</Link>
-        <Link href="/dashboard/institution/auction/create">Create Auction</Link>
-        <li>My Chats</li>
-      </ul>
-    </div>
-  );
+  const [isExpanded, setIsExpanded] = useState(true); // Sidebar toggle state
+  const pathname = usePathname();
+
+  const links = [
+    {
+      href: "/dashboard/institution/auction/",
+      label: "My Auctions",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+          />
+        </svg>
+      ),
+    },
+    {
+      href: "/dashboard/institution/auction/create",
+      label: "Create Auction",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+      ),
+    },
+    {
+      href: "/chats",
+      label: "My Chats",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8,9,-8s9,3.582,9,8z"
+          />
+        </svg>
+      ),
+    },
+];
+
+return (
+    <motion.div
+      initial={{ width: isExpanded ? "280px" : "80px" }}
+      animate={{ width: isExpanded ? "280px" : "80px" }}
+      className={`h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 border-r border-yellow-900/20 relative shadow-xl`}
+    >
+      {/* Toggle Button */}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={`absolute -right-4 top-6 bg-yellow-600 rounded-full p-1.5 hover:bg-yellow-500 transition-colors duration-300`}
+      >
+        {isExpanded ? <X size={16} /> : <MenuIcon size={16} />}
+      </button>
+
+      {/* Logo Section */}
+      <div className={`p-6 ${!isExpanded && "hidden"}`}>
+        <motion.div
+          initial={false}
+          animate={{ opacity: isExpanded ? 1 : 0 }}
+          className={`bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent text-xl font-bold`}
+        >
+          Institution Dashboard
+        </motion.div>
+      </div>
+
+      {/* Navigation Links */}
+      <nav className={`p-${isExpanded ? '6' : '3'} space-y-${isExpanded ? '4' : '1'}`}>
+        <ul>
+          {links.map((link, index) => {
+            const isActive = pathname === link.href;
+
+            return (
+              <motion.li
+                key={link.href}
+                initial={{ x: -20, opacity: isExpanded ?1 : .5 }}
+                animate={{ x: isExpanded ? [0] : [-20], opacity: isExpanded ? [1] : [0] }}
+                transition={{ delay: index * .1 }}
+              >
+                <Link href={link.href}>
+                  <motion.div
+                    whileHover={{ x: isExpanded ?10 : -10 }}
+                    className={`flex items-center gap-4 text-neutral-400 hover:text-yellow-500 transition-colors duration-300 p-${isExpanded ? '3' : '1'} rounded-lg hover:bg-neutral-900/50`}
+                  >
+                    {link.icon}
+                    {isExpanded && <span>{link.label}</span>}
+                  </motion.div>
+                </Link>
+              </motion.li>
+            );
+          })}
+        </ul>
+      </nav>
+    </motion.div>
+   );
 };
 
 export default SideBarDashboard;

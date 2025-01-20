@@ -1,12 +1,16 @@
-import SideBarDashboard from "@/app/components/colleges/SideBarDashboard";
+"use client";
 import React from "react";
+import SideBarDashboard from "@/app/components/colleges/SideBarDashboard";
 
-const page = () => {
+const Page = () => {
   return (
-    <div>
+    <div style={{ display: "flex" }}>
       <SideBarDashboard />
+      <div style={{ marginLeft: "20px" }}>
+        Main Content
+      </div>
     </div>
   );
 };
 
-export default page;
+export default Page;
