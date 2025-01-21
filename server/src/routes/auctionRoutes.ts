@@ -11,6 +11,7 @@ import {
   getOthersSingleAuctionController,
   openAuctionController,
   placeBidController,
+  removeWinnerController,
   updateAuctionController,
   updateYourBidController,
 } from "../controllers/auctionControllers";
@@ -56,5 +57,9 @@ auctionRoutes.put("/open-auction/:id", isSign, openAuctionController);
 //For Accepting the Bid of a User and Declaring Winner
 
 auctionRoutes.put("/accept-bid", isSign, acceptBidAcontroller);
+
+//For Removing as Bid Winner//
+
+auctionRoutes.put("/remove-winner",isSign,removeWinnerController);
 
 export default auctionRoutes;

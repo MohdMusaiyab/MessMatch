@@ -884,3 +884,84 @@ export const acceptBidAcontroller = async (
     });
   }
 };
+
+// ============For Removing the Bid as Winner================
+export const removeWinnerController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  console.log("Satrting to Remove");
+  const userId = req.userId;
+  if (!userId) {
+    return res.status(403).json({
+      message: "Please Login First",
+      success: false,
+    });
+  }
+
+  try {
+    const { auctionId, bidId } = req.body;
+
+    if (!auctionId || !bidId) {
+      return res.status(400).json({
+        message: "Please provide auction ID and bid ID",
+        success: false,
+      });
+    }
+    const auction = await prisma.auction.findUnique({
+      where: {
+        id: auctionId,
+      },
+      select: {
+        creatorId: true,
+      },
+    });
+    if (!auction) {
+      return res.status(404).json({
+        message: "Auction Not Found",
+        success: false,
+      });
+    }
+    if (auction.creatorId !== userId) {
+      return res.status(403).json({
+        message: "You are not authorized to accept bids for this auction",
+        success: false,
+      });
+    }
+    const bid = await prisma.bid.findUnique({
+      where: {
+        id: bidId,
+      },
+      select: {
+        auctionId: true,
+        bidderId: true,
+      },
+    });
+
+    if (!bid || bid.auctionId !== auctionId) {
+      return res.status(404).json({
+        message: "Bid not found for this auction",
+        success: false,
+      });
+    }
+    //Now Remove the Winner
+    await prisma.auction.update({
+      where: {
+        id: auctionId,
+      },
+      data: {
+        winnerId: null,
+      },
+    });
+    return res.status(200).json({
+      message: "Winner Removed Successfully",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Internal server error",
+      success: false,
+    });
+  }
+};
