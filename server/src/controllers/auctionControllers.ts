@@ -621,7 +621,9 @@ export const deleteYourBidController = async (
         id: true,
         auction: {
           select: {
+            id: true,
             isOpen: true,
+            winnerId: true,
           },
         },
       },
@@ -640,7 +642,13 @@ export const deleteYourBidController = async (
         success: false,
       });
     }
-
+    //Handlng the Case if the Bidder is Winner
+    if (existingBid.auction.winnerId === userId) {
+      await prisma.auction.update({
+        where: { id: existingBid.auction.id },
+        data: { winnerId: null },
+      });
+    }
     // Delete the bid
     await prisma.bid.delete({
       where: {
@@ -890,7 +898,6 @@ export const removeWinnerController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
-  console.log("Satrting to Remove");
   const userId = req.userId;
   if (!userId) {
     return res.status(403).json({
@@ -900,11 +907,11 @@ export const removeWinnerController = async (
   }
 
   try {
-    const { auctionId, bidId } = req.body;
+    const { auctionId } = req.body;
 
-    if (!auctionId || !bidId) {
+    if (!auctionId) {
       return res.status(400).json({
-        message: "Please provide auction ID and bid ID",
+        message: "Please provide auction ID ",
         success: false,
       });
     }
@@ -914,6 +921,7 @@ export const removeWinnerController = async (
       },
       select: {
         creatorId: true,
+        winnerId: true,
       },
     });
     if (!auction) {
@@ -928,22 +936,14 @@ export const removeWinnerController = async (
         success: false,
       });
     }
-    const bid = await prisma.bid.findUnique({
-      where: {
-        id: bidId,
-      },
-      select: {
-        auctionId: true,
-        bidderId: true,
-      },
-    });
-
-    if (!bid || bid.auctionId !== auctionId) {
-      return res.status(404).json({
-        message: "Bid not found for this auction",
+    
+    //First Check if that auction had some winner or not
+    if (!auction.winnerId) {
+      return res.status(400).json({
+        message: "No Winner Found",
         success: false,
       });
-    }
+    }    
     //Now Remove the Winner
     await prisma.auction.update({
       where: {

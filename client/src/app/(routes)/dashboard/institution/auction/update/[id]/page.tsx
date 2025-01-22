@@ -15,7 +15,7 @@ const AuctionDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [winnerId,setWinnerId]=useState<string | null>(null);
+  const [winnerId, setWinnerId] = useState<string | null>(null);
   // Fetch auction details
   useEffect(() => {
     const fetchAuction = async () => {
@@ -99,14 +99,13 @@ const AuctionDetail = () => {
       setError("Failed to accept bid. Please try again later.");
     }
   };
-  
+
   const handleRemoveWinner = async () => {
     try {
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/remove-winner`,
         {
-          auctionId: id,  
-          bidId: auction.winner?.id, // Assuming this is the correct bid ID structure
+          auctionId: id,
         },
         { withCredentials: true }
       );
