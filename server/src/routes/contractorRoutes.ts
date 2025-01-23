@@ -4,6 +4,7 @@ import {
   deleteYourMenuController,
   getFiltersController,
   getLatestAuctionsController,
+  getLatestMenusController,
   getMyMenusController,
   getOthersSingleMenuController,
   getSingleMenuController,
@@ -52,5 +53,9 @@ contractorRoutes.get("/filters",isSign,getFiltersController);
 
 // ==========For Getting Latest 3 Auctions where he had Placedd Bid + 3 of hi latets Menu's==========
 
- contractorRoutes.get("/latest-things",isSign,isContractor,getLatestAuctionsController);
+contractorRoutes.get("/latest-things",isSign,isContractor,getLatestAuctionsController);
+
+
+// For fetching the latest 3 menus for any contractor dashboard
+contractorRoutes.get("/dashboard-latest-menus", isSign, getLatestMenusController);
 export default contractorRoutes;

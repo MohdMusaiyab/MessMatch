@@ -508,3 +508,35 @@ export const getLatestAuctionsController = async (
     });
   }
 };
+
+// ==============For Getting the Latest 3 Menus=================
+export const getLatestMenusController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    console.log("Reaching Backend");
+    const menus = await prisma.menu.findMany({
+      select: {
+        id: true,
+        name: true,
+        pricePerHead: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: 3,
+    });
+    return res.status(200).json({
+      message: "Data fetched successfully",
+      success: true,
+      data: menus,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      message: "Error in fetching latest menus",
+      success: false,
+    });
+  }
+};
