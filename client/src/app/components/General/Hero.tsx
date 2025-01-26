@@ -1,40 +1,65 @@
-import React from "react";
-import { Diamond, ArrowRight, Shield, Star, Award } from "lucide-react";
+"use client";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Diamond, 
+  ArrowRight, 
+  Shield, 
+  Star, 
+  Award 
+} from "lucide-react";
 import Link from "next/link";
 
 const Hero = () => {
+  const [activeFeature, setActiveFeature] = useState(0);
+  const features = [
+    {
+      icon: Shield,
+      title: "Verified Contractors",
+      description: "Rigorously screened and top-performing mess service providers."
+    },
+    {
+      icon: Star,
+      title: "Premium Service",
+      description: "Exceptional dining solutions tailored to institutional needs."
+    },
+    {
+      icon: Award,
+      title: "Quality Assured",
+      description: "Consistent excellence in culinary and service delivery."
+    }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveFeature((prev) => (prev + 1) % features.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="relative bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 py-24">
-      {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/5 to-yellow-600/5" />
 
-      {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500/20 to-transparent" />
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-500/20 to-transparent" />
-
-      <div className="container mx-auto px-4 relative">
-        <div className="text-center max-w-4xl mx-auto">
-          {/* Premium icon */}
-          <div className="flex justify-center mb-6">
+      <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-12 items-center">
+        {/* Left Content */}
+        <div className="text-center md:text-left">
+          <div className="flex justify-center md:justify-start mb-6">
             <Diamond className="text-yellow-500 w-12 h-12" />
           </div>
 
-          {/* Main heading with gradient */}
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
             <span className="bg-gradient-to-r from-yellow-500 to-yellow-200 text-transparent bg-clip-text">
-              Elite Mess Contractor Network
+              Revolutionize Dining
             </span>
           </h1>
 
-          {/* Subheading with premium styling */}
           <p className="text-lg md:text-xl text-neutral-300 mb-8 leading-relaxed">
-            Connect with premium mess contractors through our exclusive
-            platform. Elevating institutional dining experiences through
-            certified partnerships.
+            Transform institutional catering through intelligent connections, 
+            where quality meets innovation and every meal tells a story of excellence.
           </p>
 
-          {/* CTA buttons with gradient effects */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
+          <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mb-12">
             <Link
               href="/dashboard"
               className="group px-8 py-4 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 rounded-lg flex items-center justify-center transition-all"
@@ -49,22 +74,32 @@ const Hero = () => {
               Learn More
             </Link>
           </div>
+        </div>
 
-          {/* Trust indicators */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <Shield className="text-yellow-500 w-5 h-5" />
-              <span className="text-neutral-300">Verified Contractors</span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <Star className="text-yellow-500 w-5 h-5" />
-              <span className="text-neutral-300">Premium Service</span>
-            </div>
-            <div className="flex items-center justify-center gap-2">
-              <Award className="text-yellow-500 w-5 h-5" />
-              <span className="text-neutral-300">Quality Assured</span>
-            </div>
-          </div>
+        {/* Right Content - Animated Features */}
+        <div className="relative h-[400px] overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeFeature}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 0.5 }}
+              className="absolute w-full"
+            >
+              <div className="bg-neutral-900/50 backdrop-blur-sm rounded-xl p-6 border border-yellow-500/20 space-y-4">
+                {React.createElement(features[activeFeature].icon, { 
+                  className: "text-yellow-500 w-12 h-12 mx-auto mb-4" 
+                })}
+                <h3 className="text-2xl font-semibold text-yellow-500 text-center">
+                  {features[activeFeature].title}
+                </h3>
+                <p className="text-neutral-300 text-center">
+                  {features[activeFeature].description}
+                </p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>

@@ -1,101 +1,153 @@
 'use client'
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Shield, Utensils, CheckCircle, DollarSign } from 'lucide-react';
+"use client"
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { 
+  Network, 
+  Shield, 
+  MessageCircle, 
+  Bell, 
+  ArrowRight 
+} from "lucide-react";
 
-const Features = () => {
- const featureList = [
-   {
-     title: 'Easy Connections',
-     description: 'Seamlessly connect with mess contractors who meet your specific requirements.',
-     icon: <Shield className="w-8 h-8" />,
-   },
-   {
-     title: 'Customizable Menus', 
-     description: 'Create and customize meal plans that cater to diverse dietary needs.',
-     icon: <Utensils className="w-8 h-8" />,
-   },
-   {
-     title: 'Reliable Service',
-     description: 'Enjoy dependable service from vetted contractors with positive reviews.',
-     icon: <CheckCircle className="w-8 h-8" />,
-   },
-   {
-     title: 'Cost-Effective Solutions',
-     description: 'Find competitive pricing options that fit your budget without compromising quality.',
-     icon: <DollarSign className="w-8 h-8" />,
-   },
- ];
+const Features: React.FC = () => {
+  const [activeFeature, setActiveFeature] = useState(0);
+  
+  const features = [
+    {
+      icon: Network,
+      title: "Dynamic Matching",
+      description: "Intelligent algorithm connecting mess contractors with perfect institutional partners.",
+      details: [
+        "AI-powered compatibility scoring",
+        "Real-time contractor availability tracking",
+        "Customized institutional requirements matching"
+      ]
+    },
+    {
+      icon: Shield,
+      title: "Secure Ecosystem",
+      description: "Comprehensive verification and trust-building platform.",
+      details: [
+        "Multi-layer contractor verification",
+        "Transparent performance ratings",
+        "Secure transaction mechanisms"
+      ]
+    },
+    {
+      icon: MessageCircle,
+      title: "Interactive Communication",
+      description: "Seamless communication bridge between contractors and institutions.",
+      details: [
+        "Instant messaging platform",
+        "Negotiation and proposal tools",
+        "Performance feedback system"
+      ]
+    },
+    {
+      icon: Bell,
+      title: "Smart Notifications",
+      description: "Proactive updates and intelligent alert system.",
+      details: [
+        "Customizable notification preferences",
+        "Real-time auction and bidding alerts",
+        "Performance milestone tracking"
+      ]
+    }
+  ];
 
- const containerVariants = {
-   hidden: { opacity: 0 },
-   visible: {
-     opacity: 1,
-     transition: {
-       staggerChildren: 0.2
-     }
-   }
- };
+  return (
+    <div className="bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 py-24 px-4">
+      <div className="container mx-auto grid md:grid-cols-2 gap-12 items-center">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent text-center  md:col-span-2">Features</h1>
+        {/* Features List */}
+        <div className="space-y-6">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ 
+                opacity: activeFeature === index ? 1 : 0.5, 
+                x: 0 
+              }}
+              transition={{ duration: 0.5 }}
+              onClick={() => setActiveFeature(index)}
+              className={`
+                cursor-pointer p-6 rounded-xl transition-all duration-300
+                ${activeFeature === index 
+                  ? 'bg-neutral-900/70 border border-yellow-500/30' 
+                  : 'hover:bg-neutral-900/40'}
+              `}
+            >
+              <div className="flex items-center space-x-4">
+                {React.createElement(feature.icon, {
+                  className: `
+                    w-10 h-10 
+                    ${activeFeature === index 
+                      ? 'text-yellow-500' 
+                      : 'text-neutral-600'}
+                  `
+                })}
+                <h3 className={`
+                  text-xl font-semibold 
+                  ${activeFeature === index 
+                    ? 'text-yellow-500' 
+                    : 'text-neutral-300'}
+                `}>
+                  {feature.title}
+                </h3>
+              </div>
+              {activeFeature === index && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 space-y-2"
+                >
+                  <p className="text-neutral-400">{feature.description}</p>
+                  <ul className="text-neutral-500 list-disc list-inside">
+                    {feature.details.map((detail) => (
+                      <li key={detail}>{detail}</li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
+        </div>
 
- const itemVariants = {
-   hidden: { opacity: 0, y: 20 },
-   visible: {
-     opacity: 1,
-     y: 0,
-     transition: {
-       duration: 0.5
-     }
-   }
- };
-
- return (
-   <div className="py-24 bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
-     <div className="container mx-auto px-4">
-       <motion.div
-         initial={{ opacity: 0, y: -20 }}
-         animate={{ opacity: 1, y: 0 }}
-         transition={{ duration: 0.6 }}
-         className="text-center mb-16"
-       >
-         <h2 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-6">
-           Our Features
-         </h2>
-         <div className="w-24 h-1 bg-gradient-to-r from-yellow-600 to-yellow-700 mx-auto rounded-full"/>
-       </motion.div>
-
-       <motion.div 
-         variants={containerVariants}
-         initial="hidden"
-         animate="visible"
-         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-       >
-         {featureList.map((feature, index) => (
-           <motion.div
-             key={index}
-             variants={itemVariants}
-             whileHover={{ 
-               scale: 1.05,
-               transition: { duration: 0.2 }
-             }}
-             className="bg-neutral-900/50 backdrop-blur p-8 rounded-lg border border-yellow-900/20 
-                        shadow-lg hover:shadow-yellow-500/10 transition-all duration-300
-                        flex flex-col items-center text-center"
-           >
-             <div className="mb-6 text-yellow-500 bg-neutral-800/50 p-4 rounded-full">
-               {feature.icon}
-             </div>
-             <h3 className="text-xl font-semibold mb-4 text-white">
-               {feature.title}
-             </h3>
-             <p className="text-neutral-400 leading-relaxed">
-               {feature.description}
-             </p>
-           </motion.div>
-         ))}
-       </motion.div>
-     </div>
-   </div>
- );
+        {/* Interactive Feature Visualization */}
+        <motion.div
+          key={activeFeature}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="bg-neutral-900/50 backdrop-blur-lg rounded-2xl p-8 border border-yellow-500/20"
+        >
+          <div className="flex flex-col items-center justify-center h-full space-y-6">
+            {React.createElement(features[activeFeature].icon, {
+              className: "w-24 h-24 text-yellow-500 mb-4"
+            })}
+            <h2 className="text-3xl font-bold text-yellow-500 text-center">
+              {features[activeFeature].title}
+            </h2>
+            <p className="text-neutral-300 text-center max-w-md">
+              {features[activeFeature].description}
+            </p>
+            <button className="
+              flex items-center space-x-2 
+              bg-gradient-to-r from-yellow-600 to-yellow-700 
+              text-white px-6 py-3 rounded-lg 
+              hover:from-yellow-700 hover:to-yellow-800 
+              transition-all
+            ">
+              <span>Explore More</span>
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
 };
 
 export default Features;
