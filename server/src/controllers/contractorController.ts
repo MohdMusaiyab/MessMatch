@@ -515,7 +515,7 @@ export const getLatestMenusController = async (
   res: Response
 ): Promise<any> => {
   try {
-    console.log("Reaching Backend");
+    
     const menus = await prisma.menu.findMany({
       select: {
         id: true,

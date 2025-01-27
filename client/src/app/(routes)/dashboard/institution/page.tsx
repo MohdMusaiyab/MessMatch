@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import SideBarDashboard from "@/app/components/colleges/SideBarDashboard";
 import axios from "axios";
+import Link from "next/link";
 
 // Define menu type based on the backend response
 interface Menu {
@@ -57,9 +58,9 @@ const Page: React.FC = () => {
               key={menu.id}
               className="bg-gradient-to-b from-neutral-900 to-neutral-950 backdrop-blur-md border border-yellow-900/20 shadow-lg rounded-lg p-6 transition-all duration-300 hover:border-yellow-700 hover:shadow-yellow-600/20"
             >
-              <h2 className="text-2xl font-semibold text-neutral-200">
+              <Link href={`/dashboard/contractor/menu/${menu.id}`} className="text-2xl font-semibold text-neutral-200">
                 {menu.name}
-              </h2>
+              </Link>
               <p className="text-lg text-neutral-400 mt-2">
                 Price Per Head:{" "}
                 <span className="font-bold text-yellow-500">
