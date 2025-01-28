@@ -50,7 +50,8 @@ const UpdateUserInformation: React.FC = () => {
           email: user?.email ?? "",
           address: user?.address ?? "",
           contactNumber: user?.contactNumber ?? "",
-          securityQuestion: user?.securityQuestion ?? securityQuestions.MOTHERS_MAIDEN_NAME,
+          securityQuestion:
+            user?.securityQuestion ?? securityQuestions.MOTHERS_MAIDEN_NAME,
           securityAnswer: user?.securityAnswer ?? "",
           password: "",
           contractorFields: {
@@ -67,7 +68,9 @@ const UpdateUserInformation: React.FC = () => {
     fetchUserData();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     if (name.startsWith("contractorFields.")) {
       const fieldName = name.split(".")[1];
@@ -86,7 +89,9 @@ const UpdateUserInformation: React.FC = () => {
   const handleServiceChange = (serviceType: string) => {
     setFormData((prevData) => {
       const services = prevData.contractorFields.services.includes(serviceType)
-        ? prevData.contractorFields.services.filter(service => service !== serviceType)
+        ? prevData.contractorFields.services.filter(
+            (service) => service !== serviceType
+          )
         : [...prevData.contractorFields.services, serviceType];
       return {
         ...prevData,
@@ -119,7 +124,8 @@ const UpdateUserInformation: React.FC = () => {
     }
   };
 
-  const inputClasses = "mt-1 block w-full bg-neutral-900/50 border border-yellow-900/20 rounded-lg shadow-sm focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-600/40 p-3 text-neutral-300 placeholder-neutral-500 transition-all duration-300";
+  const inputClasses =
+    "mt-1 block w-full bg-neutral-900/50 border border-yellow-900/20 rounded-lg shadow-sm focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-600/40 p-3 text-neutral-300 placeholder-neutral-500 transition-all duration-300";
   const labelClasses = "block text-sm font-medium text-neutral-300 mb-1";
 
   return (
@@ -136,7 +142,7 @@ const UpdateUserInformation: React.FC = () => {
         <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
           Update Your Information
         </h2>
-        
+
         {error && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -149,7 +155,9 @@ const UpdateUserInformation: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="name" className={labelClasses}>Name</label>
+            <label htmlFor="name" className={labelClasses}>
+              Name
+            </label>
             <input
               type="text"
               id="name"
@@ -161,7 +169,9 @@ const UpdateUserInformation: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="email" className={labelClasses}>Email</label>
+            <label htmlFor="email" className={labelClasses}>
+              Email
+            </label>
             <input
               type="email"
               id="email"
@@ -173,7 +183,9 @@ const UpdateUserInformation: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="address" className={labelClasses}>Address</label>
+            <label htmlFor="address" className={labelClasses}>
+              Address
+            </label>
             <input
               type="text"
               id="address"
@@ -185,7 +197,9 @@ const UpdateUserInformation: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="contactNumber" className={labelClasses}>Contact Number</label>
+            <label htmlFor="contactNumber" className={labelClasses}>
+              Contact Number
+            </label>
             <input
               type="text"
               id="contactNumber"
@@ -197,7 +211,9 @@ const UpdateUserInformation: React.FC = () => {
           </div>
 
           <div>
-            <label htmlFor="securityQuestion" className={labelClasses}>Security Question</label>
+            <label htmlFor="securityQuestion" className={labelClasses}>
+              Security Question
+            </label>
             <select
               id="securityQuestion"
               name="securityQuestion"
@@ -206,18 +222,35 @@ const UpdateUserInformation: React.FC = () => {
               className={inputClasses}
             >
               {Object.entries(securityQuestions).map(([key, label]) => (
-                <option key={key} value={key} className="bg-neutral-900">{label}</option>
+                <option key={key} value={key} className="bg-neutral-900">
+                  {label}
+                </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label htmlFor="securityAnswer" className={labelClasses}>Security Answer</label>
+            <label htmlFor="securityAnswer" className={labelClasses}>
+              Security Answer
+            </label>
             <input
               type="text"
               id="securityAnswer"
               name="securityAnswer"
               value={formData.securityAnswer}
+              onChange={handleChange}
+              className={inputClasses}
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className={labelClasses}>
+              New Password (optional)
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
               onChange={handleChange}
               className={inputClasses}
             />
@@ -229,10 +262,15 @@ const UpdateUserInformation: React.FC = () => {
               animate={{ opacity: 1 }}
               className="pt-6 border-t border-yellow-900/20"
             >
-              <h3 className="text-xl font-semibold mb-6 text-yellow-500">Contractor Details</h3>
-              
+              <h3 className="text-xl font-semibold mb-6 text-yellow-500">
+                Contractor Details
+              </h3>
+
               <div className="mb-6">
-                <label htmlFor="contractorFields.numberOfPeople" className={labelClasses}>
+                <label
+                  htmlFor="contractorFields.numberOfPeople"
+                  className={labelClasses}
+                >
                   Number of People
                 </label>
                 <input
@@ -246,7 +284,9 @@ const UpdateUserInformation: React.FC = () => {
               </div>
 
               <div>
-                <h4 className="text-lg font-medium text-neutral-300 mb-4">Services</h4>
+                <h4 className="text-lg font-medium text-neutral-300 mb-4">
+                  Services
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {Object.values(ServiceType).map((service) => (
                     <motion.div
@@ -258,11 +298,16 @@ const UpdateUserInformation: React.FC = () => {
                         type="checkbox"
                         id={service}
                         value={service}
-                        checked={formData.contractorFields.services.includes(service)}
+                        checked={formData.contractorFields.services.includes(
+                          service
+                        )}
                         onChange={() => handleServiceChange(service)}
                         className="w-4 h-4 rounded border-yellow-900/20 text-yellow-600 focus:ring-yellow-500/20 bg-neutral-900/50"
                       />
-                      <label htmlFor={service} className="ml-3 text-sm text-neutral-300">
+                      <label
+                        htmlFor={service}
+                        className="ml-3 text-sm text-neutral-300"
+                      >
                         {service.replace(/_/g, " ")}
                       </label>
                     </motion.div>
@@ -272,24 +317,14 @@ const UpdateUserInformation: React.FC = () => {
             </motion.div>
           )}
 
-          <div>
-            <label htmlFor="password" className={labelClasses}>New Password (optional)</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={inputClasses}
-            />
-          </div>
-
           <motion.button
             type="submit"
             disabled={loading}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`w-full py-3 px-4 bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-100 font-semibold rounded-lg shadow-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`w-full py-3 px-4 bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-100 font-semibold rounded-lg shadow-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 ${
+              loading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
             {loading ? "Updating..." : "Update Information"}
           </motion.button>
