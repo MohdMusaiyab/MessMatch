@@ -5,16 +5,21 @@ import { Menu as MenuIcon, X, BookOpen, MessageCircle, Gavel } from 'lucide-reac
 
 const SideBarDashBoard = () => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(280); 
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setIsExpanded(false);
+        setSidebarWidth(150); // Smaller width for mobile
+      } else {
+        setSidebarWidth(280); // Normal width for larger screens
       }
     };
-    
+
     handleResize();
     window.addEventListener('resize', handleResize);
-    
+
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -26,11 +31,9 @@ const SideBarDashBoard = () => {
 
   return (
     <motion.div
-      initial={{ width: 280 }}
-      animate={{ 
-        width: isExpanded ? 280 : 64,
-      }}
-      className="relative h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 border-r border-yellow-900/20 shadow-xl flex-shrink-0 md:relative fixed z-50"
+      initial={{ width: sidebarWidth }}
+      animate={{ width: isExpanded ? sidebarWidth : 64 }}
+      className="relative h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 border-r border-yellow-900/20 shadow-xl flex-shrink-0 md:relative fixed z-40"
     >
       {/* Toggle Button */}
       <button

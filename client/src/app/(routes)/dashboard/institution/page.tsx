@@ -1,10 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import SideBarDashboard from "@/app/components/colleges/SideBarDashboard";
 import axios from "axios";
+import { motion } from "framer-motion";
 import Link from "next/link";
+import SideBarDashboard from "@/app/components/colleges/SideBarDashboard";
+import { Loader2, AlertCircle, Plus, ChevronRight } from "lucide-react";
 
-// Define menu type based on the backend response
 interface Menu {
   id: number;
   name: string;
@@ -16,9 +17,9 @@ const Page: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch menus from the backend
   const getLatestMenus = async () => {
     try {
-      console.log("Fetching latest menus...");
       const response = await axios.get<{ message: string; success: boolean; data: Menu[] }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/contractor/dashboard-latest-menus`,
         { withCredentials: true }
@@ -31,7 +32,6 @@ const Page: React.FC = () => {
       }
     } catch (err) {
       setError("Failed to load menus. Please try again.");
-      console.error("Error fetching menus:", err);
     } finally {
       setLoading(false);
     }
@@ -41,39 +41,60 @@ const Page: React.FC = () => {
     getLatestMenus();
   }, []);
 
-  return (
-    <div className="flex min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 text-neutral-300">
-      <SideBarDashboard />
-      <div className="flex-1 p-6">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 text-transparent bg-clip-text mb-12">
-          Latest Menus
-        </h1>
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-neutral-950">
+        <Loader2 className="w-8 h-8 text-yellow-500 animate-spin" />
+      </div>
+    );
+  }
 
-        {loading && <p className="text-yellow-500">Loading...</p>}
-        {error && <p className="text-red-500">{error}</p>}
-
-        <div className="space-y-6">
-          {menus.map((menu) => (
-            <div
-              key={menu.id}
-              className="bg-gradient-to-b from-neutral-900 to-neutral-950 backdrop-blur-md border border-yellow-900/20 shadow-lg rounded-lg p-6 transition-all duration-300 hover:border-yellow-700 hover:shadow-yellow-600/20"
-            >
-              <Link href={`/dashboard/contractor/menu/${menu.id}`} className="text-2xl font-semibold text-neutral-200">
-                {menu.name}
-              </Link>
-              <p className="text-lg text-neutral-400 mt-2">
-                Price Per Head:{" "}
-                <span className="font-bold text-yellow-500">
-                  ${menu.pricePerHead}
-                </span>
-              </p>
-            </div>
-          ))}
+  // Error state
+  if (error) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-neutral-950">
+        <div className="bg-red-950/50 text-red-200 p-4 rounded-lg flex items-center gap-2">
+          <AlertCircle className="w-5 h-5" />
+          {error}
         </div>
+      </div>
+    );
+  }
 
-        {!loading && menus.length === 0 && (
-          <p className="text-neutral-400 mt-6">No menus available.</p>
-        )}
+  return (
+    <div className="flex min-h-screen bg-neutral-950 overflow-hidden">
+      <SideBarDashboard />
+      <div className="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-6 md:mb-8"
+        >
+          Latest Menus
+        </motion.h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+          {menus.length ? (
+            menus.map((menu) => (
+              <motion.div
+                key={menu.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-neutral-900/50 hover:bg-neutral-800/70 p-3 md:p-4 rounded-lg flex flex-col gap-2 transition-all duration-300"
+              >
+                <Link href={`/dashboard/contractor/menu/${menu.id}`} className="text-lg font-semibold text-neutral-200">
+                  {menu.name}
+                </Link>
+                <p className="text-sm text-neutral-400">
+                  Price Per Head: <span className="font-bold text-yellow-500">${menu.pricePerHead}</span>
+                </p>
+              </motion.div>
+            ))
+          ) : (
+            <p className="text-neutral-500 text-center py-4 md:py-8">No menus available.</p>
+          )}
+        </div>
       </div>
     </div>
   );
