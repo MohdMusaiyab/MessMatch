@@ -7,6 +7,7 @@ import cors from "cors";
 import userRoutes from "./routes/userRoutes";
 import contractorRoutes from "./routes/contractorRoutes";
 import auctionRoutes from "./routes/auctionRoutes";
+import contractRoutes from "./routes/contractRoutes";
 dotenv.config();
 
 const app: Application = express();
@@ -28,6 +29,7 @@ app.use(`${process.env.BASE_URL}/contractor`, contractorRoutes);
 
 app.use(`${process.env.BASE_URL}/auction`, auctionRoutes);
 
+app.use(`${process.env.BASE_URL}/contract`, contractRoutes);
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });

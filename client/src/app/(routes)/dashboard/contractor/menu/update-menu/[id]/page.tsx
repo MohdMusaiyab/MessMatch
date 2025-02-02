@@ -67,9 +67,13 @@ const UpdateMenuPage = () => {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const updatedFormData = {
+        ...formData,
+        pricePerHead: Number(formData.pricePerHead),
+      };
       await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/contractor/update-menu/${id}`,
-        formData,
+        updatedFormData,
         { withCredentials: true }
       );
       alert("Menu updated successfully!");

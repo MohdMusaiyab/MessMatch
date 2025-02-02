@@ -54,6 +54,7 @@ model User {
   role             Role
   securityQuestion SecurityQuestion
   securityAnswer   String
+  institutionContracts Contract[] @relation("InstitutionContracts")
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
@@ -80,6 +81,9 @@ model MessContractor {
   reviews        Review[] // Reviews received
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+
+  // Opposite relation field for Contract
+  contracts      Contract[]    @relation("ContractorContracts")
 }
 
 model Menu {
@@ -115,6 +119,7 @@ model Auction {
   winnerId    String?
   winner      MessContractor? @relation(fields: [winnerId], references: [id], name: "AuctionWins")
   bids        Bid[]
+  contract    Contract?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 }
@@ -157,4 +162,21 @@ model VideoConference {
   endTime      DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+model Contract {
+  id              String   @id @default(uuid())
+  terms           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  auctionId       String   @unique
+  contractorId    String
+  institutionId   String
+  contractorAccepted  Boolean @default(false)
+  institutionAccepted Boolean @default(false)
+  auction    Auction   @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  contractor MessContractor      @relation(fields: [contractorId], references: [id], name: "ContractorContracts")
+  institution User     @relation(fields: [institutionId], references: [id], name: "InstitutionContracts")
+
+  @@unique([auctionId, contractorId, institutionId])
 }

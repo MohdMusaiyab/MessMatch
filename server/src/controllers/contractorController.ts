@@ -174,6 +174,7 @@ export const updateMenuController = async (
         success: false,
       });
     }
+
     const updatedMenu = await prisma.menu.update({
       where: {
         id: menuId,
@@ -515,7 +516,6 @@ export const getLatestMenusController = async (
   res: Response
 ): Promise<any> => {
   try {
-    
     const menus = await prisma.menu.findMany({
       select: {
         id: true,

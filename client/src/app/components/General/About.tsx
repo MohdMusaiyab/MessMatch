@@ -2,7 +2,7 @@
 "use client"
 import React from "react";
 import { motion } from "framer-motion";
-import { Target, Globe, Users } from "lucide-react";
+import { Target, Globe, Users,MenuIcon } from "lucide-react";
 
 const About: React.FC = () => {
   const containerVariants = {
@@ -61,10 +61,10 @@ const About: React.FC = () => {
           >
             <Target className="w-12 h-12 text-yellow-500 mx-auto mb-4 group-hover:rotate-12 transition-transform" />
             <h3 className="text-2xl font-semibold mb-4 text-white">
-              Precision Matching
+            Win Contracts with Smart Bidding
             </h3>
             <p className="text-neutral-400">
-              Advanced algorithm connecting mess contractors with perfect institutional partners.
+            Institutions can create auctions, and mess contractors can bid competitively in real-time, ensuring the best deals for both parties.
             </p>
           </motion.div>
 
@@ -74,10 +74,10 @@ const About: React.FC = () => {
           >
             <Globe className="w-12 h-12 text-yellow-500 mx-auto mb-4 group-hover:rotate-6 transition-transform" />
             <h3 className="text-2xl font-semibold mb-4 text-white">
-              Expansive Network
+            Trust Built on Transparency
             </h3>
             <p className="text-neutral-400">
-              Nationwide reach connecting top-tier contractors across diverse institutional landscapes.
+            Institutions can view detailed profiles, customer ratings, and reviews before selecting a mess contractor, ensuring quality and reliability.
             </p>
           </motion.div>
 
@@ -85,12 +85,12 @@ const About: React.FC = () => {
             variants={itemVariants}
             className="bg-neutral-900/50 backdrop-blur p-8 rounded-lg border border-yellow-900/20 shadow-lg group"
           >
-            <Users className="w-12 h-12 text-yellow-500 mx-auto mb-4 group-hover:-rotate-6 transition-transform" />
+            <MenuIcon className="w-12 h-12 text-yellow-500 mx-auto mb-4 group-hover:-rotate-6 transition-transform" />
             <h3 className="text-2xl font-semibold mb-4 text-white">
-              Community Trust
+            Showcase Menus That Stand Out
             </h3>
             <p className="text-neutral-400">
-              Building transparent, reliable ecosystem through verified profiles and real-time feedback.
+            Mess contractors can display diverse meal plans, pricing, and specialties, helping institutions choose the best catering fit for their needs.
             </p>
           </motion.div>
         </motion.div>

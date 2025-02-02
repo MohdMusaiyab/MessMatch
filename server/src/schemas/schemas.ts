@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, ZodObject } from 'zod';
 
 // Enums
 export const RoleEnum = z.enum(['COLLEGE', 'CONTRACTOR', 'CORPORATE', 'ADMIN', 'OTHER']);
@@ -23,7 +23,7 @@ export const ServiceTypeEnum = z.enum([
 export const MenuTypeEnum = z.enum(['VEG', 'NON_VEG', 'BOTH']);
 
 // Base Schemas
-export const UserSchema = z.object({
+export const UserSchema: z.ZodSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   email: z.string().email(),
@@ -35,6 +35,9 @@ export const UserSchema = z.object({
   securityAnswer: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+
+  // Relations
+  institutionContracts: z.array(z.lazy(() => ContractSchema)).optional(), // New field
 });
 
 export const MenuSchema = z.object({
@@ -54,10 +57,11 @@ export const MessContractorSchema = z.object({
   ratings: z.number().min(0).max(5).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  
+
   // Relations
   user: UserSchema,
   menus: z.array(MenuSchema),
+  contracts: z.array(z.lazy(() => ContractSchema)).optional(), // New field
 });
 
 export const ReviewSchema = z.object({
@@ -67,13 +71,13 @@ export const ReviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   comment: z.string().optional(),
   createdAt: z.date(),
-  
+
   // Relations
   reviewer: UserSchema,
   contractor: MessContractorSchema,
 });
 
-export const AuctionSchema = z.object({
+export const AuctionSchema: z.ZodSchema = z.object({
   id: z.string().uuid(),
   creatorId: z.string().uuid(),
   title: z.string(),
@@ -81,12 +85,27 @@ export const AuctionSchema = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   isOpen: z.boolean(),  
+
   // Relations
   creator: UserSchema,
-//   creator: z.object({
-//     id: z.string().uuid(), // Creator ID
-//     name: z.string().min(1), // Creator name (optional, but good for context)
-// }),
+  contract: z.lazy(() => ContractSchema).optional(), // Auctions can have contracts
+});
+
+export const ContractSchema: z.ZodSchema = z.object({
+  id: z.string().uuid(),
+  terms: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  auctionId: z.string().uuid(),
+  contractorId: z.string().uuid(),
+  institutionId: z.string().uuid(),
+  contractorAccepted: z.boolean(),
+  institutionAccepted: z.boolean(),
+
+  // Relations
+  auction: AuctionSchema,
+  contractor: MessContractorSchema,
+  institution: UserSchema,
 });
 
 export const BidSchema = z.object({
@@ -95,7 +114,7 @@ export const BidSchema = z.object({
   bidderId: z.string().uuid(),
   amount: z.number().positive(),
   createdAt: z.date(),
-  
+
   // Relations
   auction: AuctionSchema,
   bidder: UserSchema,
@@ -106,7 +125,7 @@ export const ChatSchema = z.object({
   user1Id: z.string().uuid(),
   user2Id: z.string().uuid(),
   createdAt: z.date(),
-  
+
   // Relations
   user1: UserSchema,
   user2: UserSchema,
@@ -118,7 +137,7 @@ export const MessageSchema = z.object({
   senderId: z.string().uuid(),
   content: z.string(),
   createdAt: z.date(),
-  
+
   // Relations
   chat: ChatSchema,
   sender: UserSchema,
@@ -130,18 +149,18 @@ export const VideoConferenceSchema = z.object({
   endTime: z.date().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  
+
   // Relations
   participants: z.array(UserSchema),
 });
 
 // Input Schemas (for creation)
-export const CreateUserSchema = UserSchema.omit({ 
+export const CreateUserSchema = (UserSchema as ZodObject<any>).omit({ 
   id: true, 
   createdAt: true, 
   updatedAt: true 
 });
-// For Login Schema
+
 export const LoginSchema = z.object({
   email: z.string().email(),
   password: z.string(),
@@ -167,7 +186,12 @@ export const CreateAuctionSchema = z.object({
   title: z.string().min(1), 
   description: z.string().min(1), 
   isOpen: z.boolean(),
+});
 
+export const CreateContractSchema = (ContractSchema as ZodObject<any>).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const CreateBidSchema = BidSchema.omit({ 
@@ -197,6 +221,7 @@ export type Menu = z.infer<typeof MenuSchema>;
 export type MessContractor = z.infer<typeof MessContractorSchema>;
 export type Review = z.infer<typeof ReviewSchema>;
 export type Auction = z.infer<typeof AuctionSchema>;
+export type Contract = z.infer<typeof ContractSchema>;
 export type Bid = z.infer<typeof BidSchema>;
 export type Chat = z.infer<typeof ChatSchema>;
 export type Message = z.infer<typeof MessageSchema>;

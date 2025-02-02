@@ -93,9 +93,10 @@ const AuctionDetail = () => {
       setAuction({
         ...auction,
         isOpen: false,
-        winnerId: response.data.data.winnerId,
+        // winnerId: response.data.data.winnerId,
       });
     } catch (err) {
+      console.log(err);
       setError("Failed to accept bid. Please try again later.");
     }
   };
