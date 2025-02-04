@@ -375,6 +375,12 @@ export const getOthersSingleAuctionController = async (
             },
           },
         },
+        contract: {
+          select: {
+            contractorAccepted: true,
+            institutionAccepted: true,
+          },
+        },
       },
     });
 
@@ -414,6 +420,7 @@ export const getOthersSingleAuctionController = async (
               email: auction.winner.user.email,
             }
           : null,
+        contract: auction.contract,
       },
     });
   } catch (error) {
@@ -642,7 +649,7 @@ export const deleteYourBidController = async (
         success: false,
       });
     }
-    //Handlng the Case if the Bidder is Winner 
+    //Handlng the Case if the Bidder is Winner
     //Alos Handle the Case where Bid is to be deleted and so is the Contract assoicated with it if any
     if (existingBid.auction.winnerId === userId) {
       await prisma.auction.update({
@@ -939,14 +946,14 @@ export const removeWinnerController = async (
         success: false,
       });
     }
-    
+
     //First Check if that auction had some winner or not
     if (!auction.winnerId) {
       return res.status(400).json({
         message: "No Winner Found",
         success: false,
       });
-    }    
+    }
     //Now Remove the Winner
     await prisma.auction.update({
       where: {

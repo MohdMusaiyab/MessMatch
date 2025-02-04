@@ -1,24 +1,8 @@
 import express from "express";
+import { isAuthorizedUser } from "../middlewares/isAuthorizedUser";
 import { isSign } from "../middlewares/isSign";
-import {
-  createContractController,
-  getAllMyContractsController,
-  getSingleContractController,
-  terminateContractController,
-  updateContractController,
-} from "../controllers/contractControllers";
-const contractRoutes = express.Router();
-// ================For Creating the Contract====================
-contractRoutes.post("/create", isSign, createContractController);
-// ===============For Updating the Contract==============
-contractRoutes.put("/update", isSign, updateContractController);
-// =================For Terminating the Contract==============
-contractRoutes.delete("/terminate", isSign, terminateContractController);
-// For getting all Your Contracts
-contractRoutes.get("/all", isSign, getAllMyContractsController);
-
-//For Getting a Single Contract of Yours
-
-contractRoutes.get("/get/:id", isSign, getSingleContractController);
-
+import { fetDetailsForCreateContract } from "../controllers/contractControllers";
+export const contractRoutes = express.Router();
+//Basic Route for Gettign Details During Create
+contractRoutes.get("/:auctionId",isSign,fetDetailsForCreateContract);
 export default contractRoutes;

@@ -30,6 +30,7 @@ app.use(`${process.env.BASE_URL}/contractor`, contractorRoutes);
 app.use(`${process.env.BASE_URL}/auction`, auctionRoutes);
 
 app.use(`${process.env.BASE_URL}/contract`, contractRoutes);
+
 app.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });

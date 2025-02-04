@@ -1,72 +1,66 @@
 import { Request, Response } from "express";
+import prisma from "../utils/prisma";
 
-// ====================For Creating the Contract====================
-export const createContractController = async (
+export const fetDetailsForCreateContract = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   try {
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
-  }
-};
+    const auctionId = req.params.auctionId;
+    if (!auctionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Auction ID is required.",
+      });
+    }
 
-// ====================For Updating the Contract====================
+    // Find auction details
+    const auction = await prisma.auction.findUnique({
+      where: {
+        id: auctionId,
+      },
+      select: {
+        creatorId: true,
+        winnerId: true,
+      },
+    });
 
-export const updateContractController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  try {
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
-  }
-};
+    // Check if auction exists
+    if (!auction) {
+      return res.status(404).json({
+        success: false,
+        message: "Auction not found.",
+      });
+    }
 
-// ====================For Terminating / Deleting the Contract=====================
-export const terminateContractController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  try {
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
-  }
-};
+    // Check for existing contracts for this auction
+    const existingContract = await prisma.contract.findFirst({
+      where: {
+        auctionId: auctionId,
+        NOT: {
+          status: 'PENDING', // Assuming 'PENDING' is a valid status in your Contract model
+        },
+      },
+    });
 
-// For getting all My Contracts
-export const getAllMyContractsController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  try {
-  } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
-  }
-};
+    // If a non-pending contract exists, return its details
+    if (existingContract) {
+      return res.status(200).json({
+        success: true,
+        message: "A contract already exists for this auction.",
+        auctionId,
+      });
+    }
 
-// For getting a Single Contract of Yours
-export const getSingleContractController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  try {
+    // If no non-pending contract exists, return winner ID and creator ID
+    return res.status(200).json({
+      success: true,
+      message: "No existing contracts found. You can create a new contract.",
+      winnerId: auction.winnerId,
+      creatorId: auction.creatorId,
+    });
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
+    console.error("Error fetching details for contract creation:", error);
+    return res.status(500).json({ message: "Internal Server Error", success: false });
   }
 };

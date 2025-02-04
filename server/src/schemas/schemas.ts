@@ -22,6 +22,8 @@ export const ServiceTypeEnum = z.enum([
 
 export const MenuTypeEnum = z.enum(['VEG', 'NON_VEG', 'BOTH']);
 
+export const ContractStatusEnum = z.enum(['PENDING', 'ACCEPTED', 'REJECTED', 'TERMINATED']);
+
 // Base Schemas
 export const UserSchema: z.ZodSchema = z.object({
   id: z.string().uuid(),
@@ -101,6 +103,7 @@ export const ContractSchema: z.ZodSchema = z.object({
   institutionId: z.string().uuid(),
   contractorAccepted: z.boolean(),
   institutionAccepted: z.boolean(),
+  status: ContractStatusEnum,
 
   // Relations
   auction: AuctionSchema,

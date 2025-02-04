@@ -119,27 +119,30 @@ const AuctionDetail = () => {
     }
   };
 
-  if (loading) return (
-    <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
-      <div className="text-yellow-500 text-lg">Loading...</div>
-    </div>
-  );
-
-  if (error) return (
-    <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
-      <div className="text-red-500 bg-neutral-900/50 p-6 rounded-lg border border-red-500/20">
-        {error}
+  if (loading)
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
+        <div className="text-yellow-500 text-lg">Loading...</div>
       </div>
-    </div>
-  );
+    );
 
-  if (!auction) return (
-    <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
-      <div className="text-neutral-300 bg-neutral-900/50 p-6 rounded-lg border border-yellow-500/20">
-        No auction found.
+  if (error)
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
+        <div className="text-red-500 bg-neutral-900/50 p-6 rounded-lg border border-red-500/20">
+          {error}
+        </div>
       </div>
-    </div>
-  );
+    );
+
+  if (!auction)
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
+        <div className="text-neutral-300 bg-neutral-900/50 p-6 rounded-lg border border-yellow-500/20">
+          No auction found.
+        </div>
+      </div>
+    );
 
   const isUserWinner = auction.winner && session?.user.id === auction.winner.id;
 
@@ -153,14 +156,16 @@ const AuctionDetail = () => {
             <h1 className="text-2xl md:text-3xl font-bold mb-6 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
               {auction.title}
             </h1>
-            
+
             <p className="text-neutral-300 mb-6">{auction.description}</p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <p className="text-neutral-400">
                 Created on: {new Date(auction.createdAt).toLocaleDateString()}
               </p>
-              <p className="text-neutral-400">Total Bids: {auction.totalBids}</p>
+              <p className="text-neutral-400">
+                Total Bids: {auction.totalBids}
+              </p>
             </div>
 
             {/* Status Badge */}
@@ -184,11 +189,37 @@ const AuctionDetail = () => {
               {isUserWinner ? (
                 <div className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg">
                   🏆 Congratulations! You won this auction!
+                  {auction.contract ? (
+                    auction.contract.institutionAccepted ? (
+                      <div className="bg-green-500/10 text-green-500 p-4 rounded-lg">
+                        ✅ Contract Accepted by Institution
+                      </div>
+                    ) : auction.contract.contractorAccepted ? (
+                      <div className="bg-blue-500/10 text-blue-500 p-4 rounded-lg">
+                        🛠 Contract Accepted by Mess
+                      </div>
+                    ) : (
+                      <div className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg">
+                        ⏳ Contract Pending Acceptance
+                      </div>
+                    )
+                  ) : (
+                    <Link
+                      href={`/dashboard/contract/create-contract/${id}`}
+                      className="block w-full text-center bg-yellow-600 text-neutral-200 px-2 py-2 mt-1 rounded-lg transition-all duration-300 hover:bg-yellow-500"
+                    >
+                      Create Contract
+                    </Link>
+                  )}
                 </div>
               ) : auction.winner ? (
                 <div className="space-y-2">
-                  <p className="text-neutral-300">Name: {auction.winner.name}</p>
-                  <p className="text-neutral-300">Email: {auction.winner.email}</p>
+                  <p className="text-neutral-300">
+                    Name: {auction.winner.name}
+                  </p>
+                  <p className="text-neutral-300">
+                    Email: {auction.winner.email}
+                  </p>
                 </div>
               ) : (
                 <p className="text-neutral-400">No winner declared yet.</p>

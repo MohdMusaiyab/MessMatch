@@ -44,6 +44,13 @@ enum MenuType {
   BOTH
 }
 
+enum ContractStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  TERMINATED
+}
+
 model User {
   id               String           @id @default(uuid())
   name             String
@@ -172,6 +179,7 @@ model Contract {
   auctionId       String   @unique
   contractorId    String
   institutionId   String
+  status          ContractStatus @default(PENDING)
   contractorAccepted  Boolean @default(false)
   institutionAccepted Boolean @default(false)
   auction    Auction   @relation(fields: [auctionId], references: [id], onDelete: Cascade)
