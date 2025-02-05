@@ -191,17 +191,26 @@ const AuctionDetail = () => {
                   🏆 Congratulations! You won this auction!
                   {auction.contract ? (
                     auction.contract.institutionAccepted ? (
-                      <div className="bg-green-500/10 text-green-500 p-4 rounded-lg">
+                      <Link
+                        href={`/dashboard/contract/${auction.id}`}
+                        className="bg-green-500/10 text-green-500 p-4 rounded-lg"
+                      >
                         ✅ Contract Accepted by Institution
-                      </div>
+                      </Link>
                     ) : auction.contract.contractorAccepted ? (
-                      <div className="bg-blue-500/10 text-blue-500 p-4 rounded-lg">
+                      <Link
+                        href={`/dashboard/contract/${auction.id}`}
+                        className="bg-blue-500/10 text-blue-500 p-4 rounded-lg"
+                      >
                         🛠 Contract Accepted by Mess
-                      </div>
+                      </Link>
                     ) : (
-                      <div className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg">
+                      <Link
+                        href={`/dashboard/contract/${auction.contract.id}`}
+                        className="bg-yellow-500/10 text-yellow-500 p-4 rounded-lg"
+                      >
                         ⏳ Contract Pending Acceptance
-                      </div>
+                      </Link>
                     )
                   ) : (
                     <Link

@@ -377,6 +377,7 @@ export const getOthersSingleAuctionController = async (
         },
         contract: {
           select: {
+            id:true,
             contractorAccepted: true,
             institutionAccepted: true,
           },

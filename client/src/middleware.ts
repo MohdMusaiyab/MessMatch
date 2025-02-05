@@ -7,8 +7,8 @@ export async function middleware(req: NextRequest) {
 
   // Define protected routes
   const protectedRoutes = ["/dashboard", "/explore", "/profile", "/payment"];
-  const contractorRestrictedRoutes = ["/dashboard/institution"];
-  const nonContractorRestrictedRoutes = ["/dashboard/contractor"];
+  const contractorRestrictedRoutes = ["/dashboard/institution/*"];
+  const nonContractorRestrictedRoutes = ["/dashboard/contractor/&"];
 
   // Check if the user is accessing a protected route
   if (protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
@@ -22,11 +22,11 @@ export async function middleware(req: NextRequest) {
 
     // Restrict access based on role
     if (userRole === "CONTRACTOR" && contractorRestrictedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
-    if (userRole !== "CONTRACTOR" && nonContractorRestrictedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+    if (userRole !== "CONRACTOR" && nonContractorRestrictedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
   }
 

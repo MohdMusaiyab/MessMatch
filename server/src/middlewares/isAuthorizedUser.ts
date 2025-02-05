@@ -40,19 +40,25 @@ export const isAuthorizedUser = async (
       // Check if user is either the creator or the winner of the auction
       const isAuctionOwner = auction.creatorId === loggedInUserId;
       const isWinner = auction.winner?.userId === loggedInUserId;
-
+      console.log(isAuctionOwner,isWinner)
       if (isAuctionOwner || isWinner) {
+        console.log("returingn")
         return next(); // User is authorized for auction-related actions
       }
     }
 
     // If contractId is provided
     if (contractId) {
+      console.log("Reaching here");
       const contract = await prisma.contract.findUnique({
         where: { id: contractId },
         select: {
-          contractorId: true,
           institutionId: true,
+          contractor:{
+            select:{
+              userId:true
+            }
+          }
         },
       });
 
@@ -62,7 +68,8 @@ export const isAuthorizedUser = async (
       }
 
       // Check if user is either the contractor or the institution associated with the contract
-      const isContractor = contract.contractorId === loggedInUserId;
+      
+      const isContractor = contract.contractor.userId === loggedInUserId;
       const isInstitution = contract.institutionId === loggedInUserId;
 
       if (isContractor || isInstitution) {
