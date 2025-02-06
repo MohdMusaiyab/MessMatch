@@ -20,6 +20,7 @@ export const fetDetailsForCreateContract = async (
         id: auctionId,
       },
       select: {
+        id:true,
         creatorId: true,
         winnerId: true,
         winner: {
@@ -34,6 +35,7 @@ export const fetDetailsForCreateContract = async (
         },
       },
     });
+    
 
     // Check if auction exists
     if (!auction) {
@@ -44,16 +46,14 @@ export const fetDetailsForCreateContract = async (
     }
 
     // Check for existing contracts for this auction
-    const existingContract = await prisma.contract.findFirst({
+    const existingContract = await prisma.contract.findUnique({
       where: {
-        auctionId: auctionId,
-        NOT: {
-          status: "PENDING", // Assuming 'PENDING' is a valid status in your Contract model
-        },
+        auctionId: auction?.id,
       },
     });
 
     // If a non-pending contract exists, return its details
+    
     if (existingContract) {
       return res.status(200).json({
         success: true,
@@ -179,6 +179,7 @@ export const getSingleContractDetails = async (
         terms: true,
         createdAt: true,
         updatedAt: true,
+        status:true,
         auction: {
           select: {
             id: true,
@@ -190,12 +191,13 @@ export const getSingleContractDetails = async (
         contractor: {
           select: {
             id: true,
-            user:{
-                select:{
-                    name:true,
-                    email:true,
-                }
-            }
+            userId: true,
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
           },
         },
         institution: {
@@ -223,5 +225,135 @@ export const getSingleContractDetails = async (
   } catch (error) {
     console.error("Error in getSingleContractDetails:", error);
     res.status(500).json({ error: "Internal Server Error", success: false });
+  }
+};
+
+//For toggeling the Status of the contractorAccepted and institutionAccepted
+
+export const toggleStatusController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { contractId } = req.params;
+  if (!contractId) {
+    return res.status(400).json({
+      success: false,
+      message: "Contract ID is required.",
+    });
+  }
+  const userId = req.userId;
+  try {
+    //Find the contract and necessary things associated with it
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      select: {
+        id: true,
+        status: true,
+        institutionAccepted: true,
+        contractorAccepted: true,
+        institutionId: true,
+        contractor: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    if (!contract) {
+      return res.status(404).json({
+        success: false,
+        message: "Contract not found.",
+      });
+    }
+    let updatedContract;
+    if (userId === contract.institutionId) {
+      // Toggle institution acceptance
+      console.log("User id", userId);
+      console.log("Ins id", contract.institutionId);
+
+      updatedContract = await prisma.contract.update({
+        where: { id: contractId },
+        data: { institutionAccepted: !contract.institutionAccepted },
+      });
+    } else if (userId === contract.contractor.userId) {
+      console.log("User id",userId);
+      console.log("Contractor id",contract.contractor.userId);
+      updatedContract = await prisma.contract.update({
+        where: { id: contractId },
+        data: { contractorAccepted: !contract.contractorAccepted },
+      });
+    } else {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to update this contract.",
+      });
+    }
+    if (
+      updatedContract.institutionAccepted &&
+      updatedContract.contractorAccepted
+    ) {
+      await prisma.contract.update({
+        where: { id: contractId },
+        data: { status: "ACCEPTED" },
+      });
+    }
+    //When this happens then on /contract/:contractId page , things will be changed ,show option to terminate and no update button then, till then user can have changes
+    return res.status(200).json({
+      success: true,
+      message: "Contract acceptance status updated.",
+      data: updatedContract,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+
+//Contract Status Controller
+export const getContractStatusController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { contractId } = req.params;
+  
+  if (!contractId) {
+    return res.status(400).json({
+      success: false,
+      message: "Contract ID is required.",
+    });
+  }
+
+  try {
+    const contractStatus = await prisma.contract.findUnique({
+      where: { id: contractId },
+      select: {
+        status: true,
+        institutionAccepted: true,
+        contractorAccepted: true,
+      },
+    });
+
+    if (!contractStatus) {
+      return res.status(404).json({
+        success: false,
+        message: "Contract not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: contractStatus,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
   }
 };

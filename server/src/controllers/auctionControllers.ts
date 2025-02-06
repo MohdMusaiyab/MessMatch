@@ -349,6 +349,7 @@ export const getOthersSingleAuctionController = async (
             id: true, // Include creator ID
             name: true,
             email: true,
+            contactNumber:true,
           },
         },
         createdAt: true,
@@ -411,6 +412,7 @@ export const getOthersSingleAuctionController = async (
           id: auction.creator.id,
           name: auction.creator.name,
           email: auction.creator.email,
+          contactNumber:auction.creator.contactNumber,
         },
         totalBids,
         userBid: auction.bids[0] || null, // Return the user's bid if available

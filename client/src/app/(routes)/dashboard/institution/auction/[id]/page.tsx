@@ -192,14 +192,14 @@ const AuctionDetail = () => {
                   {auction.contract ? (
                     auction.contract.institutionAccepted ? (
                       <Link
-                        href={`/dashboard/contract/${auction.id}`}
+                        href={`/dashboard/contract/${auction.contract.id}`}
                         className="bg-green-500/10 text-green-500 p-4 rounded-lg"
                       >
                         ✅ Contract Accepted by Institution
                       </Link>
                     ) : auction.contract.contractorAccepted ? (
                       <Link
-                        href={`/dashboard/contract/${auction.id}`}
+                        href={`/dashboard/contract/${auction.contract.id}`}
                         className="bg-blue-500/10 text-blue-500 p-4 rounded-lg"
                       >
                         🛠 Contract Accepted by Mess
@@ -323,7 +323,7 @@ const AuctionDetail = () => {
                 {auction.creator.name}
               </Link>
               <p className="text-neutral-400">Email: {auction.creator.email}</p>
-              <p className="text-neutral-400">Phone: {auction.creator.phone}</p>
+              <p className="text-neutral-400">Phone: {auction.creator.contactNumber}</p>
             </div>
           </div>
         </div>
