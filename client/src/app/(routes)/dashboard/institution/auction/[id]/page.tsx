@@ -236,7 +236,7 @@ const AuctionDetail = () => {
             </div>
 
             {/* Bidding Section */}
-            {auction.isOpen ? (
+            {(auction.isOpen && auction.winnerId !=session?.user.id) ? (
               auction.userBid ? (
                 <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
                   <h2 className="text-xl font-bold mb-4 text-neutral-200">

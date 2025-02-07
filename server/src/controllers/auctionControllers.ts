@@ -349,7 +349,7 @@ export const getOthersSingleAuctionController = async (
             id: true, // Include creator ID
             name: true,
             email: true,
-            contactNumber:true,
+            contactNumber: true,
           },
         },
         createdAt: true,
@@ -378,7 +378,7 @@ export const getOthersSingleAuctionController = async (
         },
         contract: {
           select: {
-            id:true,
+            id: true,
             contractorAccepted: true,
             institutionAccepted: true,
           },
@@ -412,7 +412,7 @@ export const getOthersSingleAuctionController = async (
           id: auction.creator.id,
           name: auction.creator.name,
           email: auction.creator.email,
-          contactNumber:auction.creator.contactNumber,
+          contactNumber: auction.creator.contactNumber,
         },
         totalBids,
         userBid: auction.bids[0] || null, // Return the user's bid if available
@@ -957,7 +957,20 @@ export const removeWinnerController = async (
         success: false,
       });
     }
-    //Now Remove the Winner
+    const contract = await prisma.contract.findUnique({
+      where: {
+        auctionId: auctionId,
+      },
+    });
+    console.log("Contract", contract);
+    if (contract) {
+      // If a contract exists, delete it
+      await prisma.contract.delete({
+        where: {
+          auctionId: auctionId,
+        },
+      });
+    }
     await prisma.auction.update({
       where: {
         id: auctionId,
@@ -966,6 +979,7 @@ export const removeWinnerController = async (
         winnerId: null,
       },
     });
+
     return res.status(200).json({
       message: "Winner Removed Successfully",
       success: true,

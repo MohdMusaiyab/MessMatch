@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface Contract {
@@ -17,22 +17,50 @@ interface Contract {
   institutionAccepted: boolean;
 }
 
-interface ContractResponse {
-  success: boolean;
+// Define different data shapes for the response
+interface ContractDataExisting {
+  contract: Contract;
+}
+
+interface ContractDataCreated {
+  id: string;
+}
+
+interface ContractResponseSuccessExisting {
+  success: true;
   message?: string;
   winnerId?: string;
   creatorId?: string;
-  data?: {
-    contract: Contract | null;
-  };
+  data: ContractDataExisting;
 }
 
+interface ContractResponseSuccessCreated {
+  success: true;
+  message?: string;
+  winnerId?: string;
+  creatorId?: string;
+  data: ContractDataCreated;
+}
+
+interface ContractResponseFailure {
+  success: false;
+  message: string;
+}
+
+type ContractResponse =
+  | ContractResponseSuccessExisting
+  | ContractResponseSuccessCreated
+  | ContractResponseFailure;
+
 const CreateContractPage = () => {
-  const [contractDetails, setContractDetails] = useState<ContractResponse | null>(null);
+  const [contractDetails, setContractDetails] =
+    useState<ContractResponse | null>(null);
   const [terms, setTerms] = useState("");
   const [loading, setLoading] = useState(true);
+  const [creatingContract, setCreatingContract] = useState(false);
   const [error, setError] = useState("");
   const { auctionId } = useParams();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchContractDetails = async () => {
@@ -42,11 +70,7 @@ const CreateContractPage = () => {
           { withCredentials: true }
         );
 
-        if (response.data.success) {
-          setContractDetails(response.data);
-        } else {
-          setError(response.data.message || "Failed to fetch contract details");
-        }
+        setContractDetails(response.data);
       } catch (error) {
         console.error("Error fetching contract details:", error);
         setError("Internal Server Error");
@@ -60,7 +84,7 @@ const CreateContractPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setCreatingContract(true);
 
     try {
       const response = await axios.post<ContractResponse>(
@@ -70,15 +94,20 @@ const CreateContractPage = () => {
       );
 
       if (response.data.success) {
-        setContractDetails(response.data);
+        // Properly access the contract ID based on the response type
+        if ("id" in response.data.data) {
+          router.push(`/dashboard/contract/${response.data.data.id}`);
+        } else if ("contract" in response.data.data) {
+          router.push(`/dashboard/contract/${response.data.data.contract.id}`);
+        }
       } else {
-        setError(response.data.message || "Failed to create contract");
+        setError("Failed to create contract");
       }
     } catch (error) {
       console.error("Error creating contract:", error);
       setError("Internal Server Error");
     } finally {
-      setLoading(false);
+      setCreatingContract(false);
     }
   };
 
@@ -100,8 +129,18 @@ const CreateContractPage = () => {
     );
   }
 
-  if (!contractDetails) {
-    return null; // Or a loading state, or some other fallback
+  if (!contractDetails || !("success" in contractDetails)) {
+    return null;
+  }
+
+  if (!contractDetails.success) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
+        <div className="text-red-500 bg-neutral-900/50 p-6 rounded-lg border border-red-500/20">
+          {contractDetails.message}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -112,7 +151,7 @@ const CreateContractPage = () => {
             Create Contract
           </h1>
 
-          {contractDetails.data && contractDetails.data.contract ? (
+          {contractDetails.data && "contract" in contractDetails.data ? (
             <div className="text-center space-y-4">
               <p className="text-yellow-500 mb-4">
                 A contract already exists for this auction.
@@ -124,7 +163,9 @@ const CreateContractPage = () => {
                 </p>
                 <p className="text-neutral-300">
                   <span className="text-yellow-500">Created:</span>{" "}
-                  {new Date(contractDetails.data.contract.createdAt).toLocaleDateString()}
+                  {new Date(
+                    contractDetails.data.contract.createdAt
+                  ).toLocaleDateString()}
                 </p>
               </div>
               <Link
@@ -172,9 +213,14 @@ const CreateContractPage = () => {
                   className="w-full px-6 py-3 rounded-lg font-medium
                            bg-yellow-500/10 text-yellow-500
                            hover:bg-yellow-500/20
-                           transition-all duration-200"
+                           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={creatingContract}
                 >
-                  Create Contract
+                  {creatingContract ? (
+                    <span className="animate-pulse">Creating Contract...</span>
+                  ) : (
+                    "Create Contract"
+                  )}
                 </button>
               </form>
             </>
