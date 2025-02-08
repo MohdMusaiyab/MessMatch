@@ -284,8 +284,16 @@ export const getMySingleAuctionController = async (
           },
         },
         creatorId: true,
+        contract: {
+          // Include the contract relation
+          select: {
+            id: true, // Include the contract ID
+            // Add other contract fields you need here
+          },
+        },
       },
     });
+
     if (!auction) {
       return res.status(404).json({
         message: "Auction Not Found",
@@ -775,7 +783,18 @@ export const openAuctionController = async (
         success: false,
       });
     }
-
+    //Check if any contract exists or not for it
+    const contract = await prisma.contract.findUnique({
+      where: {
+        auctionId: id,
+      },
+    });
+    if (contract) {
+      return res.status(400).json({
+        message: "Cannot Open this Auction as Contract Exists for this Auction",
+        success: false,
+      });
+    }
     await prisma.auction.update({
       where: {
         id,

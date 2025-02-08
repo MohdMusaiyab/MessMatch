@@ -203,23 +203,41 @@ const AuctionDetail = () => {
                   Close Auction
                 </button>
               ) : (
-                <button
-                  type="button"
-                  onClick={handleOpenAuction}
-                  className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-6 py-3 rounded-md hover:bg-emerald-500/20 transition-all duration-300 font-medium"
-                >
-                  Open Auction Again
-                </button>
+                !auction.contract && ( // Conditionally render the "Open Auction Again" button
+                  <button
+                    type="button"
+                    onClick={handleOpenAuction}
+                    className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-6 py-3 rounded-md hover:bg-emerald-500/20 transition-all duration-300 font-medium"
+                  >
+                    Open Auction Again
+                  </button>
+                )
               )}
             </div>
           </form>
         )}
-
+        ...
         <div className="bg-neutral-900/50 p-6 rounded-lg backdrop-blur-sm border border-yellow-900/20">
           <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
             Auction Details
           </h2>
           <div className="space-y-4">
+
+            {/* Conditionally render the contract link section */}
+            {auction.contract && (
+              <p className="flex flex-col md:flex-row md:items-center gap-2">
+                <span className="text-yellow-500 font-semibold min-w-[120px]">
+                  Contract:
+                </span>
+                <Link
+                  href={`/dashboard/contract/${auction.contract.id}`} // Replace with your actual contract route
+                  className="text-neutral-300 hover:text-yellow-500 transition-colors duration-300"
+                >
+                  View Contract ({auction.contract.id})
+                </Link>
+              </p>
+            )}
+
             <p className="flex flex-col md:flex-row md:items-center gap-2">
               <span className="text-yellow-500 font-semibold min-w-[120px]">
                 Title:

@@ -1,7 +1,7 @@
 import express from "express";
 import { isAuthorizedUser } from "../middlewares/isAuthorizedUser";
 import { isSign } from "../middlewares/isSign";
-import { fetDetailsForCreateContract,createContractController, getSingleContractDetails, toggleStatusController, getContractStatusController } from "../controllers/contractControllers";
+import { fetDetailsForCreateContract,createContractController, getSingleContractDetails, toggleStatusController, getContractStatusController, terminateContractController } from "../controllers/contractControllers";
 export const contractRoutes = express.Router();
 
 //Basic Route for Gettign Details During Create
@@ -18,5 +18,8 @@ contractRoutes.put("/toggle-status/:contractId",isSign,isAuthorizedUser,toggleSt
 
 //For Getting the Status and Acceptance 
 contractRoutes.get("/status/:contractId", isSign, isAuthorizedUser, getContractStatusController);
+
+//For Terminating the Contract
+contractRoutes.delete("/terminate/:contractId",isSign,isAuthorizedUser,terminateContractController);
 
 export default contractRoutes;

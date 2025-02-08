@@ -20,7 +20,7 @@ export const fetDetailsForCreateContract = async (
         id: auctionId,
       },
       select: {
-        id:true,
+        id: true,
         creatorId: true,
         winnerId: true,
         winner: {
@@ -35,7 +35,6 @@ export const fetDetailsForCreateContract = async (
         },
       },
     });
-    
 
     // Check if auction exists
     if (!auction) {
@@ -53,7 +52,7 @@ export const fetDetailsForCreateContract = async (
     });
 
     // If a non-pending contract exists, return its details
-    
+
     if (existingContract) {
       return res.status(200).json({
         success: true,
@@ -179,7 +178,7 @@ export const getSingleContractDetails = async (
         terms: true,
         createdAt: true,
         updatedAt: true,
-        status:true,
+        status: true,
         auction: {
           select: {
             id: true,
@@ -277,8 +276,8 @@ export const toggleStatusController = async (
         data: { institutionAccepted: !contract.institutionAccepted },
       });
     } else if (userId === contract.contractor.userId) {
-      console.log("User id",userId);
-      console.log("Contractor id",contract.contractor.userId);
+      console.log("User id", userId);
+      console.log("Contractor id", contract.contractor.userId);
       updatedContract = await prisma.contract.update({
         where: { id: contractId },
         data: { contractorAccepted: !contract.contractorAccepted },
@@ -313,14 +312,13 @@ export const toggleStatusController = async (
   }
 };
 
-
 //Contract Status Controller
 export const getContractStatusController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   const { contractId } = req.params;
-  
+
   if (!contractId) {
     return res.status(400).json({
       success: false,
@@ -352,6 +350,111 @@ export const getContractStatusController = async (
   } catch (error) {
     console.log(error);
     return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+//For Terminating the Status of the Contract
+export const terminateContractController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { contractId } = req.params;
+  if (!contractId) {
+    return res.status(400).json({
+      success: false,
+      message: "Contract ID is required.",
+    });
+  }
+  try {
+    const contract = await prisma.contract.findUnique({
+      where: {
+        id: contractId,
+      },
+      select: {
+        status: true,
+        auctionId: true,
+        institutionAccepted: true,
+        institutionId: true,
+        contractorId: true,
+        contractorAccepted: true,
+        contractor: {
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+    if (!contract) {
+      return res.status(404).json({
+        success: false,
+        message: "Contract not found.",
+      });
+    }
+    //Return if sttaus is already terminated
+    if (contract.status === "TERMINATED") {
+      return res.status(400).json({
+        success: false,
+        message: "Contract is already terminated.",
+      });
+    }
+    //Return if status is not accepted
+    if (!contract.institutionAccepted || !contract.contractorAccepted) {
+      return res.status(400).json({
+        success: false,
+        message: "Contract is not accepted yet.",
+      });
+    }
+    //Also if status is not ACCEPTED return saying status is not accepted
+    if (contract.status !== "ACCEPTED") {
+      return res.status(400).json({
+        success: false,
+        message: "Contract is not accepted yet.",
+      });
+    }
+    //Now we will check for loggedInUserId
+    const loggedInUserId = req.userId;
+    if (req.role !== "CONTRACTOR") {
+      if (loggedInUserId !== contract.institutionId) {
+        console.log("Institution Id", loggedInUserId);
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to terminate this contract.",
+        });
+      }
+    }
+
+    //Now for the Mess Contract
+    if (req.role === "CONTRACTOR") {
+      if (loggedInUserId !== contract.contractor.userId) {
+        console.log("Rejectedt Here");
+        return res.status(403).json({
+          success: false,
+          message: "You are not authorized to terminate this contract.",
+        });
+      }
+    }
+
+    //Once COntract Terminated
+    //Close the Auction as well and set the status to closed
+    await prisma.auction.update({
+      where: { id: contract.auctionId },
+      data: { isOpen: false },
+    });
+    //Now we will terminate the contract
+    await prisma.contract.update({
+      where: { id: contractId },
+      data: { status: "TERMINATED" },
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Contract terminated successfully.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
       success: false,
       message: "Something went wrong",
     });

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Modal from 'react-modal'; // Install: npm install react-modal
 
 interface User {
   id: string;
@@ -54,6 +55,9 @@ const ContractDetailsPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  const [isTerminating, setIsTerminating] = useState<boolean>(false);
+  const [showTerminationModal, setShowTerminationModal] = useState<boolean>(false);
+  const [terminationError, setTerminationError] = useState<string>("");
 
   useEffect(() => {
     const fetchContractDetails = async () => {
@@ -84,7 +88,7 @@ const ContractDetailsPage = () => {
 
   const handleToggleStatus = async () => {
     if (!contract) return;
-    
+
     setIsUpdating(true);
     try {
       const response = await axios.put(
@@ -122,7 +126,7 @@ const ContractDetailsPage = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/contract/status/${contractId}`,
         { withCredentials: true }
       );
-  
+
       if (response.data.success) {
         setContract(prevContract => prevContract ? {
           ...prevContract,
@@ -135,13 +139,15 @@ const ContractDetailsPage = () => {
       console.error("Failed to fetch contract status:", error);
     }
   };
+
   useEffect(() => {
-    if (contract && contract.status !== "ACCEPTED") {
+    if (contract && contract.status !== "ACCEPTED" && contract.status !== "TERMINATED") {
       const intervalId = setInterval(pollContractStatus, 5000); // Poll every 5 seconds
-      
+
       return () => clearInterval(intervalId);
     }
   }, [contract]);
+
   const StatusBadge: React.FC<StatusBadgeProps> = ({ accepted }) => (
     <span
       className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium ${
@@ -156,12 +162,60 @@ const ContractDetailsPage = () => {
 
   const canToggleStatus = () => {
     if (!contract || !session?.user) return false;
-    
+
     if (session.user.role === "CONTRACTOR") {
       return session.user.id === contract.contractor.userId && contract.status !== "ACCEPTED";
     }
-    
+
     return session.user.id === contract.institution.id && contract.status !== "ACCEPTED";
+  };
+
+  const canTerminateContract = () => {
+    if (!contract || !session?.user) return false;
+
+    // Only allow termination if the contract is ACCEPTED and the user is either
+    // the institution or the contractor.
+    if (contract.status === "ACCEPTED") {
+      return (session.user.id === contract.institution.id || session.user.id === contract.contractor.userId);
+    }
+
+    return false;
+  };
+
+  const handleOpenTerminationModal = () => {
+    setShowTerminationModal(true);
+  };
+
+  const handleCloseTerminationModal = () => {
+    setShowTerminationModal(false);
+    setTerminationError("");
+  };
+
+  const handleTerminateContract = async () => {
+    if (!contract) return;
+
+    setIsTerminating(true);
+    setTerminationError("");
+
+    try {
+      const response = await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/contract/terminate/${contractId}`,
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        // Update the contract status after successful termination
+        setContract({ ...contract, status: "TERMINATED" });
+        handleCloseTerminationModal();
+      } else {
+        setTerminationError(response.data.message || "Failed to terminate contract.");
+      }
+    } catch (error) {
+      console.error("Error terminating contract:", error);
+      setTerminationError("Failed to terminate contract. Please try again later.");
+    } finally {
+      setIsTerminating(false);
+    }
   };
 
   if (loading) {
@@ -204,6 +258,8 @@ const ContractDetailsPage = () => {
                 <span className={`px-3 py-1 rounded-full text-sm ${
                   contract?.status === "ACCEPTED"
                     ? "bg-green-500/10 text-green-500"
+                  : contract?.status === "TERMINATED"
+                      ? "bg-red-500/10 text-red-500" // Show red for terminated
                     : "bg-yellow-500/10 text-yellow-500"
                 }`}>
                   {contract?.status}
@@ -277,8 +333,8 @@ const ContractDetailsPage = () => {
                 <button
                   onClick={handleToggleStatus}
                   disabled={isUpdating}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 
-                    ${session?.user.role === "CONTRACTOR" 
+                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-200
+                    ${session?.user.role === "CONTRACTOR"
                       ? contract?.contractorAccepted
                         ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
                         : "bg-green-500/10 text-green-500 hover:bg-green-500/20"
@@ -289,8 +345,8 @@ const ContractDetailsPage = () => {
                     ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}
                   `}
                 >
-                  {isUpdating ? "Updating..." : 
-                    (session?.user.role === "CONTRACTOR" 
+                  {isUpdating ? "Updating..." :
+                    (session?.user.role === "CONTRACTOR"
                       ? (contract?.contractorAccepted ? "Revoke Acceptance" : "Accept Contract")
                       : (contract?.institutionAccepted ? "Revoke Acceptance" : "Accept Contract")
                     )
@@ -298,9 +354,58 @@ const ContractDetailsPage = () => {
                 </button>
               </div>
             )}
+
+            {canTerminateContract() && (
+              <div className="flex justify-center">
+                <button
+                  onClick={handleOpenTerminationModal}
+                  disabled={isTerminating}
+                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 bg-red-600 hover:bg-red-700 text-white
+                    ${isTerminating ? "opacity-50 cursor-not-allowed" : ""}
+                  `}
+                >
+                  {isTerminating ? "Terminating..." : "Terminate Contract"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={showTerminationModal}
+        onRequestClose={handleCloseTerminationModal}
+        style={{
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          },
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            marginRight: '-50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: '#2D3748',
+            color: 'white',
+            borderRadius: '8px',
+            padding: '20px',
+            border: '1px solid #4A5568'
+          }
+        }}
+        contentLabel="Termination Confirmation"
+      >
+        <h2>Confirm Termination</h2>
+        <p>Are you sure you want to terminate this contract? This action cannot be undone.</p>
+        {terminationError && <p className="text-red-500">{terminationError}</p>}
+        <div className="mt-4 flex justify-end">
+          <button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2" onClick={handleCloseTerminationModal}>
+            Cancel
+          </button>
+          <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={handleTerminateContract} disabled={isTerminating}>
+            {isTerminating ? "Terminating..." : "Terminate"}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };
