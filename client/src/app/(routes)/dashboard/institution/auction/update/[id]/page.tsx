@@ -16,7 +16,7 @@ const AuctionDetail = () => {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [winnerId, setWinnerId] = useState<string | null>(null);
-  // Fetch auction details
+
   useEffect(() => {
     const fetchAuction = async () => {
       if (!id) return;
@@ -38,7 +38,6 @@ const AuctionDetail = () => {
     fetchAuction();
   }, [id]);
 
-  // [Previous handlers remain unchanged]
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -89,11 +88,9 @@ const AuctionDetail = () => {
         { withCredentials: true }
       );
       alert(response.data.message);
-      // await fetchAuction();
       setAuction({
         ...auction,
         isOpen: false,
-        // winnerId: response.data.data.winnerId,
       });
     } catch (err) {
       console.log(err);
@@ -203,7 +200,7 @@ const AuctionDetail = () => {
                   Close Auction
                 </button>
               ) : (
-                !auction.contract && ( // Conditionally render the "Open Auction Again" button
+                !auction.contract && (
                   <button
                     type="button"
                     onClick={handleOpenAuction}
@@ -216,28 +213,24 @@ const AuctionDetail = () => {
             </div>
           </form>
         )}
-        ...
         <div className="bg-neutral-900/50 p-6 rounded-lg backdrop-blur-sm border border-yellow-900/20">
           <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
             Auction Details
           </h2>
           <div className="space-y-4">
-
-            {/* Conditionally render the contract link section */}
             {auction.contract && (
               <p className="flex flex-col md:flex-row md:items-center gap-2">
                 <span className="text-yellow-500 font-semibold min-w-[120px]">
                   Contract:
                 </span>
                 <Link
-                  href={`/dashboard/contract/${auction.contract.id}`} // Replace with your actual contract route
+                  href={`/dashboard/contract/${auction.contract.id}`}
                   className="text-neutral-300 hover:text-yellow-500 transition-colors duration-300"
                 >
                   View Contract ({auction.contract.id})
                 </Link>
               </p>
             )}
-
             <p className="flex flex-col md:flex-row md:items-center gap-2">
               <span className="text-yellow-500 font-semibold min-w-[120px]">
                 Title:
@@ -279,6 +272,14 @@ const AuctionDetail = () => {
                       >
                         Remove Winner
                       </button>
+                    )}
+                    {!auction.contract && (
+                      <Link
+                        href={`/dashboard/contract/create-contract/${auction?.id}`}
+                        className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-950 px-4 py-2 rounded-md hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 font-medium"
+                      >
+                        Create Contract
+                      </Link>
                     )}
                   </>
                 ) : (
@@ -323,7 +324,7 @@ const AuctionDetail = () => {
                       </Link>
                     </p>
                   </div>
-                  {isCreator && auction.isOpen && (
+                  {isCreator && !auction.contract && !auction.winner && (
                     <button
                       onClick={() => handleAcceptBid(bid.id)}
                       className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-950 px-4 py-2 rounded-md hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 font-medium whitespace-nowrap"

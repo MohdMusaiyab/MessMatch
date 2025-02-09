@@ -150,7 +150,7 @@ const CreateContractPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent text-center">
             Create Contract
           </h1>
-
+  
           {contractDetails.data && "contract" in contractDetails.data ? (
             <div className="text-center space-y-4">
               <p className="text-yellow-500 mb-4">
@@ -177,58 +177,78 @@ const CreateContractPage = () => {
             </div>
           ) : (
             <>
-              <div className="mb-6 bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-4">
-                <p className="text-neutral-300 mb-2">
-                  <span className="text-yellow-500">Winner ID:</span>{" "}
-                  {contractDetails?.winnerId}
-                </p>
-                <p className="text-neutral-300">
-                  <span className="text-yellow-500">Creator ID:</span>{" "}
-                  {contractDetails?.creatorId}
-                </p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label
-                    htmlFor="terms"
-                    className="block text-yellow-500 text-sm font-medium mb-2"
+              {(!contractDetails?.winnerId || !contractDetails?.creatorId) && (
+                <div className="text-center space-y-4 mb-6">
+                  <p className="text-red-500">
+                    Winner not selected. Please go to the dashboard to select a winner.
+                  </p>
+                  <Link
+                    href="/dashboard"
+                    className="inline-block px-6 py-3 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-all duration-200"
                   >
-                    Terms and Conditions
-                  </label>
-                  <textarea
-                    id="terms"
-                    value={terms}
-                    onChange={(e) => setTerms(e.target.value)}
-                    className="w-full p-3 bg-neutral-950/50 border border-yellow-900/20 rounded-lg
-                             text-neutral-300 placeholder-neutral-600
-                             focus:outline-none focus:ring-2 focus:ring-yellow-500/20"
-                    rows={6}
-                    placeholder="Enter your terms and conditions here..."
-                    required
-                  />
+                    Go to Dashboard
+                  </Link>
                 </div>
-                <button
-                  type="submit"
-                  className="w-full px-6 py-3 rounded-lg font-medium
-                           bg-yellow-500/10 text-yellow-500
-                           hover:bg-yellow-500/20
-                           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={creatingContract}
-                >
-                  {creatingContract ? (
-                    <span className="animate-pulse">Creating Contract...</span>
-                  ) : (
-                    "Create Contract"
-                  )}
-                </button>
-              </form>
+              )}
+  
+              {/* Only render the form and button if both winnerId and creatorId exist */}
+              {contractDetails?.winnerId && contractDetails?.creatorId && (
+                <>
+                  <div className="mb-6 bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-4">
+                    <p className="text-neutral-300 mb-2">
+                      <span className="text-yellow-500">Winner ID:</span>{" "}
+                      {contractDetails?.winnerId}
+                    </p>
+                    <p className="text-neutral-300">
+                      <span className="text-yellow-500">Creator ID:</span>{" "}
+                      {contractDetails?.creatorId}
+                    </p>
+                  </div>
+  
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div>
+                      <label
+                        htmlFor="terms"
+                        className="block text-yellow-500 text-sm font-medium mb-2"
+                      >
+                        Terms and Conditions
+                      </label>
+                      <textarea
+                        id="terms"
+                        value={terms}
+                        onChange={(e) => setTerms(e.target.value)}
+                        className="w-full p-3 bg-neutral-950/50 border border-yellow-900/20 rounded-lg
+                                 text-neutral-300 placeholder-neutral-600
+                                 focus:outline-none focus:ring-2 focus:ring-yellow-500/20"
+                        rows={6}
+                        placeholder="Enter your terms and conditions here..."
+                        required
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full px-6 py-3 rounded-lg font-medium
+                               bg-yellow-500/10 text-yellow-500
+                               hover:bg-yellow-500/20
+                               transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={creatingContract}
+                    >
+                      {creatingContract ? (
+                        <span className="animate-pulse">Creating Contract...</span>
+                      ) : (
+                        "Create Contract"
+                      )}
+                    </button>
+                  </form>
+                </>
+              )}
             </>
           )}
         </div>
       </div>
     </div>
   );
+  
 };
 
 export default CreateContractPage;

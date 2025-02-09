@@ -42,7 +42,7 @@ export const isAuthorizedUser = async (
       const isWinner = auction.winner?.userId === loggedInUserId;
       console.log(isAuctionOwner,isWinner)
       if (isAuctionOwner || isWinner) {
-        console.log("returingn")
+        
         return next(); // User is authorized for auction-related actions
       }
     }

@@ -289,6 +289,7 @@ export const getMySingleAuctionController = async (
           select: {
             id: true, // Include the contract ID
             // Add other contract fields you need here
+            status: true,
           },
         },
       },
@@ -864,13 +865,13 @@ export const acceptBidAcontroller = async (
         success: false,
       });
     }
-
-    if (!auction.isOpen) {
-      return res.status(400).json({
-        message: "Auction is closed",
-        success: false,
-      });
-    }
+    //Can Make Winner even if its closed
+    // if (!auction.isOpen) {
+    //   return res.status(400).json({
+    //     message: "Auction is closed",
+    //     success: false,
+    //   });
+    // }
 
     const bid = await prisma.bid.findUnique({
       where: {

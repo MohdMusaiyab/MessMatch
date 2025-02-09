@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Users, Shield, Trophy, CheckCircle, TrendingUp } from 'lucide-react';
+import { Building2, Shield, CheckCircle, TrendingUp } from 'lucide-react';
 
 const AboutPage = () => {
   const fadeIn = {

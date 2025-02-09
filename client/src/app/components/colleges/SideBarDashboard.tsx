@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { usePathname } from "next/navigation";
 import { Menu as MenuIcon, X } from "lucide-react";
 
 const SideBarDashBoard = () => {
