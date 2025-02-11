@@ -49,7 +49,7 @@ export const isAuthorizedUser = async (
 
     // If contractId is provided
     if (contractId) {
-      console.log("Reaching here");
+      
       const contract = await prisma.contract.findUnique({
         where: { id: contractId },
         select: {

@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Diamond, Menu, X, ChevronDown, LogOut } from "lucide-react";
-
+import logo from "../../../../public/picsvg_download.svg";
+import Image from "next/image";
 // Component Definition
 const Header: React.FC = () => {
   const { data: session } = useSession();
@@ -43,7 +44,7 @@ const Header: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
-              <Diamond className="h-6 w-6 text-yellow-500" />
+              <Image src={logo} alt="BidConnect" width={200} height={10} />
               <span className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 text-transparent bg-clip-text">
                 BidConnect
               </span>
@@ -79,7 +80,12 @@ const Header: React.FC = () => {
 
                   {/* Dropdown */}
                   <div className="absolute right-0 mt-2 w-48 py-2 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <Link href="/profile" className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors">Profile</Link>
+                    <Link
+                      href="/profile"
+                      className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors"
+                    >
+                      Profile
+                    </Link>
                     <button
                       onClick={() => signOut()}
                       className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors"

@@ -51,6 +51,37 @@ enum ContractStatus {
   TERMINATED
 }
 
+enum State {
+  ANDHRA_PRADESH
+  ARUNACHAL_PRADESH
+  ASSAM
+  BIHAR
+  CHHATTISGARH
+  GOA
+  GUJARAT
+  HARYANA
+  HIMACHAL_PRADESH
+  JHARKHAND
+  KARNATAKA
+  KERALA
+  MADHYA_PRADESH
+  MAHARASHTRA
+  MANIPUR
+  MEGHALAYA
+  MIZORAM
+  NAGALAND
+  ODISHA
+  PUNJAB
+  RAJASTHAN
+  SIKKIM
+  TAMIL_NADU
+  TELANGANA
+  TRIPURA
+  UTTAR_PRADESH
+  UTTARAKHAND
+  WEST_BENGAL
+}
+
 model User {
   id               String           @id @default(uuid())
   name             String
@@ -61,6 +92,7 @@ model User {
   role             Role
   securityQuestion SecurityQuestion
   securityAnswer   String
+  state            State
   institutionContracts Contract[] @relation("InstitutionContracts")
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
