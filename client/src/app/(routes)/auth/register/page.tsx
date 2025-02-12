@@ -5,6 +5,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
+import { State } from "@/app/types/States";
 
 // Keep existing interfaces and security question map
 interface FormData {
@@ -16,6 +17,7 @@ interface FormData {
   securityAnswer: string;
   contactNumber: string;
   address: string;
+  state: string; // Added state field
 }
 
 const securityQuestionMap: Record<string, string> = {
@@ -48,6 +50,7 @@ const RegisterPage: React.FC = () => {
     securityAnswer: "",
     contactNumber: "",
     address: "",
+    state: "", // Initialize with an empty state
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -234,6 +237,26 @@ const RegisterPage: React.FC = () => {
                     className={inputClasses}
                   />
                 </motion.div>
+                <div>
+                  <label htmlFor="state" className={labelClasses}>
+                    State
+                  </label>
+                  <select
+                    id="state"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    required
+                    className={inputClasses}
+                  >
+                    <option value="">Select a state</option>
+                    {Object.entries(State).map(([key, value]) => (
+                      <option key={key} value={key}>
+                        {value}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <motion.div
                   whileHover={{ scale: 1.01 }}

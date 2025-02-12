@@ -1,28 +1,71 @@
-import { z, ZodObject } from 'zod';
+import { stat } from "fs";
+import { z, ZodObject } from "zod";
 
 // Enums
-export const RoleEnum = z.enum(['COLLEGE', 'CONTRACTOR', 'CORPORATE', 'ADMIN', 'OTHER']);
+export const RoleEnum = z.enum([
+  "COLLEGE",
+  "CONTRACTOR",
+  "CORPORATE",
+  "ADMIN",
+  "OTHER",
+]);
 
 export const SecurityQuestionEnum = z.enum([
-  'MOTHERS_MAIDEN_NAME', 
-  'FIRST_PET_NAME', 
-  'FAVORITE_CHILDHOOD_MEMORY', 
-  'FAVORITE_TEACHER_NAME', 
-  'BIRTH_TOWN_NAME'
+  "MOTHERS_MAIDEN_NAME",
+  "FIRST_PET_NAME",
+  "FAVORITE_CHILDHOOD_MEMORY",
+  "FAVORITE_TEACHER_NAME",
+  "BIRTH_TOWN_NAME",
 ]);
 
 export const ServiceTypeEnum = z.enum([
-  'HOSTELS', 
-  'CORPORATE_EVENTS', 
-  'CORPORATE_OFFICES', 
-  'WEDDINGS', 
-  'PARTIES', 
-  'OTHER'
+  "HOSTELS",
+  "CORPORATE_EVENTS",
+  "CORPORATE_OFFICES",
+  "WEDDINGS",
+  "PARTIES",
+  "OTHER",
 ]);
 
-export const MenuTypeEnum = z.enum(['VEG', 'NON_VEG', 'BOTH']);
+export const StateTypeEnum = z.enum([
+  "ANDHRA_PRADESH",
+  "ARUNACHAL_PRADESH",
+  "ASSAM",
+  "BIHAR",
+  "CHHATTISGARH",
+  "GOA",
+  "GUJARAT",
+  "HARYANA",
+  "HIMACHAL_PRADESH",
+  "JHARKHAND",
+  "KARNATAKA",
+  "KERALA",
+  "MADHYA_PRADESH",
+  "MAHARASHTRA",
+  "MANIPUR",
+  "MEGHALAYA",
+  "MIZORAM",
+  "NAGALAND",
+  "ODISHA",
+  "PUNJAB",
+  "RAJASTHAN",
+  "SIKKIM",
+  "TAMIL_NADU",
+  "TELANGANA",
+  "TRIPURA",
+  "UTTAR_PRADESH",
+  "UTTARAKHAND",
+  "WEST_BENGAL",
+]);
 
-export const ContractStatusEnum = z.enum(['PENDING', 'ACCEPTED', 'REJECTED', 'TERMINATED']);
+export const MenuTypeEnum = z.enum(["VEG", "NON_VEG", "BOTH"]);
+
+export const ContractStatusEnum = z.enum([
+  "PENDING",
+  "ACCEPTED",
+  "REJECTED",
+  "TERMINATED",
+]);
 
 // Base Schemas
 export const UserSchema: z.ZodSchema = z.object({
@@ -37,6 +80,7 @@ export const UserSchema: z.ZodSchema = z.object({
   securityAnswer: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  state: StateTypeEnum,
 
   // Relations
   institutionContracts: z.array(z.lazy(() => ContractSchema)).optional(), // New field
@@ -86,7 +130,7 @@ export const AuctionSchema: z.ZodSchema = z.object({
   description: z.string(),
   createdAt: z.date(),
   updatedAt: z.date(),
-  isOpen: z.boolean(),  
+  isOpen: z.boolean(),
 
   // Relations
   creator: UserSchema,
@@ -158,10 +202,10 @@ export const VideoConferenceSchema = z.object({
 });
 
 // Input Schemas (for creation)
-export const CreateUserSchema = (UserSchema as ZodObject<any>).omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
+export const CreateUserSchema = (UserSchema as ZodObject<any>).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const LoginSchema = z.object({
@@ -169,25 +213,25 @@ export const LoginSchema = z.object({
   password: z.string(),
 });
 
-export const CreateMenuSchema = MenuSchema.omit({ 
-  id: true 
+export const CreateMenuSchema = MenuSchema.omit({
+  id: true,
 });
 
-export const CreateMessContractorSchema = MessContractorSchema.omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
+export const CreateMessContractorSchema = MessContractorSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
-export const CreateReviewSchema = ReviewSchema.omit({ 
-  id: true, 
-  createdAt: true 
+export const CreateReviewSchema = ReviewSchema.omit({
+  id: true,
+  createdAt: true,
 });
 
 export const CreateAuctionSchema = z.object({
   creatorId: z.string().uuid(),
-  title: z.string().min(1), 
-  description: z.string().min(1), 
+  title: z.string().min(1),
+  description: z.string().min(1),
   isOpen: z.boolean(),
 });
 
@@ -197,25 +241,25 @@ export const CreateContractSchema = (ContractSchema as ZodObject<any>).omit({
   updatedAt: true,
 });
 
-export const CreateBidSchema = BidSchema.omit({ 
-  id: true, 
-  createdAt: true 
+export const CreateBidSchema = BidSchema.omit({
+  id: true,
+  createdAt: true,
 });
 
-export const CreateChatSchema = ChatSchema.omit({ 
-  id: true, 
-  createdAt: true 
+export const CreateChatSchema = ChatSchema.omit({
+  id: true,
+  createdAt: true,
 });
 
-export const CreateMessageSchema = MessageSchema.omit({ 
-  id: true, 
-  createdAt: true 
+export const CreateMessageSchema = MessageSchema.omit({
+  id: true,
+  createdAt: true,
 });
 
-export const CreateVideoConferenceSchema = VideoConferenceSchema.omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
+export const CreateVideoConferenceSchema = VideoConferenceSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 // Inference Types

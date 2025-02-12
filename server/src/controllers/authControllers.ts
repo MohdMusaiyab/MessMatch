@@ -19,6 +19,7 @@ export const registerController = async (
       securityAnswer,
       address,
       contactNumber,
+      state
     } = parsedBody;
 
     // Check if the user already exists
@@ -49,6 +50,7 @@ export const registerController = async (
         securityAnswer: hashedSecurityAnswer,
         address,
         contactNumber,
+        state
       },
     });
     if (role === "CONTRACTOR") {
