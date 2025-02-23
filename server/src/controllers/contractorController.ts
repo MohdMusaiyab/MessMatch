@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 import { CreateMenuSchema, MenuSchema } from "../schemas/schemas";
 import { ZodError } from "zod";
-import { Prisma } from "@prisma/client";
+import { Prisma, State } from "@prisma/client";
 import { ServiceType } from "@prisma/client";
 export const createMenuController = async (
   req: Request,
@@ -296,6 +296,7 @@ export const getFiltersController = async (
       search,
       serviceType,
       menuType,
+      state, // New query parameter for state
       sortBy,
       sortOrder = "asc",
     } = req.query;
@@ -375,6 +376,16 @@ export const getFiltersController = async (
       });
     }
 
+    // State filter
+    
+    if (state) {
+      filters.push({
+        user: {
+          state: state as State, // Assuming state is an enum or string
+        },
+      });
+    }
+
     // Combine OR conditions into the where clause
     const where: Prisma.MessContractorWhereInput = {
       AND: filters.length > 0 ? filters : undefined,
@@ -413,6 +424,7 @@ export const getFiltersController = async (
               email: true,
               contactNumber: true,
               address: true,
+              state: true, // Include state in the response
             },
           },
           menus: true,

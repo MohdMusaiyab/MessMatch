@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { State } from "@/app/types/States";
 
 enum ServiceType {
   HOSTELS = "HOSTELS",
@@ -27,6 +28,7 @@ interface User {
   email: string;
   contactNumber: string;
   address: string;
+  state: string; // Add state to the User interface
 }
 
 interface Contractor {
@@ -43,6 +45,7 @@ const ContractorsPage: React.FC = () => {
   const [search, setSearch] = useState<string>("");
   const [serviceTypes, setServiceTypes] = useState<string[]>([]);
   const [menuType, setMenuType] = useState<string>("");
+  const [state, setState] = useState<string>(""); // Add state filter
   const [sortBy, setSortBy] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("asc");
   const [loading, setLoading] = useState<boolean>(false);
@@ -53,18 +56,22 @@ const ContractorsPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/contractor/filters`, {
-        params: {
-          page,
-          limit,
-          search,
-          serviceType: serviceTypes.length > 0 ? serviceTypes : undefined,
-          menuType,
-          sortBy,
-          sortOrder,
-        },
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/contractor/filters`,
+        {
+          params: {
+            page,
+            limit,
+            search,
+            serviceType: serviceTypes.length > 0 ? serviceTypes : undefined,
+            menuType,
+            state, // Include state in the query parameters
+            sortBy,
+            sortOrder,
+          },
+          withCredentials: true,
+        }
+      );
 
       if (response.data.data.length === 0) {
         setError("No contractors found.");
@@ -82,12 +89,16 @@ const ContractorsPage: React.FC = () => {
 
   useEffect(() => {
     fetchContractors();
-  }, [page, serviceTypes, menuType, sortBy, sortOrder]);
+  }, [page, serviceTypes, menuType, state, sortBy, sortOrder]);
 
-  const handleServiceTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleServiceTypeChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const { value } = event.target;
     setServiceTypes((prev) =>
-      prev.includes(value) ? prev.filter((type) => type !== value) : [...prev, value]
+      prev.includes(value)
+        ? prev.filter((type) => type !== value)
+        : [...prev, value]
     );
   };
 
@@ -100,11 +111,11 @@ const ContractorsPage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
       <div className="flex flex-col lg:flex-row">
         {/* Filters Sidebar */}
-        <motion.aside 
+        <motion.aside
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           className={`lg:w-1/4 p-6 bg-gradient-to-b from-neutral-900 to-neutral-950 border-r border-yellow-900/20
-                     ${isFilterOpen ? 'block' : 'hidden lg:block'}`}
+                     ${isFilterOpen ? "block" : "hidden lg:block"}`}
         >
           <div className="sticky top-6">
             <h2 className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-6">
@@ -113,7 +124,10 @@ const ContractorsPage: React.FC = () => {
 
             <form onSubmit={handleSearchSubmit} className="mb-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-500/50" size={20} />
+                <Search
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-yellow-500/50"
+                  size={20}
+                />
                 <input
                   type="text"
                   placeholder="Search contractors..."
@@ -138,8 +152,11 @@ const ContractorsPage: React.FC = () => {
             </form>
 
             <div className="space-y-6">
+              {/* Service Type Filter */}
               <div>
-                <h3 className="text-neutral-300 font-semibold mb-3">Service Type</h3>
+                <h3 className="text-neutral-300 font-semibold mb-3">
+                  Service Type
+                </h3>
                 <div className="space-y-2">
                   {Object.values(ServiceType).map((service) => (
                     <div key={service} className="flex items-center">
@@ -152,7 +169,10 @@ const ContractorsPage: React.FC = () => {
                         className="w-4 h-4 rounded border-yellow-900/20 text-yellow-600 
                                  focus:ring-yellow-500/20 bg-neutral-900"
                       />
-                      <label htmlFor={service} className="ml-3 text-sm text-neutral-400">
+                      <label
+                        htmlFor={service}
+                        className="ml-3 text-sm text-neutral-400"
+                      >
                         {service.replace(/_/g, " ")}
                       </label>
                     </div>
@@ -160,8 +180,11 @@ const ContractorsPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Menu Type Filter */}
               <div>
-                <h3 className="text-neutral-300 font-semibold mb-3">Menu Type</h3>
+                <h3 className="text-neutral-300 font-semibold mb-3">
+                  Menu Type
+                </h3>
                 <select
                   value={menuType}
                   onChange={(e) => setMenuType(e.target.value)}
@@ -176,6 +199,27 @@ const ContractorsPage: React.FC = () => {
                 </select>
               </div>
 
+              {/* State Filter */}
+              {/* State Filter */}
+              <div>
+                <h3 className="text-neutral-300 font-semibold mb-3">State</h3>
+                <select
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  className="w-full px-4 py-3 bg-neutral-900 border border-yellow-900/20 rounded-lg
+             text-neutral-300 focus:ring-2 focus:ring-yellow-500/20 focus:border-yellow-500/40
+             transition-all duration-300"
+                >
+                  <option value="">All States</option>
+                  {Object.entries(State).map(([key, label]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sort By Filter */}
               <div>
                 <h3 className="text-neutral-300 font-semibold mb-3">Sort By</h3>
                 <select
@@ -234,40 +278,54 @@ const ContractorsPage: React.FC = () => {
                              hover:shadow-2xl hover:shadow-yellow-900/10 
                              transition-all duration-300"
                   >
-                    <h2 className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 
-                                 bg-clip-text text-transparent">
+                    <h2
+                      className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 
+                                 bg-clip-text text-transparent"
+                    >
                       {contractor.user.name}
                     </h2>
                     <div className="mt-4 space-y-2 text-neutral-400">
                       <p>Email: {contractor.user.email}</p>
                       <p>Contact: {contractor.user.contactNumber}</p>
                       <p>Address: {contractor.user.address}</p>
+                      <p>State: {contractor.user.state}</p>{" "}
+                      {/* Display state */}
                     </div>
 
                     {contractor.menus.length > 0 ? (
                       <div className="mt-6">
-                        <h3 className="text-lg font-semibold text-neutral-300 mb-4">Available Menus</h3>
+                        <h3 className="text-lg font-semibold text-neutral-300 mb-4">
+                          Available Menus
+                        </h3>
                         <div className="grid gap-4">
                           {contractor.menus.map((menu) => (
                             <div
                               key={menu.id}
                               className="p-4 bg-neutral-900/50 border border-yellow-900/10 rounded-lg"
                             >
-                              <h4 className="font-bold text-yellow-500 mb-2">{menu.name}</h4>
-                              <p className="text-neutral-400">Items: {menu.items.join(", ")}</p>
+                              <h4 className="font-bold text-yellow-500 mb-2">
+                                {menu.name}
+                              </h4>
+                              <p className="text-neutral-400">
+                                Items: {menu.items.join(", ")}
+                              </p>
                               <p className="text-neutral-300 mt-2">
-                                Price per Head: 
+                                Price per Head:
                                 <span className="text-yellow-500 font-semibold ml-2">
                                   ₹{menu.pricePerHead.toLocaleString()}
                                 </span>
                               </p>
-                              <p className="text-neutral-400">Type: {menu.type}</p>
+                              <p className="text-neutral-400">
+                                Type: {menu.type}
+                              </p>
                             </div>
                           ))}
                         </div>
                       </div>
                     ) : (
-                      <p className="mt-4 text-neutral-500">No menus available.</p>
+                      <p className="mt-4 text-neutral-500">
+                        No menus available.
+                      </p>
                     )}
                   </motion.div>
                 ))}
@@ -292,7 +350,11 @@ const ContractorsPage: React.FC = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setPage((prev) => Math.min(prev + 1, Math.ceil(total / limit)))}
+                  onClick={() =>
+                    setPage((prev) =>
+                      Math.min(prev + 1, Math.ceil(total / limit))
+                    )
+                  }
                   disabled={page === Math.ceil(total / limit)}
                   className="px-6 py-2 flex items-center gap-2 bg-neutral-800 text-neutral-300 
                            rounded-lg hover:bg-neutral-700 transition-all duration-300

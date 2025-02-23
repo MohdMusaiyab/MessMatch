@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ZodError } from "zod";
 import { hashPassword } from "../utils/auth";
 import prisma from "../utils/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, State } from "@prisma/client";
 
 export const updateUserController = async (
   req: Request,
@@ -256,7 +256,7 @@ export const getYourOwnProfileController = async (
   }
 };
 
-// ================For Filtering the Users +Acution=====================
+// ================For Filtering the Users + Acution=====================
 
 export const getAuctionsAndContractorsController = async (
   req: Request,
@@ -269,38 +269,49 @@ export const getAuctionsAndContractorsController = async (
       search,
       maxBids,
       auctionStatus, // 'open' or 'closed'
+      state, // Add state query parameter
     } = req.query;
 
     const parsedPage = parseInt(page as string, 10);
     const parsedLimit = parseInt(limit as string, 10);
     const skip = (parsedPage - 1) * parsedLimit;
 
-    // Initialize filters array
-    const auctionFilters: any[] = [];
+    // Initialize filters array for auctions
+    const auctionFilters: Prisma.AuctionWhereInput[] = [];
 
     // Search filter for auctions
     if (search) {
       auctionFilters.push({
         title: {
           contains: search as string,
-          mode: 'insensitive',
+          mode: "insensitive",
         },
       });
     }
 
     // Auction status filter
-    if (auctionStatus === 'open') {
+    if (auctionStatus === "open") {
       auctionFilters.push({
         isOpen: true,
       });
-    } else if (auctionStatus === 'closed') {
+    } else if (auctionStatus === "closed") {
       auctionFilters.push({
         isOpen: false,
       });
     }
 
+    // State filter for auctions (based on creator's state)
+    if (state) {
+      auctionFilters.push({
+        creator: {
+          state: state as State, // Filter by creator's state
+        },
+      });
+    }
+
     // Combine conditions for auctions
-    const auctionWhere = auctionFilters.length > 0 ? { AND: auctionFilters } : {};
+    const auctionWhere =
+      auctionFilters.length > 0 ? { AND: auctionFilters } : {};
 
     // Fetch auctions based on filters
     let auctions: any[] = [];
@@ -310,7 +321,7 @@ export const getAuctionsAndContractorsController = async (
     if (maxBids) {
       const isMoreThan20 = maxBids === "20+";
       const maxBidsInt = isMoreThan20 ? null : parseInt(maxBids as string, 10);
-    
+
       const allAuctions = await prisma.auction.findMany({
         where: auctionWhere,
         include: {
@@ -321,23 +332,25 @@ export const getAuctionsAndContractorsController = async (
               name: true,
               email: true,
               contactNumber: true,
+              state: true, // Include creator's state in the response
             },
           },
         },
       });
-    
+
       // Filter auctions based on the count of bids
       if (isMoreThan20) {
         auctions = allAuctions.filter((auction) => auction.bids.length > 20);
       } else {
-        auctions = allAuctions.filter((auction) => auction.bids.length <= maxBidsInt!);
+        auctions = allAuctions.filter(
+          (auction) => auction.bids.length <= maxBidsInt!
+        );
       }
-    
+
       // Paginate filtered auctions
       totalAuctions = auctions.length;
       auctions = auctions.slice(skip, skip + parsedLimit);
-    }
-    else {
+    } else {
       // If no maxBids filter, fetch directly with pagination
       [auctions, totalAuctions] = await Promise.all([
         prisma.auction.findMany({
@@ -350,6 +363,7 @@ export const getAuctionsAndContractorsController = async (
                 name: true,
                 email: true,
                 contactNumber: true,
+                state: true, // Include creator's state in the response
               },
             },
           },
@@ -360,17 +374,37 @@ export const getAuctionsAndContractorsController = async (
       ]);
     }
 
-    // Fetch mess contractors based on search key
+    // Fetch mess contractors based on search key and state
     let contractors: any = [];
-    if (search) {
-      contractors = await prisma.messContractor.findMany({
-        where: {
+    if (search || state) {
+      const contractorFilters: Prisma.MessContractorWhereInput[] = [];
+
+      // Search filter for contractors
+      if (search) {
+        contractorFilters.push({
           user: {
             name: {
               contains: search as string,
-              mode: 'insensitive',
+              mode: "insensitive",
             },
-            role: 'CONTRACTOR', // Ensure role is CONTRACTOR
+          },
+        });
+      }
+
+      // State filter for contractors
+      if (state) {
+        contractorFilters.push({
+          user: {
+            state: state as State, // Filter by contractor's state
+          },
+        });
+      }
+
+      contractors = await prisma.messContractor.findMany({
+        where: {
+          AND: contractorFilters,
+          user: {
+            role: "CONTRACTOR", // Ensure role is CONTRACTOR
           },
         },
         include: {
@@ -380,6 +414,7 @@ export const getAuctionsAndContractorsController = async (
               name: true,
               email: true,
               contactNumber: true,
+              state: true, // Include state in the response
             },
           },
         },
@@ -408,4 +443,3 @@ export const getAuctionsAndContractorsController = async (
     });
   }
 };
-
