@@ -15,6 +15,9 @@ export const updateUserController = async (
       name,
       email,
       password,
+      state,
+      address,
+      contactNumber,
       securityQuestion,
       securityAnswer,
       contractorFields, // For contractor-specific fields
@@ -37,6 +40,9 @@ export const updateUserController = async (
     const updateData: any = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
+    if(state) updateData.state = state;
+    if (address) updateData.address = address;
+    if (contactNumber) updateData.contactNumber = contactNumber;
     if (password) updateData.password = await hashPassword(password); // Hashing the password
     if (securityQuestion) updateData.securityQuestion = securityQuestion;
     if (securityAnswer)
@@ -206,6 +212,7 @@ export const getYourOwnProfileController = async (
         name: true,
         email: true,
         address: true,
+        state: true,
         securityQuestion: true,
         contactNumber: true,
         role: true,

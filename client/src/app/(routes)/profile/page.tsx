@@ -31,6 +31,7 @@ interface User {
   name: string;
   email: string;
   address: string;
+  state: string;
   securityQuestion: string;
   contactNumber: string;
   role: string;
@@ -132,6 +133,9 @@ const ProfilePage = () => {
             </div>
             <div className="col-span-1">
               <InfoItem label="Role" value={user.role} />
+            </div>
+            <div className="col-span-1">
+              <InfoItem label="State" value={user.state} />
             </div>
           </div>
           <Link

@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { securityQuestions } from "@/app/types/securtyQuestions";
+import { State } from "@/app/types/States";
 
 enum ServiceType {
   HOSTELS = "HOSTELS",
@@ -23,6 +25,7 @@ const UpdateUserInformation: React.FC = () => {
     name: "",
     email: "",
     address: "",
+    state: "",
     contactNumber: "",
     securityQuestion: securityQuestions.MOTHERS_MAIDEN_NAME,
     securityAnswer: "",
@@ -36,6 +39,7 @@ const UpdateUserInformation: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isContractor, setIsContractor] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -45,20 +49,26 @@ const UpdateUserInformation: React.FC = () => {
           { withCredentials: true }
         );
         const user = response.data.data;
-        setFormData({
-          name: user?.name ?? "",
-          email: user?.email ?? "",
-          address: user?.address ?? "",
-          contactNumber: user?.contactNumber ?? "",
+
+        // Merge fetched user data with existing formData
+        setFormData((prevFormData) => ({
+          ...prevFormData, // Keep existing form data
+          name: user?.name ?? "", // Update name
+          email: user?.email ?? "", // Update email
+          address: user?.address ?? "", // Update address
+          state: user?.state ?? "", // Update state
+          contactNumber: user?.contactNumber ?? "", // Update contact number
           securityQuestion:
-            user?.securityQuestion ?? securityQuestions.MOTHERS_MAIDEN_NAME,
-          securityAnswer: user?.securityAnswer ?? "",
-          password: "",
+            user?.securityQuestion ?? securityQuestions.MOTHERS_MAIDEN_NAME, // Update security question
+          securityAnswer: user?.securityAnswer ?? "", // Update security answer
+          password: "", // Reset password field (optional)
           contractorFields: {
-            numberOfPeople: user.contractor?.numberOfPeople,
-            services: user.contractor?.services ?? [],
+            numberOfPeople: user.contractor?.numberOfPeople ?? undefined, // Update number of people
+            services: user.contractor?.services ?? [], // Update services
           },
-        });
+        }));
+
+        // Set contractor role
         setIsContractor(user.role === "CONTRACTOR");
       } catch (err) {
         console.error(err);
@@ -110,11 +120,12 @@ const UpdateUserInformation: React.FC = () => {
     try {
       const response = await axios.put(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/update`,
-        formData,
+        formData, // This includes the state key (e.g., "ANDHRA_PRADESH")
         { withCredentials: true }
       );
       if (response.status === 200) {
         alert("User information updated successfully!");
+        router.push("/profile");
       }
     } catch (err) {
       console.error(err);
@@ -194,6 +205,28 @@ const UpdateUserInformation: React.FC = () => {
               onChange={handleChange}
               className={inputClasses}
             />
+          </div>
+          <div>
+            <label htmlFor="state" className={labelClasses}>
+              State
+            </label>
+            <select
+              id="state"
+              name="state"
+              required
+              className={inputClasses}
+              value={formData.state} // This should store the key (e.g., "ANDHRA_PRADESH")
+              onChange={handleChange}
+            >
+              <option value="">Select a state</option>
+              {Object.entries(State).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {" "}
+                  {/* Store the key */}
+                  {value} {/* Display the value */}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

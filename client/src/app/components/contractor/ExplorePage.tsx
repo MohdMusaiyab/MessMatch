@@ -15,6 +15,7 @@ interface Auction {
     name: string;
     email: string;
     role: string;
+    state: string;
   };
   winner?: {
     id: string;
@@ -262,6 +263,12 @@ const ExplorePage = () => {
                           <span className="text-neutral-500">Created</span>
                           <span className="text-neutral-300">
                             {formatDate(auction.createdAt)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center py-2 border-t border-yellow-900/10">
+                          <span className="text-neutral-500">Created</span>
+                          <span className="text-neutral-300">
+                            {auction.creator?.state}
                           </span>
                         </div>
                       </div>
