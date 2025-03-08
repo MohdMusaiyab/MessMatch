@@ -7,11 +7,32 @@ export async function middleware(req: NextRequest) {
 
   // Define protected routes
   const protectedRoutes = ["/dashboard", "/explore", "/profile", "/payment"];
-  const contractorRestrictedRoutes = ["/dashboard/institution/*"];
-  const nonContractorRestrictedRoutes = ["/dashboard/contractor/&"];
 
-  // Check if the user is accessing a protected route
-  if (protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
+  // Routes restricted for contractors (exact paths)
+  const contractorRestrictedRoutes = [
+    "/dashboard/institution",
+    "/dashboard/institution/auction",
+    "/dashboard/institution/auction/create",
+    "/dashboard/institution/auction/update",
+  ];
+
+  // Routes restricted for non-contractors (exact paths)
+  const nonContractorRestrictedRoutes = [
+    "/dashboard/contractor",
+    "/dashboard/contractor/my-auctions",
+    "/dashboard/contractor/menu/create-menu",
+    "/dashboard/contractor/menu/update-menu",
+  ];
+
+  // Get current pathname
+  const pathname = req.nextUrl.pathname;
+
+  // Check if the user is accessing a protected route (using startsWith)
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (isProtectedRoute) {
     // If not authenticated, redirect to login
     if (!token) {
       return NextResponse.redirect(new URL("/auth/login", req.url));
@@ -20,13 +41,28 @@ export async function middleware(req: NextRequest) {
     // Check the user's role
     const userRole = token.role;
 
-    // Restrict access based on role
-    if (userRole === "CONTRACTOR" && contractorRestrictedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    // Restrict access for contractors - exact path matching
+    if (userRole === "CONTRACTOR") {
+      // Check for exact matches in contractor restricted routes
+      if (contractorRestrictedRoutes.includes(pathname)) {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
+
+      // Special handling for update routes with IDs
+      const updatePathMatch = pathname.match(
+        /^\/dashboard\/institution\/auction\/update\/[\w-]+$/
+      );
+      if (updatePathMatch) {
+        return NextResponse.redirect(new URL("/", req.url));
+      }
     }
 
-    if (userRole !== "CONRACTOR" && nonContractorRestrictedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    // Restrict access for non-contractors - exact path matching
+    if (
+      userRole !== "CONTRACTOR" &&
+      nonContractorRestrictedRoutes.includes(pathname)
+    ) {
+      return NextResponse.redirect(new URL("/", req.url));
     }
   }
 
@@ -37,12 +73,6 @@ export async function middleware(req: NextRequest) {
 // Specify which paths the middleware should run on
 export const config = {
   matcher: [
-    "/:path*",
-    "/dashboard/:path*",
-    "/explore/:path*",
-    "/profile",
-    "/profile/:path*",
-    "/payment",
-    "/payment/:path*",
-  ], // add more paths as needed
+    "/:path*", // Match all routes
+  ],
 };

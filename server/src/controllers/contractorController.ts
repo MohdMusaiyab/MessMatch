@@ -118,6 +118,7 @@ export const getOthersSingleMenuController = async (
                 email: true,
                 contactNumber: true,
                 address: true,
+                state:true,
               },
             },
           },
@@ -296,21 +297,22 @@ export const getFiltersController = async (
       search,
       serviceType,
       menuType,
-      state, // New query parameter for state
+      state,
       sortBy,
       sortOrder = "asc",
     } = req.query;
 
+    // Parse pagination parameters
     const parsedPage = parseInt(page as string, 10);
     const parsedLimit = parseInt(limit as string, 10);
     const skip = (parsedPage - 1) * parsedLimit;
 
-    // Initialize filters array
-    const filters: Prisma.MessContractorWhereInput[] = [];
+    // Initialize filters array for AND conditions
+    const andFilters: Prisma.MessContractorWhereInput[] = [];
 
     // Search filter
     if (search) {
-      filters.push({
+      andFilters.push({
         OR: [
           {
             user: {
@@ -347,27 +349,18 @@ export const getFiltersController = async (
       });
     }
 
-    // Create an array for OR conditions
-    const orConditions: Prisma.MessContractorWhereInput[] = [];
-
-    // Service type filter
-    if (Array.isArray(serviceType)) {
-      orConditions.push({
-        services: {
-          hasSome: serviceType.map((type) => type as ServiceType), // Map to ServiceType enum
-        },
-      });
-    } else if (serviceType) {
-      orConditions.push({
-        services: {
-          hasSome: [serviceType as ServiceType], // Single value case
+    // State filter (AND condition)
+    if (state) {
+      andFilters.push({
+        user: {
+          state: state as State, // Assuming state is an enum or string
         },
       });
     }
 
-    // Menu type filter
+    // Menu type filter (AND condition)
     if (menuType) {
-      orConditions.push({
+      andFilters.push({
         menus: {
           some: {
             type: menuType as any, // Assuming menuType is an enum or string
@@ -376,20 +369,28 @@ export const getFiltersController = async (
       });
     }
 
-    // State filter
-    
-    if (state) {
-      filters.push({
-        user: {
-          state: state as State, // Assuming state is an enum or string
+    // Service type filter (OR condition)
+    const orFilters: Prisma.MessContractorWhereInput[] = [];
+    if (Array.isArray(serviceType)) {
+      orFilters.push({
+        services: {
+          hasSome: serviceType.map((type) => type as ServiceType), // Map to ServiceType enum
+        },
+      });
+    } else if (serviceType) {
+      orFilters.push({
+        services: {
+          hasSome: [serviceType as ServiceType], // Single value case
         },
       });
     }
 
-    // Combine OR conditions into the where clause
+    // Combine AND and OR conditions
     const where: Prisma.MessContractorWhereInput = {
-      AND: filters.length > 0 ? filters : undefined,
-      OR: orConditions.length > 0 ? orConditions : undefined,
+      AND: [
+        ...andFilters, // All AND conditions
+        orFilters.length > 0 ? { OR: orFilters } : {}, // OR conditions (if any)
+      ],
     };
 
     // Sorting
@@ -413,6 +414,7 @@ export const getFiltersController = async (
       }
     }
 
+    // Fetch data and total count in parallel
     const [contractors, total] = await Promise.all([
       prisma.messContractor.findMany({
         where,
@@ -436,6 +438,7 @@ export const getFiltersController = async (
       prisma.messContractor.count({ where }),
     ]);
 
+    // Return response
     return res.status(200).json({
       success: true,
       message: "Contractors fetched successfully",
@@ -455,7 +458,6 @@ export const getFiltersController = async (
     });
   }
 };
-
 // ============For Getting Latesst 3 Auctions where he had Placed Bid + 3 of his Latest Menu's================
 
 export const getLatestAuctionsController = async (
@@ -552,3 +554,5 @@ export const getLatestMenusController = async (
     });
   }
 };
+
+

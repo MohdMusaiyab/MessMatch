@@ -6,39 +6,43 @@ import Link from "next/link";
 import SideBarDashboard from "@/app/components/colleges/SideBarDashboard";
 import { Loader2, AlertCircle, Plus, ChevronRight } from "lucide-react";
 
-interface Menu {
-  id: number;
-  name: string;
-  pricePerHead: number;
+interface Contract {
+  id: string;
+  auction: {
+    title: string;
+  };
 }
 
 const Page: React.FC = () => {
-  const [menus, setMenus] = useState<Menu[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch menus from the backend
-  const getLatestMenus = async () => {
+  // Fetch contracts from the backend
+  const getMyContracts = async () => {
     try {
-      const response = await axios.get<{ message: string; success: boolean; data: Menu[] }>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/contractor/dashboard-latest-menus`,
-        { withCredentials: true }
-      );
+      const response = await axios.get<{
+        message: string;
+        success: boolean;
+        data: Contract[];
+      }>(`${process.env.NEXT_PUBLIC_BACKEND_URL}/contract/my-contracts`, {
+        withCredentials: true,
+      });
 
       if (response.data.success) {
-        setMenus(response.data.data);
+        setContracts(response.data.data);
       } else {
-        setError("Failed to fetch menus.");
+        setError("Failed to fetch contracts.");
       }
     } catch (err) {
-      setError("Failed to load menus. Please try again.");
+      setError("Failed to load contracts. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    getLatestMenus();
+    getMyContracts();
   }, []);
 
   // Loading state
@@ -71,28 +75,30 @@ const Page: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-6 md:mb-8"
         >
-          Latest Menus
+          My Contracts
         </motion.h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-          {menus.length ? (
-            menus.map((menu) => (
+          {contracts.length ? (
+            contracts.map((contract) => (
               <motion.div
-                key={menu.id}
+                key={contract.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-neutral-900/50 hover:bg-neutral-800/70 p-3 md:p-4 rounded-lg flex flex-col gap-2 transition-all duration-300"
               >
-                <Link href={`/dashboard/contractor/menu/${menu.id}`} className="text-lg font-semibold text-neutral-200">
-                  {menu.name}
+                <Link
+                  href={`/dashboard/contract/${contract.id}`}
+                  className="text-lg font-semibold text-neutral-200"
+                >
+                  {contract.auction.title}
                 </Link>
-                <p className="text-sm text-neutral-400">
-                  Price Per Head: <span className="font-bold text-yellow-500">${menu.pricePerHead}</span>
-                </p>
               </motion.div>
             ))
           ) : (
-            <p className="text-neutral-500 text-center py-4 md:py-8">No menus available.</p>
+            <p className="text-neutral-500 text-center py-4 md:py-8">
+              No contracts available.
+            </p>
           )}
         </div>
       </div>

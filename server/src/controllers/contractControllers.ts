@@ -460,3 +460,49 @@ export const terminateContractController = async (
     });
   }
 };
+
+// ============For Getting All Your Active Contracts============
+export const getMyContractsController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  console.log("Reaching Here");
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: "User Id is required.",
+      });
+    }
+    const contracts = await prisma.contract.findMany({
+      where: {
+        OR: [
+          {
+            institutionId: userId,
+          },
+          { contractor: { userId: userId } }, // Access userId inside contractor
+        ],
+      },
+      select: {
+        auction: {
+          select: {
+            title: true,
+          },
+        },
+        id: true,
+      },
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Contracts Fetched Successfully",
+      data: contracts,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};

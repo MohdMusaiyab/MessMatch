@@ -30,6 +30,7 @@ interface User {
   name: string;
   email: string;
   address: string;
+  state: string;
   contactNumber: string;
   role: string;
   contractor?: Contractor;
@@ -131,6 +132,7 @@ const UserProfilePage = () => {
             <InfoItem label="Name" value={user.name} />
             <InfoItem label="Email" value={user.email} />
             <InfoItem label="Address" value={user.address} />
+            <InfoItem label="State" value={user.state} />
             <InfoItem label="Contact" value={user.contactNumber} />
             <InfoItem label="Role" value={user.role} />
           </div>

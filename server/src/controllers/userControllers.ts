@@ -133,6 +133,7 @@ export const getUserController = async (
         name: true,
         email: true,
         address: true,
+        state:true,
         contactNumber: true,
         role: true,
         contractor: {

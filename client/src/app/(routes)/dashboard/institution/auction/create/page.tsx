@@ -25,13 +25,11 @@ const CreateAuctionPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setLoading(true); // Set loading before making the request
 
-    const requestData = {
-      ...formData,
-    };
+    const requestData = { ...formData };
 
     try {
-      setLoading(true);
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/create`,
         requestData,
@@ -39,14 +37,16 @@ const CreateAuctionPage = () => {
       );
 
       if (response.status === 201) {
-        router.push("/dashboard/institution/my-auctions");
+        // Delay for UX so the loading effect is visible
+        setTimeout(() => {
+          router.push("/dashboard/institution/auction");
+        }, 1500); // 1.5s delay before redirecting
       } else {
         throw new Error(response.data.message || "Failed to create auction");
       }
     } catch (err: any) {
       setError(err.response?.data?.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading if an error occurs
     }
   };
 
@@ -79,6 +79,7 @@ const CreateAuctionPage = () => {
               onChange={handleInputChange}
               required
               className="w-full bg-neutral-800 border border-yellow-900/20 rounded-lg p-3 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all"
+              disabled={loading} // Disable input during submission
             />
           </div>
 
@@ -97,6 +98,7 @@ const CreateAuctionPage = () => {
               required
               className="w-full bg-neutral-800 border border-yellow-900/20 rounded-lg p-3 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all"
               rows={4}
+              disabled={loading} // Disable input during submission
             ></textarea>
           </div>
 
@@ -105,7 +107,7 @@ const CreateAuctionPage = () => {
             disabled={loading}
             className={`w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-200 px-6 py-3 rounded-lg transition-all duration-300 hover:from-yellow-500 hover:to-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium`}
           >
-            {loading ? "Creating..." : "Create Auction"}
+            {loading ? "Creating Auction..." : "Create Auction"}
           </button>
         </form>
       </div>

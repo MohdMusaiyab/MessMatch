@@ -22,6 +22,7 @@ interface ContractorUser {
   email: string;
   contactNumber: string;
   address: string;
+  state: string;
 }
 
 interface Contractor {
@@ -107,7 +108,9 @@ const Page: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
                 <div className="flex items-center gap-4">
                   <Tag className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                  <span className="text-neutral-300">Type: {menuData.type}</span>
+                  <span className="text-neutral-300">
+                    Type: {menuData.type}
+                  </span>
                 </div>
                 <div className="flex items-center gap-4">
                   <DollarSign className="w-5 h-5 text-yellow-500 flex-shrink-0" />
@@ -129,7 +132,9 @@ const Page: React.FC = () => {
                 </div>
               </div>
               <div className="mt-8 pt-4 border-t border-yellow-900/20">
-                <h3 className="text-lg font-medium text-neutral-100 mb-4">Menu Items</h3>
+                <h3 className="text-lg font-medium text-neutral-100 mb-4">
+                  Menu Items
+                </h3>
                 {menuData.items && menuData.items.length > 0 ? (
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {menuData.items.map((item, index) => (
@@ -175,6 +180,12 @@ const Page: React.FC = () => {
                   <MapPin className="w-5 h-5 text-yellow-500 flex-shrink-0" />
                   <span className="text-neutral-300">
                     {menuData.contractor.user.address}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <MapPin className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+                  <span className="text-neutral-300">
+                    {menuData.contractor.user.state}
                   </span>
                 </div>
               </div>

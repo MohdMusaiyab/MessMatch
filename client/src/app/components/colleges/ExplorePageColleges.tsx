@@ -4,6 +4,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { State } from "@/app/types/States";
+import Link from "next/link";
 
 enum ServiceType {
   HOSTELS = "HOSTELS",
@@ -278,12 +279,13 @@ const ContractorsPage: React.FC = () => {
                              hover:shadow-2xl hover:shadow-yellow-900/10 
                              transition-all duration-300"
                   >
-                    <h2
+                    <Link
+                      href={`/profile/${contractor.user.id}`}
                       className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 
                                  bg-clip-text text-transparent"
                     >
                       {contractor.user.name}
-                    </h2>
+                    </Link>
                     <div className="mt-4 space-y-2 text-neutral-400">
                       <p>Email: {contractor.user.email}</p>
                       <p>Contact: {contractor.user.contactNumber}</p>
@@ -303,9 +305,12 @@ const ContractorsPage: React.FC = () => {
                               key={menu.id}
                               className="p-4 bg-neutral-900/50 border border-yellow-900/10 rounded-lg"
                             >
-                              <h4 className="font-bold text-yellow-500 mb-2">
+                              <Link
+                                href={`/dashboard/contractor/menu/${menu.id}`}
+                                className="font-bold text-yellow-500 mb-2"
+                              >
                                 {menu.name}
-                              </h4>
+                              </Link>
                               <p className="text-neutral-400">
                                 Items: {menu.items.join(", ")}
                               </p>
