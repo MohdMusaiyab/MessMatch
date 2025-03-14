@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import Modal from 'react-modal'; // Install: npm install react-modal
+import Modal from "react-modal"; // Install: npm install react-modal
+import { UpdateTermsModal } from "@/app/components/General/UpdateTermsModal";
 
 interface User {
   id: string;
@@ -56,8 +57,10 @@ const ContractDetailsPage = () => {
   const [error, setError] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isTerminating, setIsTerminating] = useState<boolean>(false);
-  const [showTerminationModal, setShowTerminationModal] = useState<boolean>(false);
+  const [showTerminationModal, setShowTerminationModal] =
+    useState<boolean>(false);
   const [terminationError, setTerminationError] = useState<string>("");
+  const [showUpdateTermsModal, setShowUpdateTermsModal] = useState(false);
 
   useEffect(() => {
     const fetchContractDetails = async () => {
@@ -98,7 +101,7 @@ const ContractDetailsPage = () => {
       );
 
       if (response.data.success) {
-        setContract(prevContract => {
+        setContract((prevContract) => {
           if (!prevContract) return null;
           return {
             ...prevContract,
@@ -112,7 +115,16 @@ const ContractDetailsPage = () => {
       setIsUpdating(false);
     }
   };
-
+  const handleUpdateTerms = (newTerms: string) => {
+    if (contract) {
+      setContract({
+        ...contract,
+        terms: newTerms,
+        contractorAccepted: false,
+        institutionAccepted: false,
+      });
+    }
+  };
   const pollContractStatus = async () => {
     try {
       const response = await axios.get<{
@@ -128,12 +140,16 @@ const ContractDetailsPage = () => {
       );
 
       if (response.data.success) {
-        setContract(prevContract => prevContract ? {
-          ...prevContract,
-          status: response.data.data.status,
-          institutionAccepted: response.data.data.institutionAccepted,
-          contractorAccepted: response.data.data.contractorAccepted,
-        } : null);
+        setContract((prevContract) =>
+          prevContract
+            ? {
+                ...prevContract,
+                status: response.data.data.status,
+                institutionAccepted: response.data.data.institutionAccepted,
+                contractorAccepted: response.data.data.contractorAccepted,
+              }
+            : null
+        );
       }
     } catch (error) {
       console.error("Failed to fetch contract status:", error);
@@ -141,7 +157,11 @@ const ContractDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (contract && contract.status !== "ACCEPTED" && contract.status !== "TERMINATED") {
+    if (
+      contract &&
+      contract.status !== "ACCEPTED" &&
+      contract.status !== "TERMINATED"
+    ) {
       const intervalId = setInterval(pollContractStatus, 5000); // Poll every 5 seconds
 
       return () => clearInterval(intervalId);
@@ -164,10 +184,16 @@ const ContractDetailsPage = () => {
     if (!contract || !session?.user) return false;
 
     if (session.user.role === "CONTRACTOR") {
-      return session.user.id === contract.contractor.userId && contract.status !== "ACCEPTED";
+      return (
+        session.user.id === contract.contractor.userId &&
+        contract.status !== "ACCEPTED"
+      );
     }
 
-    return session.user.id === contract.institution.id && contract.status !== "ACCEPTED";
+    return (
+      session.user.id === contract.institution.id &&
+      contract.status !== "ACCEPTED"
+    );
   };
 
   const canTerminateContract = () => {
@@ -176,7 +202,10 @@ const ContractDetailsPage = () => {
     // Only allow termination if the contract is ACCEPTED and the user is either
     // the institution or the contractor.
     if (contract.status === "ACCEPTED") {
-      return (session.user.id === contract.institution.id || session.user.id === contract.contractor.userId);
+      return (
+        session.user.id === contract.institution.id ||
+        session.user.id === contract.contractor.userId
+      );
     }
 
     return false;
@@ -208,11 +237,15 @@ const ContractDetailsPage = () => {
         setContract({ ...contract, status: "TERMINATED" });
         handleCloseTerminationModal();
       } else {
-        setTerminationError(response.data.message || "Failed to terminate contract.");
+        setTerminationError(
+          response.data.message || "Failed to terminate contract."
+        );
       }
     } catch (error) {
       console.error("Error terminating contract:", error);
-      setTerminationError("Failed to terminate contract. Please try again later.");
+      setTerminationError(
+        "Failed to terminate contract. Please try again later."
+      );
     } finally {
       setIsTerminating(false);
     }
@@ -221,7 +254,9 @@ const ContractDetailsPage = () => {
   if (loading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
-        <div className="text-yellow-500 text-lg animate-pulse">Loading contract details...</div>
+        <div className="text-yellow-500 text-lg animate-pulse">
+          Loading contract details...
+        </div>
       </div>
     );
   }
@@ -247,7 +282,8 @@ const ContractDetailsPage = () => {
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <p className="text-neutral-400">
-                <span className="text-yellow-500">Contract ID:</span> {contract?.id}
+                <span className="text-yellow-500">Contract ID:</span>{" "}
+                {contract?.id}
               </p>
               <p className="text-neutral-400">
                 <span className="text-yellow-500">Created:</span>{" "}
@@ -255,34 +291,42 @@ const ContractDetailsPage = () => {
               </p>
               <p className="text-neutral-400">
                 <span className="text-yellow-500">Status:</span>{" "}
-                <span className={`px-3 py-1 rounded-full text-sm ${
-                  contract?.status === "ACCEPTED"
-                    ? "bg-green-500/10 text-green-500"
-                  : contract?.status === "TERMINATED"
+                <span
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    contract?.status === "ACCEPTED"
+                      ? "bg-green-500/10 text-green-500"
+                      : contract?.status === "TERMINATED"
                       ? "bg-red-500/10 text-red-500" // Show red for terminated
-                    : "bg-yellow-500/10 text-yellow-500"
-                }`}>
+                      : "bg-yellow-500/10 text-yellow-500"
+                  }`}
+                >
                   {contract?.status}
                 </span>
               </p>
             </div>
 
             <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
-              <h2 className="text-xl font-bold mb-4 text-yellow-500">Auction Details</h2>
+              <h2 className="text-xl font-bold mb-4 text-yellow-500">
+                Auction Details
+              </h2>
               <div className="space-y-3">
                 <p className="text-neutral-300">
-                  <span className="text-yellow-500">Title:</span> {contract?.auction.title}
+                  <span className="text-yellow-500">Title:</span>{" "}
+                  {contract?.auction.title}
                 </p>
                 <p className="text-neutral-300">
-                  <span className="text-yellow-500">Description:</span> {contract?.auction.description}
+                  <span className="text-yellow-500">Description:</span>{" "}
+                  {contract?.auction.description}
                 </p>
                 <p className="text-neutral-300">
                   <span className="text-yellow-500">Status:</span>{" "}
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    contract?.auction.isOpen
-                      ? "bg-yellow-500/10 text-yellow-500"
-                      : "bg-neutral-800 text-neutral-400"
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      contract?.auction.isOpen
+                        ? "bg-yellow-500/10 text-yellow-500"
+                        : "bg-neutral-800 text-neutral-400"
+                    }`}
+                  >
                     {contract?.auction.isOpen ? "Open" : "Closed"}
                   </span>
                 </p>
@@ -291,41 +335,73 @@ const ContractDetailsPage = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
-                <h2 className="text-xl font-bold mb-4 text-yellow-500">Institution Details</h2>
+                <h2 className="text-xl font-bold mb-4 text-yellow-500">
+                  Institution Details
+                </h2>
                 <div className="space-y-3">
                   <p className="text-neutral-300">
-                    <span className="text-yellow-500">Name:</span> {contract?.institution.name}
+                    <span className="text-yellow-500">Name:</span>{" "}
+                    {contract?.institution.name}
                   </p>
                   <p className="text-neutral-300">
-                    <span className="text-yellow-500">Email:</span> {contract?.institution.email}
+                    <span className="text-yellow-500">Email:</span>{" "}
+                    {contract?.institution.email}
                   </p>
                   <div className="mt-4">
-                    <StatusBadge accepted={contract?.institutionAccepted ?? false} />
+                    <StatusBadge
+                      accepted={contract?.institutionAccepted ?? false}
+                    />
                   </div>
                 </div>
               </div>
 
               <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
-                <h2 className="text-xl font-bold mb-4 text-yellow-500">Contractor Details</h2>
+                <h2 className="text-xl font-bold mb-4 text-yellow-500">
+                  Contractor Details
+                </h2>
                 <div className="space-y-3">
                   <p className="text-neutral-300">
-                    <span className="text-yellow-500">Name:</span> {contract?.contractor.user.name}
+                    <span className="text-yellow-500">Name:</span>{" "}
+                    {contract?.contractor.user.name}
                   </p>
                   <p className="text-neutral-300">
-                    <span className="text-yellow-500">Email:</span> {contract?.contractor.user.email}
+                    <span className="text-yellow-500">Email:</span>{" "}
+                    {contract?.contractor.user.email}
                   </p>
                   <div className="mt-4">
-                    <StatusBadge accepted={contract?.contractorAccepted ?? false} />
+                    <StatusBadge
+                      accepted={contract?.contractorAccepted ?? false}
+                    />
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
-              <h2 className="text-xl font-bold mb-4 text-yellow-500">Terms & Conditions</h2>
+              <h2 className="text-xl font-bold mb-4 text-yellow-500">
+                Terms & Conditions
+              </h2>
               <div className="prose prose-invert max-w-none">
-                <p className="text-neutral-300 whitespace-pre-wrap">{contract?.terms}</p>
+                <p className="text-neutral-300 whitespace-pre-wrap">
+                  {contract?.terms}
+                </p>
               </div>
+              {contract?.status === "PENDING" && (
+                <button
+                  onClick={() => setShowUpdateTermsModal(true)}
+                  className="px-6 py-3 rounded-lg font-medium bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-all duration-200"
+                >
+                  Update Terms
+                </button>
+              )}
+              {showUpdateTermsModal && contract && (
+                <UpdateTermsModal
+                  contractId={contractId as string}
+                  currentTerms={contract.terms}
+                  onClose={() => setShowUpdateTermsModal(false)}
+                  onUpdate={handleUpdateTerms}
+                />
+              )}
             </div>
 
             {canToggleStatus() && (
@@ -334,23 +410,27 @@ const ContractDetailsPage = () => {
                   onClick={handleToggleStatus}
                   disabled={isUpdating}
                   className={`px-6 py-3 rounded-lg font-medium transition-all duration-200
-                    ${session?.user.role === "CONTRACTOR"
-                      ? contract?.contractorAccepted
-                        ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                        : "bg-green-500/10 text-green-500 hover:bg-green-500/20"
-                      : contract?.institutionAccepted
+                    ${
+                      session?.user.role === "CONTRACTOR"
+                        ? contract?.contractorAccepted
+                          ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                          : "bg-green-500/10 text-green-500 hover:bg-green-500/20"
+                        : contract?.institutionAccepted
                         ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
                         : "bg-green-500/10 text-green-500 hover:bg-green-500/20"
                     }
                     ${isUpdating ? "opacity-50 cursor-not-allowed" : ""}
                   `}
                 >
-                  {isUpdating ? "Updating..." :
-                    (session?.user.role === "CONTRACTOR"
-                      ? (contract?.contractorAccepted ? "Revoke Acceptance" : "Accept Contract")
-                      : (contract?.institutionAccepted ? "Revoke Acceptance" : "Accept Contract")
-                    )
-                  }
+                  {isUpdating
+                    ? "Updating..."
+                    : session?.user.role === "CONTRACTOR"
+                    ? contract?.contractorAccepted
+                      ? "Revoke Acceptance"
+                      : "Accept Contract"
+                    : contract?.institutionAccepted
+                    ? "Revoke Acceptance"
+                    : "Accept Contract"}
                 </button>
               </div>
             )}
@@ -376,32 +456,42 @@ const ContractDetailsPage = () => {
         onRequestClose={handleCloseTerminationModal}
         style={{
           overlay: {
-            backgroundColor: 'rgba(0, 0, 0, 0.5)'
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
           },
           content: {
-            top: '50%',
-            left: '50%',
-            right: 'auto',
-            bottom: 'auto',
-            marginRight: '-50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: '#2D3748',
-            color: 'white',
-            borderRadius: '8px',
-            padding: '20px',
-            border: '1px solid #4A5568'
-          }
+            top: "50%",
+            left: "50%",
+            right: "auto",
+            bottom: "auto",
+            marginRight: "-50%",
+            transform: "translate(-50%, -50%)",
+            backgroundColor: "#2D3748",
+            color: "white",
+            borderRadius: "8px",
+            padding: "20px",
+            border: "1px solid #4A5568",
+          },
         }}
         contentLabel="Termination Confirmation"
       >
         <h2>Confirm Termination</h2>
-        <p>Are you sure you want to terminate this contract? This action cannot be undone.</p>
+        <p>
+          Are you sure you want to terminate this contract? This action cannot
+          be undone.
+        </p>
         {terminationError && <p className="text-red-500">{terminationError}</p>}
         <div className="mt-4 flex justify-end">
-          <button className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2" onClick={handleCloseTerminationModal}>
+          <button
+            className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded mr-2"
+            onClick={handleCloseTerminationModal}
+          >
             Cancel
           </button>
-          <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" onClick={handleTerminateContract} disabled={isTerminating}>
+          <button
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            onClick={handleTerminateContract}
+            disabled={isTerminating}
+          >
             {isTerminating ? "Terminating..." : "Terminate"}
           </button>
         </div>

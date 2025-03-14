@@ -506,3 +506,74 @@ export const getMyContractsController = async (
     });
   }
 };
+
+// =============Update Terms Controller============
+export const updateTermsController = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const { contractId } = req.params;
+    if (!contractId) {
+      return res.status(400).json({
+        success: false,
+        message: "Contract ID is required.",
+      });
+    }
+    const { terms } = req.body;
+    if (!terms) {
+      return res.status(400).json({
+        success: false,
+        message: "Terms are required.",
+      });
+    }
+    const contract = await prisma.contract.findUnique({
+      where: {
+        id: contractId,
+      },
+      select: {
+        status: true,
+        contractorAccepted: true,
+        institutionAccepted: true,
+      },
+    });
+    if (!contract) {
+      return res.status(404).json({
+        success: false,
+        message: "Contract not found.",
+      });
+    }
+    if (
+      contract.status === "TERMINATED" ||
+      contract.status === "ACCEPTED" ||
+      contract.status === "REJECTED"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: `Contract is already ${contract.status.toLowerCase()}.`,
+      });
+    }
+    //Now Update the Contract With the New Terms and also Reset both Acceptance to False
+    await prisma.contract.update({
+      where: { id: contractId },
+      data: {
+        terms,
+        contractorAccepted: false,
+        institutionAccepted: false,
+      },
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Contract terms updated successfully.",
+      data: {
+        terms,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};

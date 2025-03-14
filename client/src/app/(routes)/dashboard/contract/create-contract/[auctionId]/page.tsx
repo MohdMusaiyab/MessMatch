@@ -150,7 +150,7 @@ const CreateContractPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent text-center">
             Create Contract
           </h1>
-  
+
           {contractDetails.data && "contract" in contractDetails.data ? (
             <div className="text-center space-y-4">
               <p className="text-yellow-500 mb-4">
@@ -180,7 +180,8 @@ const CreateContractPage = () => {
               {(!contractDetails?.winnerId || !contractDetails?.creatorId) && (
                 <div className="text-center space-y-4 mb-6">
                   <p className="text-red-500">
-                    Winner not selected. Please go to the dashboard to select a winner.
+                    Winner not selected. Please go to the dashboard to select a
+                    winner.
                   </p>
                   <Link
                     href="/dashboard"
@@ -190,7 +191,7 @@ const CreateContractPage = () => {
                   </Link>
                 </div>
               )}
-  
+
               {/* Only render the form and button if both winnerId and creatorId exist */}
               {contractDetails?.winnerId && contractDetails?.creatorId && (
                 <>
@@ -204,7 +205,7 @@ const CreateContractPage = () => {
                       {contractDetails?.creatorId}
                     </p>
                   </div>
-  
+
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                       <label
@@ -227,14 +228,17 @@ const CreateContractPage = () => {
                     </div>
                     <button
                       type="submit"
-                      className="w-full px-6 py-3 rounded-lg font-medium
-                               bg-yellow-500/10 text-yellow-500
-                               hover:bg-yellow-500/20
-                               transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`w-full px-6 py-3 rounded-lg font-medium
+             bg-yellow-500/10 text-yellow-500
+             hover:bg-yellow-500/20
+             transition-all duration-200
+             ${creatingContract ? "opacity-50 cursor-not-allowed" : ""}`}
                       disabled={creatingContract}
                     >
                       {creatingContract ? (
-                        <span className="animate-pulse">Creating Contract...</span>
+                        <span className="animate-pulse">
+                          Creating Contract...
+                        </span>
                       ) : (
                         "Create Contract"
                       )}
@@ -248,7 +252,6 @@ const CreateContractPage = () => {
       </div>
     </div>
   );
-  
 };
 
 export default CreateContractPage;

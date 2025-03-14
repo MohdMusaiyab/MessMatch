@@ -9,6 +9,7 @@ import {
   getContractStatusController,
   terminateContractController,
   getMyContractsController,
+  updateTermsController,
 } from "../controllers/contractControllers";
 export const contractRoutes = express.Router();
 
@@ -62,5 +63,12 @@ contractRoutes.delete(
   terminateContractController
 );
 
+//For Updating the terms and Services and making both acceptance false as Terms are Updated
+contractRoutes.put(
+  "/update-terms/:contractId",
+  isSign,
+  isAuthorizedUser,
+  updateTermsController
+);
 
 export default contractRoutes;
