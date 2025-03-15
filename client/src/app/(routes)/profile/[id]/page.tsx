@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import ReviewComponent from "@/app/components/colleges/ReviewComponent";
 
 interface Menu {
   id: string;
@@ -192,6 +193,7 @@ const UserProfilePage = () => {
                   </div>
                 </div>
               )}
+              <ReviewComponent profileId={id as string} />
             </motion.div>
           )}
 
