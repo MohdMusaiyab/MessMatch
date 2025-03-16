@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import SessionProviderWrapper from "./providers/SessionProviders";
+import { WebSocketProvider } from "@/context/WebSocketContext";
 import Header from "./components/General/Header";
 import Footer from "./components/General/Footer";
 
@@ -31,11 +32,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProviderWrapper>
-          <Header />
-          {children}
-          <Footer/>
-        </SessionProviderWrapper>
+        <WebSocketProvider>
+          <SessionProviderWrapper>
+            <Header />
+            {children}
+            <Footer />
+          </SessionProviderWrapper>
+        </WebSocketProvider>
       </body>
     </html>
   );
