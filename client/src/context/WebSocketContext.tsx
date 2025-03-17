@@ -23,11 +23,15 @@ export const WebSocketProvider = ({
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
+    // Debugging: Log WebSocket initialization
+    console.log("Initializing WebSocket connection...");
+
     // Initialize the WebSocket connection
     const socketInstance = io("http://localhost:4000", {
       withCredentials: true,
     });
 
+    // Debugging: Log connection events
     socketInstance.on("connect", () => {
       console.log("Connected to WebSocket server");
       setIsConnected(true);
@@ -38,10 +42,21 @@ export const WebSocketProvider = ({
       setIsConnected(false);
     });
 
+    // Debugging: Log errors
+    socketInstance.on("connect_error", (error) => {
+      console.error("WebSocket connection error:", error);
+    });
+
+    // Debugging: Log custom events (optional)
+    socketInstance.on("receiveMessage", (message) => {
+      console.log("Received message via WebSocket:", message);
+    });
+
     setSocket(socketInstance);
 
     // Cleanup on unmount
     return () => {
+      console.log("Disconnecting WebSocket...");
       socketInstance.disconnect();
     };
   }, []);

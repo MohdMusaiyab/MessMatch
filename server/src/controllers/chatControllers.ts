@@ -149,14 +149,25 @@ export const sendMessageController = async (
 ): Promise<any> => {
   const { chatId, senderId, content } = req.body;
 
+  // Debugging: Log incoming request data
+  console.log("Received request to send message:", {
+    chatId,
+    senderId,
+    content,
+  });
+
   try {
     // Validate input
     if (!chatId || !senderId || !content) {
+      console.error("Validation failed: Missing required fields");
       return res.status(400).json({
         success: false,
         message: "chatId, senderId, and content are required",
       });
     }
+
+    // Debugging: Log before creating the message
+    console.log("Creating message in the database...");
 
     // Create the message
     const message = await prisma.message.create({
@@ -170,10 +181,19 @@ export const sendMessageController = async (
       },
     });
 
+    // Debugging: Log the created message
+    console.log("Message created successfully:", message);
+
     // Emit a WebSocket event to all clients in the chat room
     if (req.io) {
+      console.log("Emitting 'receiveMessage' event to chat room:", chatId);
       req.io.to(chatId).emit("receiveMessage", message);
+    } else {
+      console.error("WebSocket instance (req.io) is not available");
     }
+
+    // Debugging: Log successful response
+    console.log("Message sent and WebSocket event emitted successfully");
 
     return res.status(201).json({
       success: true,
@@ -182,6 +202,7 @@ export const sendMessageController = async (
     });
   } catch (error) {
     console.error("Error sending message:", error);
+
     return res.status(500).json({
       success: false,
       message: "Failed to send message",

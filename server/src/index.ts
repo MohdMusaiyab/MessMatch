@@ -59,9 +59,15 @@ io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
   // Join a room (chatId)
-  socket.on("joinChat", (chatId) => {
+  socket.on("joinRoom", (chatId) => {
     socket.join(chatId);
     console.log(`User ${socket.id} joined chat ${chatId}`);
+  });
+
+  // Leave a room (chatId)
+  socket.on("leaveRoom", (chatId) => {
+    socket.leave(chatId);
+    console.log(`User ${socket.id} left chat ${chatId}`);
   });
 
   // Handle sending messages via WebSocket
