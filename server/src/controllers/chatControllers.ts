@@ -116,9 +116,14 @@ export const createChatController = async (
         ],
       },
     });
+    console.log(existingChat);  
 
     if (existingChat) {
-      return res.status(200).json(existingChat); // Return the existing chat
+      return res.status(200).json({
+        success: true,
+        message: "Chat already exists",
+        data: existingChat,
+      }); // Return the existing chat
     }
 
     // Create a new chat
