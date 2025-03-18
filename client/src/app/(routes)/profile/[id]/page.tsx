@@ -5,6 +5,7 @@ import axios from "axios";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import ReviewComponent from "@/app/components/colleges/ReviewComponent";
+import DMModal from "@/app/components/chat/DMModal";
 
 interface Menu {
   id: string;
@@ -122,6 +123,9 @@ const UserProfilePage = () => {
           className="text-4xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent"
         >
           {user.name}&apos;s Profile
+          <div>
+            <DMModal recipientId={id as string} />
+          </div>
         </motion.h1>
 
         <motion.div
