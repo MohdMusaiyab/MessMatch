@@ -4,7 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { LogIn, Mail, Lock, ChevronRight, Diamond } from "lucide-react";
+import {  Mail, Lock, ChevronRight, Diamond } from "lucide-react";
 import Link from "next/link";
 
 export default function SignIn() {
@@ -163,7 +163,7 @@ export default function SignIn() {
               </button>
             </form>
             <p className="text-neutral-300 text-sm mt-4 text-center">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/auth/register"
                 className="text-yellow-500 hover:underline"

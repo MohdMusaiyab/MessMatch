@@ -337,6 +337,7 @@ export const getOthersSingleAuctionController = async (
   }
 
   const { id } = req.params;
+
   if (!id) {
     return res.status(400).json({
       message: "Please Provide an Id",
@@ -539,7 +540,7 @@ export const updateYourBidController = async (
       success: false,
     });
   }
-
+  //Getting the Auction id
   const { id } = req.params;
   const { amount } = req.body;
 
@@ -624,7 +625,7 @@ export const deleteYourBidController = async (
 
   if (!id) {
     return res.status(400).json({
-      message: "Please provide the bid ID",
+      message: "Please provide the Auction ID",
       success: false,
     });
   }
@@ -633,7 +634,7 @@ export const deleteYourBidController = async (
     // Check if the bid exists and belongs to the user
     const existingBid = await prisma.bid.findFirst({
       where: {
-        id,
+        auctionId: id,
         bidderId: userId,
       },
       select: {
@@ -667,6 +668,20 @@ export const deleteYourBidController = async (
       await prisma.auction.update({
         where: { id: existingBid.auction.id },
         data: { winnerId: null },
+      });
+    }
+    //Also Check if the Contract Exists for this Auction
+    const contract = await prisma.contract.findUnique({
+      where: {
+        auctionId: existingBid.auction.id,
+      },
+    });
+    if (contract) {
+      // If a contract exists, delete it
+      await prisma.contract.delete({
+        where: {
+          auctionId: existingBid.auction.id,
+        },
       });
     }
 

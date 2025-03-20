@@ -83,8 +83,8 @@ const AboutPage = () => {
           {...fadeIn}
         >
           <h2 className="text-3xl font-bold text-neutral-300 mb-6">Our Mission</h2>
-          <p className="text-neutral-400 text-lg leading-relaxed">
-            We're revolutionizing institutional dining services by creating seamless connections 
+            <p className="text-neutral-400 text-lg leading-relaxed">
+            We&apos;re revolutionizing institutional dining services by creating seamless connections 
             between quality-focused mess contractors and forward-thinking institutions. Our platform 
             ensures that every partnership we facilitate leads to exceptional dining experiences, 
             operational efficiency, and mutual growth.

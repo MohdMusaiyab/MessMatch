@@ -36,7 +36,7 @@ const ContactPage = () => {
             Get in Touch
           </h1>
           <p className="text-neutral-300 text-lg max-w-2xl mx-auto">
-            We're here to help bring your vision to life. Reach out to us through any of our channels below.
+            We&apos;re here to help bring your vision to life. Reach out to us through any of our channels below.
           </p>
         </motion.div>
 

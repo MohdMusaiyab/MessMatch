@@ -101,8 +101,9 @@ const AuctionDetail = () => {
 
     setDeletingBid(true);
     try {
+      console.log(auction);
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/delete-bid/${auction.userBid.id}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/delete-bid/${id}`,
         { withCredentials: true }
       );
       alert("Bid deleted successfully!");
@@ -236,7 +237,7 @@ const AuctionDetail = () => {
             </div>
 
             {/* Bidding Section */}
-            {(auction.isOpen && auction.winnerId !=session?.user.id) ? (
+            {auction.isOpen && auction.winnerId != session?.user.id ? (
               auction.userBid ? (
                 <div className="bg-neutral-950/50 rounded-lg border border-yellow-900/20 p-6">
                   <h2 className="text-xl font-bold mb-4 text-neutral-200">
@@ -323,7 +324,9 @@ const AuctionDetail = () => {
                 {auction.creator.name}
               </Link>
               <p className="text-neutral-400">Email: {auction.creator.email}</p>
-              <p className="text-neutral-400">Phone: {auction.creator.contactNumber}</p>
+              <p className="text-neutral-400">
+                Phone: {auction.creator.contactNumber}
+              </p>
             </div>
           </div>
         </div>
