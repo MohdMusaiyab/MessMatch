@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Modal from "react-modal"; // Install: npm install react-modal
@@ -79,8 +79,24 @@ const ContractDetailsPage = () => {
         } else {
           setError(response.data.message || "Failed to fetch contract details");
         }
-      } catch (error) {
-        setError("Failed to load contract details. Please try again later.");
+      }catch (error) {
+        // Use AxiosError for better error handling
+        if (error instanceof AxiosError) {
+          if (error.response) {
+            // Handle server errors (e.g., 4xx or 5xx)
+            const backendMessage = error.response.data.message || "Unknown error";
+            setError(`Error: ${backendMessage}`);
+          } else if (error.request) {
+            // Handle network errors (e.g., no response from server)
+            setError("Network error. Please check your internet connection.");
+          } else {
+            // Handle other Axios errors
+            setError("Something went wrong. Please try again later.");
+          }
+        } else {
+          // Handle non-Axios errors
+          setError("An unexpected error occurred. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }

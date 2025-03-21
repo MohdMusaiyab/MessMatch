@@ -84,21 +84,23 @@ const CreateContractPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCreatingContract(true);
-
+    setCreatingContract(true); // This already disables the button via the disabled prop
+  
     try {
       const response = await axios.post<ContractResponse>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/contract/create-contract/${auctionId}`,
         { terms },
         { withCredentials: true }
       );
-
+  
       if (response.data.success) {
-        // Properly access the contract ID based on the response type
+        // Immediately navigate based on the response data structure
         if ("id" in response.data.data) {
           router.push(`/dashboard/contract/${response.data.data.id}`);
+          return; // Exit early to prevent setting creatingContract to false
         } else if ("contract" in response.data.data) {
           router.push(`/dashboard/contract/${response.data.data.contract.id}`);
+          return; // Exit early to prevent setting creatingContract to false
         }
       } else {
         setError("Failed to create contract");
@@ -106,9 +108,10 @@ const CreateContractPage = () => {
     } catch (error) {
       console.error("Error creating contract:", error);
       setError("Internal Server Error");
-    } finally {
-      setCreatingContract(false);
     }
+    
+    // Only runs if there was an error or unsuccessful response
+    setCreatingContract(false);
   };
 
   if (loading) {

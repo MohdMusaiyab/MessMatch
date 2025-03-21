@@ -6,22 +6,56 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 
+// Define TypeScript interfaces based on your Prisma models
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface Bid {
+  id: string;
+  amount: number;
+  bidder: User;
+}
+
+interface MessContractor {
+  id: string;
+  user: User;
+}
+
+interface Contract {
+  id: string;
+  status: string;
+}
+
+interface Auction {
+  id: string;
+  title: string;
+  description: string;
+  isOpen: boolean;
+  creatorId: string;
+  winnerId: string | null;
+  winner: MessContractor | null;
+  bids: Bid[];
+  contract: Contract | null;
+}
+
 const AuctionDetail = () => {
   const params = useParams();
   const { id } = params;
   const { data: session } = useSession();
-  const [auction, setAuction] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [auction, setAuction] = useState<Auction | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [winnerId, setWinnerId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAuction = async () => {
       if (!id) return;
       try {
-        const response = await axios.get(
+        const response = await axios.get<{ data: Auction }>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/get/${id}`,
           { withCredentials: true }
         );
@@ -41,7 +75,7 @@ const AuctionDetail = () => {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.put(
+      const response = await axios.put<{ message: string; data: Auction }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/update/${id}`,
         { title, description },
         { withCredentials: true }
@@ -55,12 +89,12 @@ const AuctionDetail = () => {
 
   const handleCloseAuction = async () => {
     try {
-      const response = await axios.delete(
+      const response = await axios.delete<{ message: string; data: Auction }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/delete/${id}`,
         { withCredentials: true }
       );
       alert(response.data.message);
-      setAuction({ ...auction, isOpen: false });
+      setAuction((prev) => (prev ? { ...prev, isOpen: false } : null));
     } catch (err) {
       setError("Failed to close auction. Please try again later.");
     }
@@ -68,13 +102,13 @@ const AuctionDetail = () => {
 
   const handleOpenAuction = async () => {
     try {
-      const response = await axios.put(
+      const response = await axios.put<{ message: string; data: Auction }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/open-auction/${id}`,
         {},
         { withCredentials: true }
       );
       alert(response.data.message);
-      setAuction({ ...auction, isOpen: true });
+      setAuction((prev) => (prev ? { ...prev, isOpen: true } : null));
     } catch (err) {
       setError("Failed to open auction. Please try again later.");
     }
@@ -82,33 +116,66 @@ const AuctionDetail = () => {
 
   const handleAcceptBid = async (bidId: string) => {
     try {
-      const response = await axios.put(
+      const response = await axios.put<{
+        message: string;
+        data: {
+          winnerId: string;
+          winner: MessContractor;
+        }
+      }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/accept-bid`,
         { auctionId: id, bidId },
         { withCredentials: true }
       );
-      alert(response.data.message);
-      setAuction({
-        ...auction,
-        isOpen: false,
+  
+      // Find the bid with the matching bidId to get complete bidder information
+      const acceptedBid = auction?.bids.find(bid => bid.id === bidId);
+      
+      // Create a complete winner object based on the bid information
+      const winnerInfo = {
+        id: response.data.data?.winnerId || "",
+        user: acceptedBid?.bidder || { id: "", name: "", email: "" }
+      };
+  
+      // Update the local state with complete information
+      setAuction((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          isOpen: false,
+          winnerId: response.data.data?.winnerId || "",
+          winner: winnerInfo
+        };
       });
+  
+      alert(response.data.message);
     } catch (err) {
-      console.log(err);
+      console.error("Accept bid error:", err);
       setError("Failed to accept bid. Please try again later.");
     }
   };
 
   const handleRemoveWinner = async () => {
     try {
-      const response = await axios.put(
+      const response = await axios.put<{ message: string }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/remove-winner`,
-        {
-          auctionId: id,
-        },
+        { auctionId: id },
         { withCredentials: true }
       );
+
+      // Update the local state
+      setAuction((prev) =>
+        prev
+          ? {
+              ...prev,
+              winnerId: null,
+              winner: null,
+              isOpen: true,
+            }
+          : null
+      );
+
       alert(response.data.message);
-      setAuction({ ...auction, winnerId: null, winner: null });
     } catch (err) {
       setError("Failed to remove winner. Please try again later.");
     }
@@ -139,7 +206,7 @@ const AuctionDetail = () => {
       </div>
     );
 
-  const isCreator = session?.user.id === auction.creatorId;
+  const isCreator = session?.user?.id === auction.creatorId;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 text-neutral-300">
@@ -275,7 +342,7 @@ const AuctionDetail = () => {
                     )}
                     {!auction.contract && (
                       <Link
-                        href={`/dashboard/contract/create-contract/${auction?.id}`}
+                        href={`/dashboard/contract/create-contract/${auction.id}`}
                         className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-950 px-4 py-2 rounded-md hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 font-medium"
                       >
                         Create Contract
@@ -300,7 +367,7 @@ const AuctionDetail = () => {
           </h3>
           <div className="space-y-4">
             {auction.bids && auction.bids.length > 0 ? (
-              auction.bids.map((bid: any) => (
+              auction.bids.map((bid) => (
                 <div
                   key={bid.id}
                   className="flex flex-col md:flex-row justify-between gap-4 bg-neutral-950/50 p-4 rounded-lg border border-yellow-900/10"
