@@ -48,10 +48,10 @@ const ContractorsPage: React.FC = () => {
   const [menuType, setMenuType] = useState<string>("");
   const [state, setState] = useState<string>(""); // Add state filter
   const [sortBy, setSortBy] = useState<string>("");
-  const [sortOrder, setSortOrder] = useState<string>("asc");
+  const [sortOrder] = useState<string>("asc");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(true);
+  const [isFilterOpen] = useState<boolean>(true);
 
   const fetchContractors = async () => {
     setLoading(true);

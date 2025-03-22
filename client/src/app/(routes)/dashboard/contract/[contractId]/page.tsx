@@ -5,7 +5,7 @@ import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Modal from "react-modal"; // Install: npm install react-modal
-import { UpdateTermsModal } from "@/app/components/General/UpdateTermsModal";
+import { UpdateTermsModal } from "@/app/components/contractor/UpdateTermsModal";
 
 interface User {
   id: string;

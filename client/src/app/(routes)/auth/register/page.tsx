@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { State } from "@/app/types/States";
+import Image from "next/image";
+import leftSideDecoration from "../../../../../public/images/cornerDecorativeElement.svg";
 
-// Keep existing interfaces and security question map
+// Interfaces and security question map
 interface FormData {
   name: string;
   email: string;
@@ -17,7 +19,7 @@ interface FormData {
   securityAnswer: string;
   contactNumber: string;
   address: string;
-  state: string; // Added state field
+  state: string;
 }
 
 const securityQuestionMap: Record<string, string> = {
@@ -89,9 +91,28 @@ const RegisterPage: React.FC = () => {
       setSuccess(response.data.message || "Registration successful!");
       setLoading(false);
       router.push("/auth/login");
-    } catch (err: any) {
+    } catch (err) {
       setLoading(false);
-      setError(err.response?.data?.message || "An unexpected error occurred.");
+
+      // Check if the error is an AxiosError
+      if (axios.isAxiosError(err)) {
+        // Handle Axios-specific errors
+        if (err.response) {
+          // Server responded with an error (e.g., 4xx or 5xx)
+          setError(
+            err.response.data.message || "An unexpected error occurred."
+          );
+        } else if (err.request) {
+          // No response received (e.g., network error)
+          setError("Network error. Please check your internet connection.");
+        } else {
+          // Other Axios errors (e.g., configuration issues)
+          setError("An unexpected error occurred. Please try again later.");
+        }
+      } else {
+        // Handle non-Axios errors
+        setError("An unexpected error occurred. Please try again later.");
+      }
     }
   };
 
@@ -100,25 +121,53 @@ const RegisterPage: React.FC = () => {
   const labelClasses = "block text-sm font-medium text-neutral-300";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
+    <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 relative overflow-hidden">
+      {/* Left side decoration - positioned absolutely */}
+      <div className="absolute top-0 left-0 w-32 h-32 md:w-48 md:h-48 opacity-60 pointer-events-none">
+        <Image
+          src={leftSideDecoration}
+          alt="Decorative corner element"
+          layout="fill"
+          objectFit="contain"
+          className="select-none"
+        />
+      </div>
+
+      {/* Right side decoration - mirrored and positioned bottom right */}
+      <div className="absolute bottom-0 right-0 w-32 h-32 md:w-48 md:h-48 opacity-60 pointer-events-none transform rotate-180">
+        <Image
+          src={leftSideDecoration}
+          alt="Decorative corner element"
+          layout="fill"
+          objectFit="contain"
+          className="select-none"
+        />
+      </div>
+
       <div className="container mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-2xl mx-auto"
+          className="max-w-2xl mx-auto relative z-10"
         >
-          <div className="bg-neutral-900/50 backdrop-blur-lg p-8 rounded-xl shadow-2xl border border-yellow-900/20">
+          <div className="bg-neutral-900/80 backdrop-blur-lg p-6 md:p-8 rounded-xl shadow-2xl border border-yellow-900/20 relative">
+            {/* Small decorative diagonal lines in corners of the form */}
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-yellow-600/40 rounded-tl-lg"></div>
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-yellow-600/40 rounded-tr-lg"></div>
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-yellow-600/40 rounded-bl-lg"></div>
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-yellow-600/40 rounded-br-lg"></div>
+
             <div className="flex items-center justify-center mb-8 space-x-2">
               <DiamondIcon />
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
                 Create Account
               </h1>
               <DiamondIcon />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <motion.div
                   whileHover={{ scale: 1.01 }}
                   transition={{ duration: 0.2 }}
@@ -314,6 +363,15 @@ const RegisterPage: React.FC = () => {
                 </motion.p>
               )}
 
+              {/* Diamond divider before button */}
+              <div className="flex items-center justify-center my-4">
+                <div className="h-px w-16 bg-gradient-to-r from-transparent via-yellow-600/40 to-transparent"></div>
+                <div className="mx-2 transform rotate-45">
+                  <div className="w-2 h-2 bg-yellow-500"></div>
+                </div>
+                <div className="h-px w-16 bg-gradient-to-r from-transparent via-yellow-600/40 to-transparent"></div>
+              </div>
+
               <motion.button
                 type="submit"
                 disabled={loading}
@@ -356,10 +414,10 @@ const RegisterPage: React.FC = () => {
                 )}
               </motion.button>
             </form>
-            <p className="text-neutral-300 text-sm mt-4 text-center">
+            <p className="text-neutral-300 text-sm mt-6 text-center">
               Already have an account?{" "}
               <a href="/auth/login" className="text-yellow-500 hover:underline">
-                Sign In
+                Login
               </a>
             </p>
           </div>

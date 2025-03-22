@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EAB308" /> <!-- yellow-500 -->
+      <stop offset="100%" stop-color="#A16207" /> <!-- yellow-700 -->
+    </linearGradient>
+  </defs>
+  
+  <!-- Main corner decoration -->
+  <path d="M0 0 L100 0 L100 10 L10 10 L10 100 L0 100 Z" fill="#171717" /> <!-- neutral-900 -->
+  
+  <!-- Gold accent line -->
+  <path d="M0 0 L90 0 L90 4 L4 4 L4 90 L0 90 Z" fill="url(#goldGradient)" />
+  
+  <!-- Decorative diamond -->
+  <rect x="40" y="40" width="20" height="20" transform="rotate(45 50 50)" fill="url(#goldGradient)" />
+</svg>

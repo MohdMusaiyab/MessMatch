@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <!-- Dark Background with Gradient -->
+  <!-- <rect width="500" height="500" fill="#171717" /> -->
+  
+  <!-- Background circular gradients similar to your page design -->
+  <circle cx="150" cy="150" r="100" fill="url(#circleGradient1)" opacity="0.2" />
+  <circle cx="350" cy="350" r="120" fill="url(#circleGradient2)" opacity="0.15" />
+  
+  <!-- Lock Body -->
+  <rect x="200" y="220" width="100" height="130" rx="10" ry="10" fill="#262626" stroke="#404040" stroke-width="2" />
+  
+  <!-- Lock Shackle -->
+  <path d="M220 220 L220 180 C220 150 280 150 280 180 L280 220" fill="none" stroke="#404040" stroke-width="8" stroke-linecap="round" />
+  
+  <!-- Key -->
+  <g transform="translate(250, 250) rotate(45)">
+    <motion.g id="keyGroup">
+      <rect x="-90" y="-10" width="140" height="20" rx="5" ry="5" fill="url(#keyGradient)" />
+      <circle cx="-90" cy="0" r="15" fill="url(#keyGradient)" />
+      <rect x="-85" y="-8" width="15" height="16" rx="2" ry="2" fill="#171717" />
+      <rect x="-105" y="-4" width="20" height="8" rx="2" ry="2" fill="#171717" />
+      <rect x="-65" y="-5" width="10" height="10" rx="1" ry="1" fill="#171717" />
+    </motion.g>
+  </g>
+  
+  <!-- Glowing effect around key -->
+  <circle cx="250" cy="250" r="60" fill="url(#glowGradient)" opacity="0.4" />
+  
+  <!-- Digital waves representing security -->
+  <path d="M100 380 Q150 350 200 380 Q250 410 300 380 Q350 350 400 380" fill="none" stroke="url(#waveGradient)" stroke-width="3" opacity="0.7" />
+  <path d="M100 400 Q150 370 200 400 Q250 430 300 400 Q350 370 400 400" fill="none" stroke="url(#waveGradient)" stroke-width="2" opacity="0.5" />
+  <path d="M100 420 Q150 390 200 420 Q250 450 300 420 Q350 390 400 420" fill="none" stroke="url(#waveGradient)" stroke-width="1" opacity="0.3" />
+  
+  <!-- Particles/stars -->
+  <circle cx="150" cy="120" r="2" fill="#EAB308" opacity="0.8" />
+  <circle cx="370" cy="150" r="1.5" fill="#EAB308" opacity="0.7" />
+  <circle cx="420" cy="290" r="2" fill="#EAB308" opacity="0.9" />
+  <circle cx="130" cy="350" r="1" fill="#EAB308" opacity="0.6" />
+  <circle cx="290" cy="100" r="1.5" fill="#EAB308" opacity="0.7" />
+  <circle cx="190" cy="420" r="1" fill="#EAB308" opacity="0.5" />
+  <circle cx="330" cy="450" r="2" fill="#EAB308" opacity="0.8" />
+  
+  <!-- Definitions for gradients -->
+  <defs>
+    <!-- Circular background gradient 1 -->
+    <radialGradient id="circleGradient1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#EAB308" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#EAB308" stop-opacity="0" />
+    </radialGradient>
+    
+    <!-- Circular background gradient 2 -->
+    <radialGradient id="circleGradient2" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#EAB308" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#EAB308" stop-opacity="0" />
+    </radialGradient>
+    
+    <!-- Key gradient -->
+    <linearGradient id="keyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#EAB308" />
+    </linearGradient>
+    
+    <!-- Glow effect gradient -->
+    <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#EAB308" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#EAB308" stop-opacity="0" />
+    </radialGradient>
+    
+    <!-- Wave gradient -->
+    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#EAB308" />
+      <stop offset="100%" stop-color="#FBBF24" />
+    </linearGradient>
+    
+    <!-- Animation for the key -->
+    
+  </defs>
+</svg>

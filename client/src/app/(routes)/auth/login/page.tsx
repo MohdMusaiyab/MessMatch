@@ -172,7 +172,7 @@ export default function SignIn() {
               </Link>
             </p>
 
-            <p className="text-center">
+            <p className="text-center text-sm">
               <Link
                 href="/auth/forgot-password"
                 className=" text-yellow-500  hover:underline"

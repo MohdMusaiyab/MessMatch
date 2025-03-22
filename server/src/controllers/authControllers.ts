@@ -32,7 +32,7 @@ export const registerController = async (
     if (user) {
       return res
         .status(400)
-        .json({ message: "User already exists", success: false });
+        .json({ message: "Email already exists", success: false });
     }
 
     // Hash the password and security answer

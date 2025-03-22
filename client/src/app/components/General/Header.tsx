@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import { Diamond, Menu, X, ChevronDown, LogOut } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import logo from "../../../../public/picsvg_download.svg";
 import Image from "next/image";
 // Component Definition
@@ -141,6 +141,13 @@ const Header: React.FC = () => {
                 >
                   Explore
                 </Link>
+                <Link
+                  href="/dashboard"
+                  className="block text-lg text-neutral-300 hover:text-yellow-500 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
 
                 {session ? (
                   <>
@@ -151,13 +158,7 @@ const Header: React.FC = () => {
                     >
                       Profile
                     </Link>
-                    <Link
-                      href="/dashboard"
-                      className="block text-lg text-neutral-300 hover:text-yellow-500 transition-colors"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
+
                     <button
                       onClick={() => {
                         signOut();
