@@ -9,7 +9,7 @@ export const updateUserController = async (
   res: Response
 ): Promise<any> => {
   try {
-    const userId = req.userId; // Extract userId from the request
+    const userId = req.userId; 
     const userRole = req.role; // Extract role from the request
     const {
       name,

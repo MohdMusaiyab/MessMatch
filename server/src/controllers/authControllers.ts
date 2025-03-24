@@ -109,7 +109,7 @@ export const loginController = async (
     if (!isPasswordValid) {
       return res
         .status(401)
-        .json({ error: "Invalid credentials", success: false });
+        .json({ message: "Invalid credentials", success: false });
     }
     const { password: _, ...userWithoutPassword } = user; // Exclude password from the response
     return res.status(200).json({

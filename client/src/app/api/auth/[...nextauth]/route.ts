@@ -40,11 +40,16 @@ const handler = NextAuth({
             role: user.role,
           };
         } catch (error) {
-          console.error(
-            "Authentication error:",
-            error?.response?.data || error?.message
-          );
-          throw new Error(error?.response?.data?.message || "Login failed");
+          if (axios.isAxiosError(error) && error.response) {
+            console.error(
+              "Authentication error:",
+              error.response.data || error.message
+            );
+            throw new Error(error.response.data?.message || "Login failed");
+          } else {
+            console.error("Authentication error:", error);
+            throw new Error("Login failed");
+          }
         }
       },
     }),

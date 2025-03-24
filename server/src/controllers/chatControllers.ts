@@ -182,7 +182,13 @@ export const sendMessageController = async (
         content,
       },
       include: {
-        sender: true, // Include sender details
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        }, // Include sender details
       },
     });
 

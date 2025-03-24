@@ -4,13 +4,14 @@ import { CreateMenuSchema, MenuSchema } from "../schemas/schemas";
 import { ZodError } from "zod";
 import { Prisma, State } from "@prisma/client";
 import { ServiceType } from "@prisma/client";
+//For Creating a Menu
 export const createMenuController = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   const userId = req.userId;
   if (!userId) {
-    return res.status(401).json({ message: "Unauthorized", success: false });
+    return res.status(401).json({ message: "Please Login", success: false });
   }
   try {
     //Parse the request body
@@ -76,7 +77,7 @@ export const getMyMenusController = async (
       .json({ message: "Something Went Wrong", success: false });
   }
 };
-// =================+For Getting Others Menu==================
+// =================+For Getting Single Menu of Others==================
 export const getOthersSingleMenuController = async (
   req: Request,
   res: Response
@@ -118,7 +119,7 @@ export const getOthersSingleMenuController = async (
                 email: true,
                 contactNumber: true,
                 address: true,
-                state:true,
+                state: true,
               },
             },
           },
@@ -153,6 +154,12 @@ export const updateMenuController = async (
 ): Promise<any> => {
   const menuId = req.params.id;
   const userId = req.userId;
+  if (!menuId) {
+    return res.status(400).json({
+      message: "Menu ID is required",
+      success: false,
+    });
+  }
   try {
     const updatedMenuData = MenuSchema.omit({ contractorId: true })
       .partial()
@@ -554,5 +561,3 @@ export const getLatestMenusController = async (
     });
   }
 };
-
-

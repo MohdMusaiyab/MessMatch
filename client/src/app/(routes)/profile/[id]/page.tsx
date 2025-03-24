@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -40,7 +40,6 @@ interface User {
 }
 
 const UserProfilePage = () => {
-  const router = useRouter();
   const { id } = useParams();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -63,8 +62,24 @@ const UserProfilePage = () => {
             );
           }
         } catch (err) {
-          console.error(err);
-          setError("An error occurred while fetching user information.");
+          if (axios.isAxiosError(err)) {
+            // Handle Axios-specific errors
+            if (err.response) {
+              // Server responded with an error (e.g., 4xx or 5xx)
+              setError(
+                err.response.data.message || "An error occurred while fetching user information."
+              );
+            } else if (err.request) {
+              // No response received (e.g., network error)
+              setError("Network error. Please check your internet connection.");
+            } else {
+              // Other Axios errors (e.g., configuration issues)
+              setError("An unexpected error occurred. Please try again later.");
+            }
+          } else {
+            // Handle non-Axios errors
+            setError("An unexpected error occurred. Please try again later.");
+          }
         } finally {
           setLoading(false);
         }

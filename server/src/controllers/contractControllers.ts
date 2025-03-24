@@ -85,6 +85,12 @@ export const createContractController = async (
   const { auctionId } = req.params; // Get auctionId from URL params
   const { terms } = req.body; // Get terms from request body
   const loggedInUserId = req.userId; // Get logged-in user ID from the middleware
+  if (!loggedInUserId) {
+    return res.status(400).json({
+      success: false,
+      message: "Please Login !",
+    });
+  }
 
   try {
     // Step 1: Fetch the auction details

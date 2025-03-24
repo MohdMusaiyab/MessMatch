@@ -198,6 +198,19 @@ export const updateAuctionController = async (
         success: false,
       });
     }
+    //Also Cannot Update Auction When Contract Exists
+    const existingContract = await prisma.contract.findMany({
+      where: {
+        auctionId: id,
+      },
+    });
+    if (existingContract.length > 0) {
+      return res.status(400).json({
+        message:
+          "Cannot Update this Auction as Contract Exists for this Auction",
+        success: false,
+      });
+    }
     //Only Update the fileds that are not Same
     if (req.body.title !== auction.title) {
       auction.title = req.body.title;
@@ -245,7 +258,7 @@ export const getMySingleAuctionController = async (
     const { id } = req.params;
     if (!id) {
       return res.status(400).json({
-        message: "Please Provide an Id",
+        message: "Please Provide an Auction Id",
         success: false,
       });
     }
@@ -340,7 +353,7 @@ export const getOthersSingleAuctionController = async (
 
   if (!id) {
     return res.status(400).json({
-      message: "Please Provide an Id",
+      message: "Please Provide an Auction Id",
       success: false,
     });
   }
@@ -578,11 +591,22 @@ export const updateYourBidController = async (
     }
     if (existingBid.auction.isOpen === false) {
       return res.status(400).json({
-        message: "Auction is Closed",
+        message: "Cannot Update Bid! Auction is Closed",
         success: false,
       });
     }
-
+    //Also Check if Contract Does not Exist for this Auction
+    const isExistingContract = await prisma.contract.findUnique({
+      where: {
+        auctionId: id,
+      },
+    });
+    if (isExistingContract) {
+      return res.status(400).json({
+        message: "Cannot Update this Bid as a Contract Exists for this Auction",
+        success: false,
+      });
+    }
     // Update the bid with the new amount
     const updatedBid = await prisma.bid.update({
       where: {
@@ -608,6 +632,7 @@ export const updateYourBidController = async (
 };
 
 // ===================For Deleting Your Own Bid Controller=============
+//Remeber to Delete the Contract if Any, Winner if Any, and also winner Id and other things
 
 export const deleteYourBidController = async (
   req: Request,
@@ -992,12 +1017,13 @@ export const removeWinnerController = async (
         success: false,
       });
     }
+    //Also Find the Contract Associated with this Auction
     const contract = await prisma.contract.findUnique({
       where: {
         auctionId: auctionId,
       },
     });
-    console.log("Contract", contract);
+
     if (contract) {
       // If a contract exists, delete it
       await prisma.contract.delete({

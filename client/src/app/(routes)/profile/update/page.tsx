@@ -15,10 +15,10 @@ enum ServiceType {
   OTHER = "OTHER",
 }
 
-interface ContractorFields {
-  numberOfPeople?: number;
-  services?: string[];
-}
+// interface ContractorFields {
+//   numberOfPeople?: number;
+//   services?: string[];
+// }
 
 const UpdateUserInformation: React.FC = () => {
   const [formData, setFormData] = useState({

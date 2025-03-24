@@ -72,7 +72,13 @@ const ProfilePage = () => {
 
     fetchUserProfile();
   }, [session]);
-
+  if (errorUser) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
+        <div className="text-red-500 text-xl">{errorUser}</div>
+      </div>
+    );
+  }
   if (loadingUser) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
@@ -107,7 +113,7 @@ const ProfilePage = () => {
           animate={{ y: 0 }}
           className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent"
         >
-          Profile
+          Your Profile
         </motion.h1>
 
         <motion.div
@@ -116,7 +122,7 @@ const ProfilePage = () => {
           className="backdrop-blur-md bg-neutral-900/50 rounded-xl p-6 border border-yellow-900/20 shadow-xl mb-8"
         >
           <h2 className="text-2xl font-semibold text-neutral-300 mb-6">
-            User Information
+            Your Information
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="col-span-1">
@@ -154,7 +160,7 @@ const ProfilePage = () => {
             className="backdrop-blur-md bg-neutral-900/50 rounded-xl p-6 border border-yellow-900/20 shadow-xl mb-8"
           >
             <h2 className="text-2xl font-semibold text-neutral-300 mb-6">
-              Contractor Details
+              Other Details
             </h2>
             <InfoItem
               label="Team Size"
@@ -199,9 +205,7 @@ const ProfilePage = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-neutral-400">
-                No menus found for this contractor.
-              </div>
+              <div className="text-neutral-400">No menus found for You.</div>
             )}
           </motion.div>
         )}
@@ -241,7 +245,7 @@ const ProfilePage = () => {
               </div>
             ) : (
               <div className="text-neutral-400">
-                No auctions created by this user.
+                No auctions created by You.
               </div>
             )}
           </motion.div>
