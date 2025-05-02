@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, Utensils } from "lucide-react";
 
 const CreateMenuPage: React.FC = () => {
-  const { data: session } = useSession();
   const [name, setName] = useState("");
   const [items, setItems] = useState<string[]>([""]);
   const [pricePerHead, setPricePerHead] = useState<number | string>("");
@@ -50,9 +49,14 @@ const CreateMenuPage: React.FC = () => {
       } else {
         alert("Failed to create menu.");
       }
-    } catch (error: any) {
-      console.error("Error creating menu:", error.response?.data || error);
-      alert(error.response?.data?.message || "Something went wrong.");
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+      console.error("Error creating menu:", error.response.data);
+      alert(error.response.data.message || "Something went wrong.");
+      } else {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred.");
+      }
     }
   };
 
@@ -75,7 +79,9 @@ const CreateMenuPage: React.FC = () => {
           className="space-y-6 bg-neutral-900/50 backdrop-blur border border-yellow-900/20 rounded-lg p-6 shadow-lg"
         >
           <div>
-            <label className="block text-neutral-200 font-medium mb-2">Menu Name</label>
+            <label className="block text-neutral-200 font-medium mb-2">
+              Menu Name
+            </label>
             <input
               type="text"
               value={name}
@@ -86,7 +92,9 @@ const CreateMenuPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-neutral-200 font-medium mb-2">Menu Items</label>
+            <label className="block text-neutral-200 font-medium mb-2">
+              Menu Items
+            </label>
             <AnimatePresence>
               {items.map((item, index) => (
                 <motion.div
@@ -128,7 +136,9 @@ const CreateMenuPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-neutral-200 font-medium mb-2">Price Per Head</label>
+            <label className="block text-neutral-200 font-medium mb-2">
+              Price Per Head
+            </label>
             <input
               type="number"
               value={pricePerHead}
@@ -139,10 +149,14 @@ const CreateMenuPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-neutral-200 font-medium mb-2">Menu Type</label>
+            <label className="block text-neutral-200 font-medium mb-2">
+              Menu Type
+            </label>
             <select
               value={type}
-              onChange={(e) => setType(e.target.value as "VEG" | "NON_VEG" | "BOTH")}
+              onChange={(e) =>
+                setType(e.target.value as "VEG" | "NON_VEG" | "BOTH")
+              }
               className="w-full bg-neutral-800 border border-yellow-900/20 rounded-md px-4 py-2 text-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 transition-all"
               required
             >

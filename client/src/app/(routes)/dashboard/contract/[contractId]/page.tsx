@@ -126,7 +126,11 @@ const ContractDetailsPage = () => {
         });
       }
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data?.message) {
+      setError(error.response.data.message);
+      } else {
       setError("Failed to update contract status. Please try again later.");
+      }
     } finally {
       setIsUpdating(false);
     }

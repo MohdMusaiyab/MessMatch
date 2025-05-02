@@ -52,7 +52,7 @@ const Hero = () => {
 
           <p className="text-lg md:text-xl text-neutral-300 mb-8 leading-relaxed">
             Bridging the Gap Between Institutions and Quality Food Providers.
-            Together, let's elevate dining experiences and foster lasting
+            Together, let&#39;s elevate dining experiences and foster lasting
             partnerships!
           </p>
 

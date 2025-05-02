@@ -21,7 +21,7 @@ const Page = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMenus = async () => {
+  const fetchMenus = React.useCallback(async () => {
     if (session?.user) {
       setLoading(true);
       try {
@@ -30,13 +30,13 @@ const Page = () => {
           { withCredentials: true }
         );
         setMenus(response.data.data);
-      } catch (error) {
-        setError("Error fetching menus");
+      } catch (error: any) {
+        setError(error.response?.data?.message || "Error fetching menus");
       } finally {
         setLoading(false);
       }
     }
-  };
+  }, [session]);
 
   const deleteMenu = async (id: string) => {
     const confirmDelete = confirm(
@@ -51,8 +51,8 @@ const Page = () => {
       );
       setMenus((prevMenus) => prevMenus.filter((menu) => menu.id !== id));
       alert("Menu deleted successfully!");
-    } catch (error) {
-      alert("Failed to delete menu. Please try again.");
+    } catch (error: any) {
+      alert(`Failed to delete menu. ${error.response?.data?.message || "Please try again."}`);
     }
   };
 
@@ -60,7 +60,7 @@ const Page = () => {
     if (status === "authenticated") {
       fetchMenus();
     }
-  }, [session, status]);
+  }, [fetchMenus, status]);
 
   if (status === "loading") {
     return (

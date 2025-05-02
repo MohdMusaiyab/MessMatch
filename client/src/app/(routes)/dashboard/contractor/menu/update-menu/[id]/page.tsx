@@ -42,8 +42,8 @@ const UpdateMenuPage = () => {
             type: response.data.data.type,
           });
         }
-      } catch (error) {
-        setError("Failed to fetch menu data");
+      } catch (error: any) {
+        setError(error.response?.data?.message || "Failed to fetch menu data");
       } finally {
         setLoading(false);
       }
@@ -78,8 +78,8 @@ const UpdateMenuPage = () => {
       );
       alert("Menu updated successfully!");
       router.push("/dashboard/contractor/menu");
-    } catch (error) {
-      setError("Failed to update menu. Please try again.");
+    } catch (error: any) {
+      setError(error.response?.data?.message || "Failed to update menu. Please try again.");
     }
   };
 
