@@ -44,9 +44,9 @@ const Header: React.FC = () => {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2">
-              <Image src={logo} alt="NexusCatering" width={20} height={10} />
+              <Image src={logo} alt="MessBazaar" width={20} height={10} />
               <span className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 text-transparent bg-clip-text">
-                NexusCatering
+                MessBazaar
               </span>
             </Link>
 
