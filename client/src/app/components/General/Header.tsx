@@ -3,9 +3,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, LogOut } from "lucide-react";
-import logo from "../../../../public/picsvg_download.svg";
+import logo from "../../../../public/logo.png";
 import Image from "next/image";
-// Component Definition
+
 const Header: React.FC = () => {
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
@@ -25,12 +25,7 @@ const Header: React.FC = () => {
 
   // Prevent Body Scrolling
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "unset";
     return () => {
       document.body.style.overflow = "unset";
     };
@@ -42,37 +37,40 @@ const Header: React.FC = () => {
       <div className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 border-b border-yellow-900/20">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-2">
-              <Image src={logo} alt="MessBazaar" width={20} height={10} />
-              <span className="text-xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 text-transparent bg-clip-text">
-                MessBazaar
-              </span>
+            {/* Logo - Fixed Width */}
+            <Link href="/" className="flex-shrink-0 w-32 md:w-40">
+              <Image 
+                src={logo} 
+                alt="MessBazaar" 
+                width={160}  // Reduced from 250
+                height={64}   // Reduced proportionally
+                className="object-contain w-full h-auto"
+                priority
+              />
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-6">
+            {/* Desktop Navigation - Now has more space */}
+            <nav className="hidden md:flex items-center space-x-6 flex-grow justify-center ml-4">
               <Link
                 href="/explore"
-                className="text-neutral-300 hover:text-yellow-500 transition-colors"
+                className="text-neutral-300 hover:text-yellow-500 transition-colors px-3 py-2"
               >
                 Explore
               </Link>
               <Link
                 href="/dashboard"
-                className="text-neutral-300 hover:text-yellow-500 transition-colors"
+                className="text-neutral-300 hover:text-yellow-500 transition-colors px-3 py-2"
               >
                 Dashboard
               </Link>
             </nav>
 
             {/* Right Section */}
-            <div className="flex items-center space-x-4">
-              {/* User Menu */}
+            <div className="flex items-center space-x-4 ml-auto">
               {session ? (
                 <div className="relative group hidden md:block">
                   <button className="flex items-center space-x-2 px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg hover:border-yellow-500/50 transition-colors">
-                    <span className="text-neutral-200">
+                    <span className="text-neutral-200 truncate max-w-[120px]">
                       {session.user?.name || "User"}
                     </span>
                     <ChevronDown className="h-4 w-4 text-neutral-400 group-hover:text-yellow-500 transition-colors" />
@@ -119,7 +117,7 @@ const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu (unchanged) */}
       {isMobileMenuOpen && (
         <div className="fixed inset-x-0 top-16 z-50 md:hidden">
           <div className="bg-neutral-950/95 border-b border-yellow-900/20 backdrop-blur-lg">
@@ -132,7 +130,6 @@ const Header: React.FC = () => {
                   <X className="h-6 w-6" />
                 </button>
               </div>
-              {/* Navigation Links */}
               <nav className="space-y-4">
                 <Link
                   href="/explore"
@@ -148,7 +145,6 @@ const Header: React.FC = () => {
                 >
                   Dashboard
                 </Link>
-
                 {session ? (
                   <>
                     <Link
@@ -158,7 +154,6 @@ const Header: React.FC = () => {
                     >
                       Profile
                     </Link>
-
                     <button
                       onClick={() => {
                         signOut();

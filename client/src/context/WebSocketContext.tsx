@@ -27,12 +27,12 @@ export const WebSocketProvider = ({
     console.log("Initializing WebSocket connection...");
 
     // Initialize the WebSocket connection
-    // const socketInstance = io("http://localhost:4000", {
-    //   withCredentials: true,
-    // });
-    const socketInstance = io("https://messmatchbackend.onrender.com", {
+    const socketInstance = io("http://localhost:4000", {
       withCredentials: true,
     });
+    // const socketInstance = io("https://messmatchbackend.onrender.com", {
+    //   withCredentials: true,  
+    // });
 
     // Debugging: Log connection events
     socketInstance.on("connect", () => {

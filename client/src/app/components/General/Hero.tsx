@@ -11,18 +11,18 @@ const Hero = () => {
       icon: Shield,
       title: "Dynamic Auction System",
       description:
-        "Empower your institution to create competitive auctions where mess contractors can bid for your business Get the best value and quality by choosing from a range of tailored proposals!",
+        "Empower institutions to host competitive bidding for mess contracts. Contractors compete to offer the best value, ensuring quality dining at optimal prices.",
     },
     {
       icon: Star,
       title: "Showcase Menus",
       description:
-        "Explore a diverse selection of mess contractors showcasing their menus and portfolios Make informed decisions by reviewing offerings that cater to your institution's unique dining needs!",
+        "Mess operators display their culinary offerings with full transparency. Institutions discover diverse menus tailored to their students' needs.",
     },
     {
       icon: Award,
-      title: "Connect Directly",
-      description: "Facilitate seamless communication with our direct chat feature.Engage with contractors in real-time to discuss requirements, negotiate terms, and build strong partnerships!",
+      title: "Direct Partnership Hub",
+      description: "Secure chat enables real-time negotiations between institutions and contractors, streamlining agreements and long-term collaborations.",
     },
   ];
 
@@ -46,14 +46,14 @@ const Hero = () => {
 
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
             <span className="bg-gradient-to-r from-yellow-500 to-yellow-200 text-transparent bg-clip-text">
-              Revolutionize Dining
+              The Marketplace for 
             </span>
+            <span className="block text-white">Campus Dining</span>
           </h1>
 
           <p className="text-lg md:text-xl text-neutral-300 mb-8 leading-relaxed">
-            Bridging the Gap Between Institutions and Quality Food Providers.
-            Together, let&#39;s elevate dining experiences and foster lasting
-            partnerships!
+            Where institutions discover quality mess partners, and contractors 
+            compete for opportunities through transparent auctions and direct collaboration.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-4 mb-12">
@@ -68,7 +68,7 @@ const Hero = () => {
               href="#about"
               className="px-8 py-4 border border-yellow-700/50 hover:border-yellow-600 rounded-lg text-yellow-500 hover:text-yellow-400 font-semibold transition-colors"
             >
-              Learn More
+              How It Works
             </Link>
           </div>
         </div>

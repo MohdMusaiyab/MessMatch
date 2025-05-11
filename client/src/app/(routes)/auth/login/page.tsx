@@ -4,7 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import {  Mail, Lock, ChevronRight, Diamond } from "lucide-react";
+import { Mail, Lock, ChevronRight, Diamond } from "lucide-react";
 import Link from "next/link";
 
 export default function SignIn() {
@@ -18,7 +18,8 @@ export default function SignIn() {
 
   useEffect(() => {
     if (session) {
-      router.push("/");
+      // Redirect to dashboard instead of home
+      router.push("/dashboard");
     }
   }, [session, router]);
 
