@@ -19,11 +19,12 @@ dotenv.config();
 const prisma = new PrismaClient();
 const app: Application = express();
 const server = http.createServer(app); // Create an HTTP server
-
+``;
 // Configure CORS for Express
 const corsOptions = {
-  origin: "http://localhost:3000", // Allow requests only from this origin
-  credentials: true, // Allow cookies and authorization headers
+  origin: ["http://localhost:3000"],
+  credentials: true,
+  exposedHeaders: ["set-cookie"],
 };
 app.use(cors(corsOptions));
 

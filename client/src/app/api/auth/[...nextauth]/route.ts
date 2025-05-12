@@ -54,6 +54,21 @@ const handler = NextAuth({
       },
     }),
   ],
+  cookies: {
+    sessionToken: {
+      name: process.env.NODE_ENV === 'production' 
+        ? '__Secure-next-auth.session-token' 
+        : 'next-auth.session-token',
+      options: {
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        domain: process.env.NODE_ENV === 'production' 
+          ? '.onrender.com' 
+          : undefined
+      }
+    }
+  },
   pages: {
     signIn: "/auth/login", // Optional: Custom sign-in page
   },
