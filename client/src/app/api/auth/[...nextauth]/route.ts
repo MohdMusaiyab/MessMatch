@@ -61,7 +61,7 @@ const handler = NextAuth({
         : 'next-auth.session-token',
       options: {
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        sameSite: 'none',
         path: '/',
         domain: process.env.NODE_ENV === 'production' 
           ? '.onrender.com' 
