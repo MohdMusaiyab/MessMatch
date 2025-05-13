@@ -26,13 +26,14 @@ const handler = NextAuth({
           );
 
           const { user, success } = response.data;
-
+          ``;
           // Ensure authentication succeeded
           if (!success || !user) {
             throw new Error(response.data.message || "Login failed");
           }
 
           // Return the user object for the JWT token
+
           return {
             id: user.id,
             name: user.name,
@@ -56,18 +57,17 @@ const handler = NextAuth({
   ],
   cookies: {
     sessionToken: {
-      name: process.env.NODE_ENV === 'production' 
-        ? '__Secure-next-auth.session-token' 
-        : 'next-auth.session-token',
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.session-token"
+          : "next-auth.session-token",
       options: {
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
-        path: '/',
-        domain: process.env.NODE_ENV === 'production' 
-          ? '.onrender.com' 
-          : undefined
-      }
-    }
+        httpOnly: true,
+        sameSite: "none",
+        path: "/",
+        secure: true, // Must be true with sameSite=none
+      },
+    },
   },
   pages: {
     signIn: "/auth/login", // Optional: Custom sign-in page

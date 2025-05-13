@@ -23,10 +23,13 @@ const server = http.createServer(app); // Create an HTTP server
 // Configure CORS for Express
 // In your backend (index.ts)
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: [
+    "http://localhost:3000",
+    "https://your-production-frontend-domain.com",
+  ],
   credentials: true,
   exposedHeaders: ["set-cookie"],
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"], // Add 'Cookie'
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
 };
 app.use(cors(corsOptions));
 
