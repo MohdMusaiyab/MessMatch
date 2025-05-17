@@ -26,7 +26,6 @@ const handler = NextAuth({
           );
 
           const { user, success } = response.data;
-          ``;
           // Ensure authentication succeeded
           if (!success || !user) {
             throw new Error(response.data.message || "Login failed");
@@ -65,18 +64,19 @@ const handler = NextAuth({
         httpOnly: true,
         sameSite: "none",
         path: "/",
-        secure: true, // Must be true with sameSite=none
+        secure: true, 
+        domain: process.env.NEXT_PUBLIC_BACKEND_URL, 
       },
     },
   },
   pages: {
-    signIn: "/auth/login", // Optional: Custom sign-in page
+    signIn: "/auth/login", 
   },
   session: {
-    strategy: "jwt", // Use JWT for session management
+    strategy: "jwt", 
   },
   callbacks: {
-    // Add user information to the token
+    
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -87,7 +87,6 @@ const handler = NextAuth({
       return token;
     },
 
-    // Pass the token to the session
     async session({ session, token }) {
       if (token) {
         session.user = {
@@ -100,7 +99,7 @@ const handler = NextAuth({
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET, // Ensure this is set in your .env file
+  secret: process.env.NEXTAUTH_SECRET, 
 });
 
 export { handler as GET, handler as POST };

@@ -25,18 +25,20 @@ const server = http.createServer(app); // Create an HTTP server
 const corsOptions = {
   origin: [
     "http://localhost:3000",
-    "https://your-production-frontend-domain.com",
+    process.env.FRONTEND_URL || "http://localhost:3000",
   ],
   credentials: true,
   exposedHeaders: ["set-cookie"],
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Specify allowed HTTP methods
 };
+app.set("trust proxy", 1);
 app.use(cors(corsOptions));
 
 // Initialize WebSocket server
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000", // Replace with your frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials
   },
