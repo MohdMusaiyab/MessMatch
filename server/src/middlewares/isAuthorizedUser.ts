@@ -9,7 +9,7 @@ export const isAuthorizedUser = async (
   try {
     const loggedInUserId = req.userId;
     const auctionId = req.params.auctionId;
-    const contractId = req.params.contractId; // Assuming contractId is in params
+    const contractId = req.params.contractId; 
 
     if (!auctionId && !contractId) {
       return res.status(400).json({
