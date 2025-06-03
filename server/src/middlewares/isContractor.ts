@@ -12,17 +12,19 @@ export const isContractor = async (
       where: { userId: userId },
     });
     if (!contractor) {
-      return res.status(403).json({
+       res.status(403).json({
         error: "You are not a contractor",
         success: false,
       });
+      return;
     }
     req.userId = contractor.id;
     next();
   } catch (error) {
     console.error("Error in isContractor middleware:", error);
-    return res
+     res
       .status(500)
       .json({ error: "Internal Server Error", success: false });
+      return;
   }
 };

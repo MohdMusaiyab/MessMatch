@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../utils/prisma";
-export const getMyChatsController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const getMyChatsController = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
     const chats = await prisma.chat.findMany({
@@ -43,25 +40,24 @@ export const getMyChatsController = async (
       };
     });
 
-    return res.status(200).send({
+    res.status(200).send({
       success: true,
       message: "Chats fetched successfully",
       data: formattedChats,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res.status(500).send({
+    res.status(500).send({
       success: false,
       message: "Failed to fetch chats",
     });
+    return;
   }
 };
 
 //For Getting a Particular Chat
-export const getASingleChatController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const getASingleChatController = async (req: Request, res: Response) => {
   const { chatId } = req.params;
   try {
     const messages = await prisma.message.findMany({
@@ -86,25 +82,24 @@ export const getASingleChatController = async (
       },
     }));
 
-    return res.status(200).send({
+    res.status(200).send({
       success: true,
       message: "Messages fetched successfully",
       data: formattedMessages,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res.status(500).send({
+    res.status(500).send({
       success: false,
       message: "Failed to fetch chats",
     });
+    return;
   }
 };
 
 //For Creating a Chat
-export const createChatController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const createChatController = async (req: Request, res: Response) => {
   const { user1Id, user2Id } = req.body;
   try {
     // Check if a chat already exists between these users
@@ -116,14 +111,14 @@ export const createChatController = async (
         ],
       },
     });
-    console.log(existingChat);  
 
     if (existingChat) {
-      return res.status(200).json({
+      res.status(200).json({
         success: true,
         message: "Chat already exists",
         data: existingChat,
       }); // Return the existing chat
+      return;
     }
 
     // Create a new chat
@@ -134,24 +129,21 @@ export const createChatController = async (
       },
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "Chat created successfully",
       data: newChat,
     });
+    return;
   } catch (error) {
     console.error("Error creating chat:", error);
-    return res
-      .status(500)
-      .json({ message: "Failed to create chat", success: false });
+    res.status(500).json({ message: "Failed to create chat", success: false });
+    return;
   }
 };
 
 //For Sending a message
-export const sendMessageController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const sendMessageController = async (req: Request, res: Response) => {
   const { chatId, senderId, content } = req.body;
 
   // Debugging: Log incoming request data
@@ -165,14 +157,12 @@ export const sendMessageController = async (
     // Validate input
     if (!chatId || !senderId || !content) {
       console.error("Validation failed: Missing required fields");
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "chatId, senderId, and content are required",
       });
+      return;
     }
-
-    // Debugging: Log before creating the message
-    console.log("Creating message in the database...");
 
     // Create the message
     const message = await prisma.message.create({
@@ -192,9 +182,6 @@ export const sendMessageController = async (
       },
     });
 
-    // Debugging: Log the created message
-    console.log("Message created successfully:", message);
-
     // Emit a WebSocket event to all clients in the chat room
     if (req.io) {
       console.log("Emitting 'receiveMessage' event to chat room:", chatId);
@@ -203,20 +190,19 @@ export const sendMessageController = async (
       console.error("WebSocket instance (req.io) is not available");
     }
 
-    // Debugging: Log successful response
-    console.log("Message sent and WebSocket event emitted successfully");
-
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "Message sent successfully",
       data: message,
     });
+    return;
   } catch (error) {
     console.error("Error sending message:", error);
 
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Failed to send message",
     });
+    return;
   }
 };

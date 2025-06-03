@@ -4,12 +4,9 @@ import { hashPassword } from "../utils/auth";
 import prisma from "../utils/prisma";
 import { Prisma, State } from "@prisma/client";
 
-export const updateUserController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const updateUserController = async (req: Request, res: Response) => {
   try {
-    const userId = req.userId; 
+    const userId = req.userId;
     const userRole = req.role; // Extract role from the request
     const {
       name,
@@ -30,17 +27,18 @@ export const updateUserController = async (
     });
 
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         message: "User not found",
         success: false,
       });
+      return;
     }
 
     // Prepare the update object for the User table
     const updateData: any = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
-    if(state) updateData.state = state;
+    if (state) updateData.state = state;
     if (address) updateData.address = address;
     if (contactNumber) updateData.contactNumber = contactNumber;
     if (password) updateData.password = await hashPassword(password); // Hashing the password
@@ -54,10 +52,11 @@ export const updateUserController = async (
 
       // Ensure contractor record exists
       if (!user.contractor) {
-        return res.status(400).json({
+        res.status(400).json({
           message: "Contractor record not found for this user",
           success: false,
         });
+        return;
       }
 
       // Update contractor-specific fields
@@ -78,50 +77,52 @@ export const updateUserController = async (
       data: updateData,
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "User updated successfully",
       success: true,
       data: updatedUser,
     });
+    return;
   } catch (error) {
     console.error(error);
 
     // Handle Zod validation errors specifically
     if (error instanceof ZodError) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Validation error",
         success: false,
         errors: error.errors,
       });
+      return;
     }
 
     // Generic error handling
-    return res.status(500).json({
+    res.status(500).json({
       message: "Error in updating user",
       success: false,
     });
+    return;
   }
 };
 // ====================For Getting a Single User Profile====================
-export const getUserController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const getUserController = async (req: Request, res: Response) => {
   const userId = req.userId; // The ID of the currently authenticated user
   if (!userId) {
-    return res.status(401).json({
+    res.status(401).json({
       // Changed to 401 Unauthorized
       message: "Unauthorized access",
       success: false,
     });
+    return;
   }
 
   const { id } = req.params; // The ID of the user being requested
   if (!id) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "User ID not provided",
       success: false,
     });
+    return;
   }
 
   try {
@@ -133,7 +134,7 @@ export const getUserController = async (
         name: true,
         email: true,
         address: true,
-        state:true,
+        state: true,
         contactNumber: true,
         role: true,
         contractor: {
@@ -164,10 +165,11 @@ export const getUserController = async (
     });
 
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         message: "User not found",
         success: false,
       });
+      return;
     }
 
     // Prepare response data
@@ -176,17 +178,19 @@ export const getUserController = async (
       contractorDetails: user.role === "CONTRACTOR" ? user.contractor : null, // Add contractor details if applicable
     };
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "User found",
       success: true,
       data: responseData,
     });
+    return;
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Error in getting user",
       success: false,
     });
+    return;
   }
 };
 
@@ -195,14 +199,15 @@ export const getUserController = async (
 export const getYourOwnProfileController = async (
   req: Request,
   res: Response
-): Promise<any> => {
+) => {
   const userId = req.userId;
 
   if (!userId) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "User not found",
       success: false,
     });
+    return;
   }
 
   try {
@@ -244,23 +249,26 @@ export const getYourOwnProfileController = async (
     });
 
     if (!user) {
-      return res.status(404).json({
+      res.status(404).json({
         message: "User not found",
         success: false,
       });
+      return;
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "User found",
       success: true,
       data: user,
     });
+    return;
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Error in getting user",
       success: false,
     });
+    return;
   }
 };
 
@@ -269,7 +277,7 @@ export const getYourOwnProfileController = async (
 export const getAuctionsAndContractorsController = async (
   req: Request,
   res: Response
-): Promise<any> => {
+) => {
   try {
     const {
       page = 1,
@@ -429,7 +437,7 @@ export const getAuctionsAndContractorsController = async (
       });
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Auctions and contractors fetched successfully",
       data: {
@@ -443,11 +451,13 @@ export const getAuctionsAndContractorsController = async (
         totalPages: Math.ceil(totalAuctions / parsedLimit),
       },
     });
+    return;
   } catch (error) {
     console.error("Auction and contractor filter error:", error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Error in fetching auctions and contractors",
     });
+    return;
   }
 };

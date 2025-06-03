@@ -4,10 +4,7 @@ import { comparePassword, hashPassword } from "../utils/auth";
 import { ZodError } from "zod";
 import prisma from "../utils/prisma";
 
-export const registerController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const registerController = async (req: Request, res: Response) => {
   try {
     const parsedBody = CreateUserSchema.parse(req.body);
     const {
@@ -19,7 +16,7 @@ export const registerController = async (
       securityAnswer,
       address,
       contactNumber,
-      state
+      state,
     } = parsedBody;
 
     // Check if the user already exists
@@ -30,9 +27,8 @@ export const registerController = async (
     });
 
     if (user) {
-      return res
-        .status(400)
-        .json({ message: "Email already exists", success: false });
+      res.status(400).json({ message: "Email already exists", success: false });
+      return;
     }
 
     // Hash the password and security answer
@@ -50,7 +46,7 @@ export const registerController = async (
         securityAnswer: hashedSecurityAnswer,
         address,
         contactNumber,
-        state
+        state,
       },
     });
     if (role === "CONTRACTOR") {
@@ -61,13 +57,14 @@ export const registerController = async (
       });
     }
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "User created successfully",
       success: true,
     });
+    return;
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Validation Error",
         errors: error.errors.map((e) => ({
           field: e.path.join("."),
@@ -75,20 +72,19 @@ export const registerController = async (
         })),
         success: false,
       });
+      return;
     }
 
     console.error("Error in creating user:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Error in creating User",
       success: false,
     });
+    return;
   }
 };
 
-export const loginController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const loginController = async (req: Request, res: Response) => {
   try {
     //Parsing the body according to the schema
 
@@ -101,25 +97,24 @@ export const loginController = async (
     });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ message: "User does not exists", success: false });
+      res.status(400).json({ message: "User does not exists", success: false });
+      return;
     }
     const isPasswordValid = await comparePassword(password, user.password);
     if (!isPasswordValid) {
-      return res
-        .status(401)
-        .json({ message: "Invalid credentials", success: false });
+      res.status(401).json({ message: "Invalid credentials", success: false });
+      return;
     }
     const { password: _, ...userWithoutPassword } = user; // Exclude password from the response
-    return res.status(200).json({
+    res.status(200).json({
       message: "Login successful",
       user: userWithoutPassword,
       success: true,
     });
+    return;
   } catch (error) {
     if (error instanceof ZodError) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Validation Error",
         errors: error.errors.map((e) => ({
           field: e.path.join("."),
@@ -127,19 +122,19 @@ export const loginController = async (
         })),
         success: false,
       });
+      return;
     }
 
     console.error("Error in login:", error);
-    return res
+    res
       .status(500)
       .json({ message: "Something went wrong! Try again.", success: false });
+    return;
   }
 };
 
-export const forgotPasswordController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+//For the forgot password functionality
+export const forgotPasswordController = async (req: Request, res: Response) => {
   try {
     const { email, securityQuestion, securityAnswer, newPassword } = req.body;
 
@@ -150,15 +145,15 @@ export const forgotPasswordController = async (
     });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ message: "User does not exists", success: false });
+      res.status(400).json({ message: "User does not exists", success: false });
+      return;
     }
 
     if (user.securityQuestion !== securityQuestion) {
-      return res
+      res
         .status(400)
         .json({ message: "Invalid security question", success: false });
+      return;
     }
 
     const isAnswerValid = await comparePassword(
@@ -167,9 +162,10 @@ export const forgotPasswordController = async (
     );
 
     if (!isAnswerValid) {
-      return res
+      res
         .status(400)
         .json({ message: "Invalid security answer", success: false });
+      return;
     }
 
     const hashedPassword = await hashPassword(newPassword);
@@ -183,13 +179,15 @@ export const forgotPasswordController = async (
       },
     });
 
-    return res
+    res
       .status(200)
       .json({ message: "Password updated successfully", success: true });
+    return;
   } catch (error) {
     console.error("Error in forgot password:", error);
-    return res
+    res
       .status(500)
       .json({ message: "Something went wrong! Try again.", success: false });
+    return;
   }
 };

@@ -4,14 +4,15 @@ import prisma from "../utils/prisma";
 export const fetDetailsForCreateContract = async (
   req: Request,
   res: Response
-): Promise<any> => {
+) => {
   try {
     const auctionId = req.params.auctionId;
     if (!auctionId) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Auction ID is required.",
       });
+      return;
     }
 
     // Find auction details
@@ -38,10 +39,11 @@ export const fetDetailsForCreateContract = async (
 
     // Check if auction exists
     if (!auction) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Auction not found.",
       });
+      return;
     }
 
     // Check for existing contracts for this auction
@@ -54,42 +56,41 @@ export const fetDetailsForCreateContract = async (
     // If a non-pending contract exists, return its details
 
     if (existingContract) {
-      return res.status(200).json({
+      res.status(200).json({
         success: true,
         message: "A contract already exists for this auction.",
         data: {
           contract: existingContract,
         },
       });
+      return;
     }
 
     // If no non-pending contract exists, return winner ID and creator ID
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "No existing contracts found. You can create a new contract.",
       winnerId: auction.winnerId,
       creatorId: auction.creatorId,
     });
+    return;
   } catch (error) {
     console.error("Error fetching details for contract creation:", error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
+    res.status(500).json({ message: "Internal Server Error", success: false });
+    return;
   }
 };
 
-export const createContractController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const createContractController = async (req: Request, res: Response) => {
   const { auctionId } = req.params; // Get auctionId from URL params
   const { terms } = req.body; // Get terms from request body
   const loggedInUserId = req.userId; // Get logged-in user ID from the middleware
   if (!loggedInUserId) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: "Please Login !",
     });
+    return;
   }
 
   try {
@@ -104,9 +105,8 @@ export const createContractController = async (
 
     // Check if the auction exists
     if (!auction) {
-      return res
-        .status(404)
-        .json({ message: "Auction not found", success: false });
+      res.status(404).json({ message: "Auction not found", success: false });
+      return;
     }
 
     // // Step 2: Ensure the logged-in user is the auction creator (institution)
@@ -119,10 +119,11 @@ export const createContractController = async (
 
     // Step 3: Ensure the auction has a winner
     if (!auction.winnerId) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "This auction does not have a winner yet",
         success: false,
       });
+      return;
     }
 
     // Step 4: Check if a contract already exists for this auction
@@ -131,10 +132,11 @@ export const createContractController = async (
     });
 
     if (existingContract) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "A contract already exists for this auction",
         success: false,
       });
+      return;
     }
 
     // Step 5: Create the contract
@@ -156,24 +158,24 @@ export const createContractController = async (
       success: true,
       data: newContract,
     });
+    return;
   } catch (error) {
     console.error("Error in createContractController:", error);
-    res.status(500).json({ error: "Internal Server Error", success: false });
+    res.status(500).json({ message: "Internal Server Error", success: false });
+    return;
   }
 };
 
 //For getting the single contract details
-export const getSingleContractDetails = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const getSingleContractDetails = async (req: Request, res: Response) => {
   try {
     const { contractId } = req.params;
     if (!contractId) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Contract ID is required.",
       });
+      return;
     }
     const contract = await prisma.contract.findUnique({
       where: {
@@ -217,34 +219,35 @@ export const getSingleContractDetails = async (
       },
     });
     if (!contract) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Contract not found.",
       });
+      return;
     }
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Contract details found.",
       data: contract,
     });
+    return;
   } catch (error) {
     console.error("Error in getSingleContractDetails:", error);
-    res.status(500).json({ error: "Internal Server Error", success: false });
+    res.status(500).json({ message: "Internal Server Error", success: false });
+    return;
   }
 };
 
 //For toggeling the Status of the contractorAccepted and institutionAccepted
 
-export const toggleStatusController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const toggleStatusController = async (req: Request, res: Response) => {
   const { contractId } = req.params;
   if (!contractId) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: "Contract ID is required.",
     });
+    return;
   }
   const userId = req.userId;
   try {
@@ -266,33 +269,30 @@ export const toggleStatusController = async (
     });
 
     if (!contract) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Contract not found.",
       });
+      return;
     }
     let updatedContract;
     if (userId === contract.institutionId) {
       // Toggle institution acceptance
-      console.log("User id", userId);
-      console.log("Ins id", contract.institutionId);
-
       updatedContract = await prisma.contract.update({
         where: { id: contractId },
         data: { institutionAccepted: !contract.institutionAccepted },
       });
     } else if (userId === contract.contractor.userId) {
-      console.log("User id", userId);
-      console.log("Contractor id", contract.contractor.userId);
       updatedContract = await prisma.contract.update({
         where: { id: contractId },
         data: { contractorAccepted: !contract.contractorAccepted },
       });
     } else {
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         message: "You are not authorized to update this contract.",
       });
+      return;
     }
     if (
       updatedContract.institutionAccepted &&
@@ -304,17 +304,19 @@ export const toggleStatusController = async (
       });
     }
     //When this happens then on /contract/:contractId page , things will be changed ,show option to terminate and no update button then, till then user can have changes
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Contract acceptance status updated.",
       data: updatedContract,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res.status(500).send({
+    res.status(500).send({
       success: false,
       message: "Something went wrong",
     });
+    return;
   }
 };
 
@@ -322,14 +324,15 @@ export const toggleStatusController = async (
 export const getContractStatusController = async (
   req: Request,
   res: Response
-): Promise<any> => {
+) => {
   const { contractId } = req.params;
 
   if (!contractId) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: "Contract ID is required.",
     });
+    return;
   }
 
   try {
@@ -343,22 +346,25 @@ export const getContractStatusController = async (
     });
 
     if (!contractStatus) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Contract not found.",
       });
+      return;
     }
 
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       data: contractStatus,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: "Something went wrong",
     });
+    return;
   }
 };
 
@@ -366,13 +372,14 @@ export const getContractStatusController = async (
 export const terminateContractController = async (
   req: Request,
   res: Response
-): Promise<any> => {
+) => {
   const { contractId } = req.params;
   if (!contractId) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: "Contract ID is required.",
     });
+    return;
   }
   try {
     const contract = await prisma.contract.findUnique({
@@ -394,41 +401,46 @@ export const terminateContractController = async (
       },
     });
     if (!contract) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Contract not found.",
       });
+      return;
     }
     //Return if sttaus is already terminated
     if (contract.status === "TERMINATED") {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Contract is already terminated.",
       });
+      return;
     }
     //Return if status is not accepted
     if (!contract.institutionAccepted || !contract.contractorAccepted) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Contract is not accepted yet.",
       });
+      return;
     }
     //Also if status is not ACCEPTED return saying status is not accepted
     if (contract.status !== "ACCEPTED") {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Contract is not accepted yet.",
       });
+      return;
     }
     //Now we will check for loggedInUserId
     const loggedInUserId = req.userId;
     if (req.role !== "CONTRACTOR") {
       if (loggedInUserId !== contract.institutionId) {
         console.log("Institution Id", loggedInUserId);
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: "You are not authorized to terminate this contract.",
         });
+        return;
       }
     }
 
@@ -436,10 +448,11 @@ export const terminateContractController = async (
     if (req.role === "CONTRACTOR") {
       if (loggedInUserId !== contract.contractor.userId) {
         console.log("Rejectedt Here");
-        return res.status(403).json({
+        res.status(403).json({
           success: false,
           message: "You are not authorized to terminate this contract.",
         });
+        return;
       }
     }
 
@@ -454,32 +467,31 @@ export const terminateContractController = async (
       where: { id: contractId },
       data: { status: "TERMINATED" },
     });
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Contract terminated successfully.",
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res.status(500).send({
+    res.status(500).send({
       success: false,
       message: "Something went wrong",
     });
+    return;
   }
 };
 
 // ============For Getting All Your Active Contracts============
-export const getMyContractsController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
-  console.log("Reaching Here");
+export const getMyContractsController = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
     if (!userId) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "User Id is required.",
       });
+      return;
     }
     const contracts = await prisma.contract.findMany({
       where: {
@@ -499,39 +511,40 @@ export const getMyContractsController = async (
         id: true,
       },
     });
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Contracts Fetched Successfully",
       data: contracts,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res.status(500).send({
+    res.status(500).send({
       success: false,
       message: "Something went wrong",
     });
+    return;
   }
 };
 
 // =============Update Terms Controller============
-export const updateTermsController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const updateTermsController = async (req: Request, res: Response) => {
   try {
     const { contractId } = req.params;
     if (!contractId) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Contract ID is required.",
       });
+      return;
     }
     const { terms } = req.body;
     if (!terms) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Terms are required.",
       });
+      return;
     }
     const contract = await prisma.contract.findUnique({
       where: {
@@ -544,20 +557,22 @@ export const updateTermsController = async (
       },
     });
     if (!contract) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Contract not found.",
       });
+      return;
     }
     if (
       contract.status === "TERMINATED" ||
       contract.status === "ACCEPTED" ||
       contract.status === "REJECTED"
     ) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: `Contract is already ${contract.status.toLowerCase()}.`,
       });
+      return;
     }
     //Now Update the Contract With the New Terms and also Reset both Acceptance to False
     await prisma.contract.update({
@@ -568,18 +583,20 @@ export const updateTermsController = async (
         institutionAccepted: false,
       },
     });
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Contract terms updated successfully.",
       data: {
         terms,
       },
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res.status(500).send({
+    res.status(500).send({
       success: false,
       message: "Something went wrong",
     });
+    return;
   }
 };

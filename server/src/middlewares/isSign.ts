@@ -7,14 +7,13 @@ export const isSign = async (
   next: NextFunction
 ): Promise<any> => {
   try {
-    const cookies = req.cookies;
-    const token = req.cookies['__Secure-next-auth.session-token'] || 
-              req.cookies['next-auth.session-token'];
+    const token =
+      req.cookies["__Secure-next-auth.session-token"] ||
+      req.cookies["next-auth.session-token"];
 
     if (!token) {
-      return res
-        .status(401)
-        .json({ error: "Unauthorized: No session token found" });
+      res.status(401).json({ message: "Unauthorized: No session token found" });
+      return;
     }
 
     const decodedToken = await getToken({
@@ -23,18 +22,19 @@ export const isSign = async (
     });
 
     if (!decodedToken) {
-      return res
-        .status(401)
-        .json({ error: "Unauthorized: Invalid session token" });
+      res.status(401).json({
+        message: "Unauthorized: Invalid session token",
+        success: false,
+      });
+      return;
     }
-    console.log("Decoded Token:");
-   console.log(decodedToken);
     req.userId = decodedToken.id as string;
     req.role = decodedToken.role as string;
-    
+
     next();
   } catch (error) {
     console.error("Error in isSign middleware:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error" });
+    return;
   }
 };

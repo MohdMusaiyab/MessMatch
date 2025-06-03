@@ -19,26 +19,23 @@ dotenv.config();
 const prisma = new PrismaClient();
 const app: Application = express();
 const server = http.createServer(app); // Create an HTTP server
-``;
+
 // Configure CORS for Express
-// In your backend (index.ts)
 const corsOptions = {
   origin: [
-    "http://localhost:3000",
-    process.env.FRONTEND_URL || "http://localhost:3000",
+    !process.env.FRONTEND_URL,
+    "http://localhost:3000", // For local development
   ],
-  credentials: true,
-  exposedHeaders: ["set-cookie"],
+  credentials: true, // Allow cookies and authorization headers
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Specify allowed HTTP methods
+  exposedHeaders: ["Set-Cookie"],
 };
-app.set("trust proxy", 1);
 app.use(cors(corsOptions));
 
 // Initialize WebSocket server
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials
   },

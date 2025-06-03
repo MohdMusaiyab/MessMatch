@@ -2,36 +2,34 @@ import { Request, Response } from "express";
 import prisma from "../utils/prisma";
 
 //For Adding a Review
-export const addReviewController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const addReviewController = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized", success: false });
+      res.status(401).json({ message: "Unauthorized", success: false });
+      return;
     }
     const { profileId } = req.params;
     if (!profileId) {
-      return res
+      res
         .status(400)
         .json({ message: "Profile ID is required", success: false });
+      return;
     }
     const { rating, comment } = req.body;
     if (!rating) {
-      return res
-        .status(400)
-        .json({ message: "Rating is required", success: false });
+      res.status(400).json({ message: "Rating is required", success: false });
+      return;
     }
     if (rating < 1 || rating > 5) {
-      return res
+      res
         .status(400)
         .json({ message: "Rating must be between 1 and 5", success: false });
+      return;
     }
     if (!comment) {
-      return res
-        .status(400)
-        .json({ message: "Comment is required", success: false });
+      res.status(400).json({ message: "Comment is required", success: false });
+      return;
     }
     const contractor = await prisma.messContractor.findFirst({
       where: {
@@ -42,9 +40,8 @@ export const addReviewController = async (
       },
     });
     if (!contractor) {
-      return res
-        .status(400)
-        .json({ message: "Contractor Not Found", success: false });
+      res.status(400).json({ message: "Contractor Not Found", success: false });
+      return;
     }
     //Now we will check if the user has already reviewed the contractor
     const existingReview = await prisma.review.findFirst({
@@ -54,10 +51,11 @@ export const addReviewController = async (
       },
     });
     if (existingReview) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "You have already reviewed this contractor",
         success: false,
       });
+      return;
     }
     //Now we will add the review
     //First find the contractor ID associated with the profile ID
@@ -70,30 +68,28 @@ export const addReviewController = async (
         comment,
       },
     });
-    return res.status(201).json({
+    res.status(201).json({
       message: "Reveiw Added Successfully",
       success: true,
       data: review,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
+    res.status(500).json({ message: "Internal Server Error", success: false });
+    return;
   }
 };
 
 //For Getting all reviews of a Contractor
-export const getAllReviewsController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const getAllReviewsController = async (req: Request, res: Response) => {
   try {
     const { profileId } = req.params;
     if (!profileId) {
-      return res
+      res
         .status(400)
         .json({ message: "Profile ID is required", success: false });
+      return;
     }
     const contractor = await prisma.messContractor.findUnique({
       where: {
@@ -101,9 +97,8 @@ export const getAllReviewsController = async (
       },
     });
     if (!contractor) {
-      return res
-        .status(400)
-        .json({ message: "Contractor Not Found", success: false });
+      res.status(400).json({ message: "Contractor Not Found", success: false });
+      return;
     }
 
     const reviews = await prisma.review.findMany({
@@ -124,30 +119,28 @@ export const getAllReviewsController = async (
         },
       },
     });
-    return res.status(200).json({
+    res.status(200).json({
       message: "Reviews Fetched Successfully",
       success: true,
       data: reviews,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
+    res.status(500).json({ message: "Internal Server Error", success: false });
+    return;
   }
 };
 
 //For Updating Your Own Review
-export const updateReviewController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const updateReviewController = async (req: Request, res: Response) => {
   try {
     const reviewId = req.params.reviewId;
     if (!reviewId) {
-      return res
+      res
         .status(400)
         .json({ message: "Review ID is required", success: false });
+      return;
     }
     //Find the review with reveiwer Id included
     const review = await prisma.review.findFirst({
@@ -157,25 +150,23 @@ export const updateReviewController = async (
       },
     });
     if (!review) {
-      return res
-        .status(400)
-        .json({ message: "Review Not Found", success: false });
+      res.status(400).json({ message: "Review Not Found", success: false });
+      return;
     }
     const { rating, comment } = req.body;
     if (!rating) {
-      return res
-        .status(400)
-        .json({ message: "Rating is required", success: false });
+      res.status(400).json({ message: "Rating is required", success: false });
+      return;
     }
     if (rating < 1 || rating > 5) {
-      return res
+      res
         .status(400)
         .json({ message: "Rating must be between 1 and 5", success: false });
+      return;
     }
     if (!comment) {
-      return res
-        .status(400)
-        .json({ message: "Comment is required", success: false });
+      res.status(400).json({ message: "Comment is required", success: false });
+      return;
     }
     const updatedReview = await prisma.review.update({
       where: {
@@ -186,30 +177,28 @@ export const updateReviewController = async (
         comment,
       },
     });
-    return res.status(200).json({
+    res.status(200).json({
       message: "Review Updated Successfully",
       success: true,
       data: updatedReview,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
+    res.status(500).json({ message: "Internal Server Error", success: false });
+    return;
   }
 };
 
 //////////////For Deleting A reveiw
-export const deleteReviewController = async (
-  req: Request,
-  res: Response
-): Promise<any> => {
+export const deleteReviewController = async (req: Request, res: Response) => {
   try {
     const reviewId = req.params.reviewId;
     if (!reviewId) {
-      return res
+      res
         .status(400)
         .json({ message: "Review ID is required", success: false });
+      return;
     }
     const review = await prisma.review.findFirst({
       where: {
@@ -218,26 +207,26 @@ export const deleteReviewController = async (
       },
     });
     if (!review) {
-      return res
-        .status(400)
-        .json({ message: "Review Not Found", success: false });
+      res.status(400).json({ message: "Review Not Found", success: false });
+      return;
     }
     if (review.reviewerId !== req.userId) {
-      return res.status(401).json({ message: "Unauthorized", success: false });
+      res.status(401).json({ message: "Unauthorized", success: false });
+      return;
     }
     await prisma.review.delete({
       where: {
         id: reviewId,
       },
     });
-    return res.status(200).json({
+    res.status(200).json({
       message: "Review Deleted Successfully",
       success: true,
     });
+    return;
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Internal Server Error", success: false });
+    res.status(500).json({ message: "Internal Server Error", success: false });
+    return;
   }
 };
