@@ -27,10 +27,10 @@ export const WebSocketProvider = ({
     console.log("Initializing WebSocket connection...");
 
     // Initialize the WebSocket connection
-    const socketInstance = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
+    const socketInstance = io(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}`, {
       withCredentials: true,
+      transports: ["websocket"],
     });
-    
 
     // Debugging: Log connection events
     socketInstance.on("connect", () => {

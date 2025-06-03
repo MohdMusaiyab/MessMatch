@@ -13,6 +13,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showGuestModal, setShowGuestModal] = useState(false);
 
   const router = useRouter();
 
@@ -33,6 +34,34 @@ export default function SignIn() {
       setLoading(false);
       return;
     }
+
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    setLoading(false);
+
+    if (res?.error) {
+      setError(res.error);
+    } else {
+      router.push("/dashboard");
+    }
+  };
+
+  const handleGuestLogin = async (role: "contractor" | "institution") => {
+    setLoading(true);
+    setError("");
+
+    const email =
+      role === "contractor"
+        ? process.env.NEXT_PUBLIC_CONTRACTOR_EMAIL
+        : process.env.NEXT_PUBLIC_INSTITUTION_EMAIL;
+    const password =
+      role === "contractor"
+        ? process.env.NEXT_PUBLIC_CONTRACTOR_PASSWORD
+        : process.env.NEXT_PUBLIC_INSTITUTION_PASSWORD;
 
     const res = await signIn("credentials", {
       email,
@@ -181,6 +210,50 @@ export default function SignIn() {
                 Forgot Password?
               </Link>
             </p>
+            <p
+              onClick={() => setShowGuestModal(true)}
+              className="text-center text-sm mt-4 text-white bg-yellow-500/10 p-2 rounded-lg cursor-pointer hover:bg-yellow-500/20 transition-colors duration-200"
+            >
+              Guest Login
+            </p>
+            {showGuestModal && (
+              <div
+                className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+                onClick={() => setShowGuestModal(false)} // Close when clicking backdrop
+              >
+                <div
+                  className="bg-neutral-900 p-6 rounded-xl shadow-2xl w-[90%] max-w-sm space-y-4 border border-yellow-900/30 relative"
+                  onClick={(e) => e.stopPropagation()} // Prevent click bubbling
+                >
+                  <h3 className="text-white text-lg font-semibold text-center">
+                    Continue as Guest
+                  </h3>
+
+                  {error && (
+                    <p className="text-red-500 text-sm text-center">{error}</p>
+                  )}
+
+                  <button
+                    onClick={() => handleGuestLogin("contractor")}
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg transition"
+                  >
+                    Login as Mess Contractor
+                  </button>
+                  <button
+                    onClick={() => handleGuestLogin("institution")}
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg transition"
+                  >
+                    Login as Institution
+                  </button>
+                  <button
+                    onClick={() => setShowGuestModal(false)}
+                    className="text-sm text-neutral-400 hover:text-white text-center w-full mt-2"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
       </motion.div>

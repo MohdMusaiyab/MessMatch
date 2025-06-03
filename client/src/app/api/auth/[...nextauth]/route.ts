@@ -65,7 +65,6 @@ const handler = NextAuth({
         sameSite: "none",
         path: "/",
         secure: true, 
-        domain: process.env.NEXT_PUBLIC_BACKEND_URL, 
       },
     },
   },
