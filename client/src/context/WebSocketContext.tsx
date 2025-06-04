@@ -30,6 +30,9 @@ export const WebSocketProvider = ({
     const socketInstance = io(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}`, {
       withCredentials: true,
       transports: ["websocket"],
+      autoConnect: false, // Recommended for Next.js
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     // Debugging: Log connection events

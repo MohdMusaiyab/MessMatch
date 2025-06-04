@@ -27,10 +27,19 @@ const corsOptions = {
     "http://localhost:3000", // For local development
   ],
   credentials: true, // Allow cookies and authorization headers
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Add OPTIONS
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'X-Requested-With',
+    'Cookie',
+    'Set-Cookie'
+  ],
   exposedHeaders: ["Set-Cookie"],
+  optionsSuccessStatus: 200 // For legacy browsers
 };
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Initialize WebSocket server
 const io = new Server(server, {
@@ -39,6 +48,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials
   },
+  transports: ['websocket', 'polling'], // Critical for Render
 });
 
 app.use(bodyparser.json());

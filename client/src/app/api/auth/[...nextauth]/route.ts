@@ -24,8 +24,11 @@ const handler = NextAuth({
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
             { email, password }
           );
+          console.log("Response from backend:", response.data);
 
           const { user, success } = response.data;
+          console.log("User authenticated:", user);
+
           // Ensure authentication succeeded
           if (!success || !user) {
             throw new Error(response.data.message || "Login failed");
