@@ -23,32 +23,39 @@ const server = http.createServer(app); // Create an HTTP server
 // Configure CORS for Express
 const corsOptions = {
   origin: [
-    !process.env.FRONTEND_URL,
+    process.env.FRONTEND_URL!,
     "http://localhost:3000", // For local development
   ],
   credentials: true, // Allow cookies and authorization headers
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Add OPTIONS
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Add OPTIONS
   allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Cookie',
-    'Set-Cookie'
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Cookie",
+    "Set-Cookie",
   ],
   exposedHeaders: ["Set-Cookie"],
-  optionsSuccessStatus: 200 // For legacy browsers
+  optionsSuccessStatus: 200, // For legacy browsers
+  preflightContinue: false, // ADDED: Handle preflight properly
 };
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options("*", cors(corsOptions));
+app.set("trust proxy", 1);
 
 // Initialize WebSocket server
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL,
+    origin: [
+      process.env.FRONTEND_URL!,
+      "http://localhost:3000",
+      "https://localhost:3000"
+    ],
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials
   },
-  transports: ['websocket', 'polling'], // Critical for Render
+  transports: ["websocket", "polling"], // Critical for Render
+  allowEIO3: true, // ADDED: Better compatibility
 });
 
 app.use(bodyparser.json());
