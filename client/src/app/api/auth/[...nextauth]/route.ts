@@ -22,14 +22,7 @@ const handler = NextAuth({
           // Authenticate with your backend
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
-            { email, password },
-            {
-              withCredentials: true, // ADDED: Include credentials
-              headers: {
-                "Content-Type": "application/json",
-              },
-              timeout: 10000, // ADDED: 10 second timeout
-            }
+            { email, password }
           );
           console.log("Response from backend:", response.data);
 
@@ -42,7 +35,12 @@ const handler = NextAuth({
           }
 
           // Return the user object for the JWT token
-
+          console.log("Returning user object:", {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          });
           return {
             id: user.id,
             name: user.name,
