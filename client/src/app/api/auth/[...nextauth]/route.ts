@@ -19,10 +19,15 @@ const handler = NextAuth({
         try {
           const { email, password } = credentials;
 
-          // Authenticate with your backend
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
-            { email, password }
+            { email, password },
+            {
+              timeout: 10000,
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
           );
           console.log("Response from backend:", response.data);
 
@@ -70,43 +75,12 @@ const handler = NextAuth({
           : "next-auth.session-token",
       options: {
         httpOnly: true,
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // FIXED: Conditional sameSite
-        secure: process.env.NODE_ENV === "production", // FIXED: Only secure in production
-        domain:
-          process.env.NODE_ENV === "production"
-            ? process.env.NEXTAUTH_COOKIE_DOMAIN
-            : undefined, // ADDED: Domain setting for pr
-      },
-    },
-    callbackUrl: {
-      name:
-        process.env.NODE_ENV === "production"
-          ? "__Secure-next-auth.callback-url"
-          : "next-auth.callback-url",
-      options: {
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain:
-          process.env.NODE_ENV === "production"
-            ? process.env.NEXTAUTH_COOKIE_DOMAIN
-            : undefined,
-      },
-    },
-    csrfToken: {
-      name:
-        process.env.NODE_ENV === "production"
-          ? "__Host-next-auth.csrf-token"
-          : "next-auth.csrf-token",
-      options: {
-        httpOnly: true,
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain:
-          process.env.NODE_ENV === "production"
-            ? process.env.NEXTAUTH_COOKIE_DOMAIN
-            : undefined,
+        ...(process.env.NEXTAUTH_COOKIE_DOMAIN && {
+          domain: process.env.NEXTAUTH_COOKIE_DOMAIN,
+        }),
       },
     },
   },
@@ -137,11 +111,14 @@ const handler = NextAuth({
           role: token.role,
         };
       }
+      console.log("Session callback - Final session:", session);
       return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-  useSecureCookies: process.env.NODE_ENV === "production",
+  debug:
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXTAUTH_DEBUG === "true",
 });
 
 export { handler as GET, handler as POST };
