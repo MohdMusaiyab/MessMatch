@@ -75,12 +75,33 @@ const handler = NextAuth({
           : "next-auth.session-token",
       options: {
         httpOnly: true,
-        sameSite: "lax",
+        sameSite: "none", // Required for cross-origin
+        secure: true, // Required for sameSite="none"
         path: "/",
-        secure: process.env.NODE_ENV === "production",
-        ...(process.env.NEXTAUTH_COOKIE_DOMAIN && {
-          domain: process.env.NEXTAUTH_COOKIE_DOMAIN,
-        }),
+        // DO NOT set domain on vercel.app
+      },
+    },
+    callbackUrl: {
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.callback-url"
+          : "next-auth.callback-url",
+      options: {
+        sameSite: "none",
+        secure: true,
+        path: "/",
+      },
+    },
+    csrfToken: {
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Host-next-auth.csrf-token"
+          : "next-auth.csrf-token",
+      options: {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+        path: "/",
       },
     },
   },

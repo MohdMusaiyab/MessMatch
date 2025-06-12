@@ -23,22 +23,17 @@ const server = http.createServer(app); // Create an HTTP server
 // Configure CORS for Express
 const corsOptions = {
   origin: [
-    process.env.FRONTEND_URL!,
-    "http://localhost:3000", // For local development
+    process.env.FRONTEND_URL!, // e.g., https://your-project.vercel.app
+    "http://localhost:3000", // for local development
   ],
-  credentials: true, // Allow cookies and authorization headers
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Add OPTIONS
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "X-Requested-With",
-    "Cookie",
-    "Set-Cookie",
-  ],
-  exposedHeaders: ["Set-Cookie"],
-  optionsSuccessStatus: 200, // For legacy browsers
-  preflightContinue: false, // ADDED: Handle preflight properly
+  credentials: true, // ✅ Required for cookies/session
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  exposedHeaders: [], // ❌ No need to expose Set-Cookie manually
+  optionsSuccessStatus: 204, // ✅ 204 is more standard than 200
+  preflightContinue: false,
 };
+
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 app.set("trust proxy", 1);
@@ -49,7 +44,7 @@ const io = new Server(server, {
     origin: [
       process.env.FRONTEND_URL!,
       "http://localhost:3000",
-      "https://localhost:3000"
+      "https://localhost:3000",
     ],
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials
