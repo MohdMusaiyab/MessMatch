@@ -36,11 +36,10 @@ const Header: React.FC = () => {
       <div className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 border-b border-yellow-900/20">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Logo - Fixed Width */}
             <Link href="/" className="flex-shrink-0 w-32 md:w-40">
               <Image 
                 src="/logo.png" 
-                alt="MessBazaar" 
+                alt="MessMatch" 
                 width={160}
                 height={64}
                 className="object-contain w-full h-auto"

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useToast } from "@/context/ToastContext";
 
 // Define TypeScript interfaces based on your Prisma models
 interface User {
@@ -45,6 +46,7 @@ const AuctionDetail = () => {
   const params = useParams();
   const { id } = params;
   const { data: session } = useSession();
+  const { toast } = useToast();
   const [auction, setAuction] = useState<Auction | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,9 +82,10 @@ const AuctionDetail = () => {
         { title, description },
         { withCredentials: true }
       );
-      alert(response.data.message);
+      toast.success(response.data.message || "Auction updated successfully!");
       setAuction(response.data.data);
-    } catch (err) {
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to update auction. Please try again later.");
       setError("Failed to update auction. Please try again later.");
     }
   };
@@ -93,9 +96,10 @@ const AuctionDetail = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/delete/${id}`,
         { withCredentials: true }
       );
-      alert(response.data.message);
+      toast.success(response.data.message || "Auction closed successfully!");
       setAuction((prev) => (prev ? { ...prev, isOpen: false } : null));
-    } catch (err) {
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to close auction. Please try again later.");
       setError("Failed to close auction. Please try again later.");
     }
   };
@@ -107,9 +111,10 @@ const AuctionDetail = () => {
         {},
         { withCredentials: true }
       );
-      alert(response.data.message);
+      toast.success(response.data.message || "Auction opened successfully!");
       setAuction((prev) => (prev ? { ...prev, isOpen: true } : null));
-    } catch (err) {
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to open auction. Please try again later.");
       setError("Failed to open auction. Please try again later.");
     }
   };
@@ -128,16 +133,13 @@ const AuctionDetail = () => {
         { withCredentials: true }
       );
   
-      // Find the bid with the matching bidId to get complete bidder information
       const acceptedBid = auction?.bids.find(bid => bid.id === bidId);
       
-      // Create a complete winner object based on the bid information
       const winnerInfo = {
         id: response.data.data?.winnerId || "",
         user: acceptedBid?.bidder || { id: "", name: "", email: "" }
       };
   
-      // Update the local state with complete information
       setAuction((prev) => {
         if (!prev) return null;
         return {
@@ -148,9 +150,10 @@ const AuctionDetail = () => {
         };
       });
   
-      alert(response.data.message);
-    } catch (err) {
+      toast.success(response.data.message || "Bid accepted successfully!");
+    } catch (err: any) {
       console.error("Accept bid error:", err);
+      toast.error(err?.response?.data?.message || "Failed to accept bid. Please try again later.");
       setError("Failed to accept bid. Please try again later.");
     }
   };
@@ -163,7 +166,6 @@ const AuctionDetail = () => {
         { withCredentials: true }
       );
 
-      // Update the local state
       setAuction((prev) =>
         prev
           ? {
@@ -175,8 +177,9 @@ const AuctionDetail = () => {
           : null
       );
 
-      alert(response.data.message);
-    } catch (err) {
+      toast.success(response.data.message || "Winner removed successfully!");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to remove winner. Please try again later.");
       setError("Failed to remove winner. Please try again later.");
     }
   };

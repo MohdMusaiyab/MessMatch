@@ -55,13 +55,22 @@ const MyBids = () => {
   );
 
   if (!bids.length) return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 px-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-neutral-300 bg-neutral-900 px-6 py-4 rounded-lg border border-yellow-900/20"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="text-center max-w-md p-8 bg-neutral-900/60 rounded-2xl border border-yellow-900/30 backdrop-blur-md"
       >
-        No bids found.
+        <h2 className="text-xl font-semibold text-neutral-200 mb-2">No Bids Placed Yet</h2>
+        <p className="text-neutral-400 text-sm mb-6 leading-relaxed">
+          You haven&apos;t participated in any auctions yet. Explore open tenders from colleges and institutions to submit competitive proposals.
+        </p>
+        <Link
+          href="/explore"
+          className="inline-block px-6 py-2.5 rounded-lg bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white font-medium text-sm transition-all shadow-lg shadow-yellow-900/20"
+        >
+          Browse Open Auctions
+        </Link>
       </motion.div>
     </div>
   );

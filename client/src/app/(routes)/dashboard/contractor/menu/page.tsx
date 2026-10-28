@@ -6,6 +6,7 @@ import axios from "axios";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
 
 interface Menu {
   id: string;
@@ -17,6 +18,7 @@ interface Menu {
 
 const Page = () => {
   const { data: session, status } = useSession();
+  const { toast } = useToast();
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,9 +52,9 @@ const Page = () => {
         { withCredentials: true }
       );
       setMenus((prevMenus) => prevMenus.filter((menu) => menu.id !== id));
-      alert("Menu deleted successfully!");
+      toast.success("Menu deleted successfully!");
     } catch (error: any) {
-      alert(`Failed to delete menu. ${error.response?.data?.message || "Please try again."}`);
+      toast.error(error.response?.data?.message || "Failed to delete menu. Please try again.");
     }
   };
 
@@ -108,13 +110,14 @@ const Page = () => {
         )}
 
         {menus.length === 0 && !loading && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-neutral-300"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-8 text-center bg-neutral-900/40 border border-yellow-900/20 rounded-xl mb-6"
           >
-            No menus available.
-          </motion.p>
+            <p className="text-neutral-300 font-medium mb-1">No Menus Created Yet</p>
+            <p className="text-neutral-500 text-sm">Add your breakfast, lunch, or dinner menus so institutions can review your culinary packages.</p>
+          </motion.div>
         )}
 
         <AnimatePresence>

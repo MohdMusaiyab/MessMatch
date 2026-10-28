@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { Loader2, Edit, AlertCircle } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
 
 interface Menu {
   id: string;
@@ -16,6 +17,7 @@ interface Menu {
 const UpdateMenuPage = () => {
   const { id } = useParams();
   const router = useRouter();
+  const { toast } = useToast();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,9 +78,10 @@ const UpdateMenuPage = () => {
         updatedFormData,
         { withCredentials: true }
       );
-      alert("Menu updated successfully!");
+      toast.success("Menu updated successfully!");
       router.push("/dashboard/contractor/menu");
     } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update menu. Please try again.");
       setError(error.response?.data?.message || "Failed to update menu. Please try again.");
     }
   };

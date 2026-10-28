@@ -80,7 +80,7 @@ export default function SignIn() {
         <div className="mb-12 relative z-10">
           <Diamond className="w-20 h-20 text-yellow-500 mb-8" />
           <h1 className="text-6xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-8">
-            MessConnect
+            MessMatch
           </h1>
           <p className="text-2xl text-neutral-400 max-w-xl">
             Connecting Quality Mess Contractors with Premium Institutions

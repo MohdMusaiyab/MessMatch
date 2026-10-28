@@ -96,9 +96,29 @@ const Page: React.FC = () => {
               </motion.div>
             ))
           ) : (
-            <p className="text-neutral-500 text-center py-4 md:py-8">
-              No contracts available.
-            </p>
+            <div className="col-span-1 md:col-span-2 text-center py-16 px-4 bg-neutral-900/30 rounded-xl border border-yellow-900/20">
+              <div className="w-12 h-12 mx-auto mb-4 p-3 bg-yellow-500/10 rounded-full border border-yellow-500/20 text-yellow-500 flex items-center justify-center">
+                <Plus className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-semibold text-neutral-200 mb-2">No Contracts Yet</h3>
+              <p className="text-sm text-neutral-400 max-w-sm mx-auto mb-6">
+                Create an auction to invite bids from verified mess contractors, or explore active caterers in your region.
+              </p>
+              <div className="flex justify-center gap-3">
+                <Link
+                  href="/dashboard/institution/auction/create"
+                  className="px-5 py-2.5 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white text-sm font-medium rounded-lg transition-all"
+                >
+                  Create Auction
+                </Link>
+                <Link
+                  href="/explore"
+                  className="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-sm font-medium rounded-lg transition-colors"
+                >
+                  Explore Contractors
+                </Link>
+              </div>
+            </div>
           )}
         </div>
       </div>

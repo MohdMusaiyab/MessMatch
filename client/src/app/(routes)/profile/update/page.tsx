@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { securityQuestions } from "@/app/types/securtyQuestions";
 import { State } from "@/app/types/States";
+import { useToast } from "@/context/ToastContext";
 
 enum ServiceType {
   HOSTELS = "HOSTELS",
@@ -21,6 +22,7 @@ enum ServiceType {
 // }
 
 const UpdateUserInformation: React.FC = () => {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -124,11 +126,11 @@ const UpdateUserInformation: React.FC = () => {
         { withCredentials: true }
       );
       if (response.status === 200) {
-        alert("User information updated successfully!");
+        toast.success("User information updated successfully!");
         router.push("/profile");
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Error updating user information. Please try again.");
       setError("Error updating user information. Please try again.");
     } finally {
       setLoading(false);

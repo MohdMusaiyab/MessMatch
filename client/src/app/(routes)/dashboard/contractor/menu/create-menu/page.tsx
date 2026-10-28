@@ -4,8 +4,10 @@ import axios from "axios";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, Utensils } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
 
 const CreateMenuPage: React.FC = () => {
+  const { toast } = useToast();
   const [name, setName] = useState("");
   const [items, setItems] = useState<string[]>([""]);
   const [pricePerHead, setPricePerHead] = useState<number | string>("");
@@ -41,21 +43,19 @@ const CreateMenuPage: React.FC = () => {
       );
 
       if (res.status === 201) {
-        alert("Menu created successfully!");
+        toast.success("Menu created successfully!");
         setName("");
         setItems([""]);
         setPricePerHead("");
         setType("VEG");
       } else {
-        alert("Failed to create menu.");
+        toast.error("Failed to create menu.");
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-      console.error("Error creating menu:", error.response.data);
-      alert(error.response.data.message || "Something went wrong.");
+        toast.error(error.response.data?.message || "Something went wrong.");
       } else {
-      console.error("Unexpected error:", error);
-      alert("An unexpected error occurred.");
+        toast.error("An unexpected error occurred.");
       }
     }
   };

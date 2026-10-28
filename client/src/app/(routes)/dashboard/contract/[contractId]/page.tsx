@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Modal from "react-modal"; // Install: npm install react-modal
 import { UpdateTermsModal } from "@/app/components/contractor/UpdateTermsModal";
+import { useToast } from "@/context/ToastContext";
 
 interface User {
   id: string;
@@ -52,6 +53,7 @@ interface StatusBadgeProps {
 const ContractDetailsPage = () => {
   const { contractId } = useParams();
   const { data: session } = useSession();
+  const { toast } = useToast();
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
@@ -124,12 +126,13 @@ const ContractDetailsPage = () => {
             ...response.data.data,
           };
         });
+        toast.success("Contract status updated successfully!");
       }
     } catch (error) {
       if (error instanceof AxiosError && error.response?.data?.message) {
-      setError(error.response.data.message);
+        toast.error(error.response.data.message);
       } else {
-      setError("Failed to update contract status. Please try again later.");
+        toast.error("Failed to update contract status. Please try again later.");
       }
     } finally {
       setIsUpdating(false);
@@ -259,8 +262,8 @@ const ContractDetailsPage = () => {
       );
 
       if (response.data.success) {
-        // Update the contract status after successful termination
         setContract({ ...contract, status: "TERMINATED" });
+        toast.success("Contract terminated successfully.");
         handleCloseTerminationModal();
       } else {
         setTerminationError(

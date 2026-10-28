@@ -39,7 +39,7 @@ const Footer = () => {
             className="col-span-1 md:col-span-2"
           >
             <h5 className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-4">
-              MessConnect
+              MessMatch
             </h5>
             <p className="text-neutral-400 mb-6 max-w-md">
               Connecting quality mess contractors with institutions for seamless
@@ -88,21 +88,20 @@ const Footer = () => {
           >
             <h6 className="text-white font-semibold mb-4">Contact Us</h6>
             <div className="space-y-3 text-neutral-400">
-              <p>Mess Bazaar</p>
+              <p>MessMatch</p>
               <p>musaiyab2003@gmail.com</p>
               <p>+91 1234567890</p>
             </div>
           </motion.div>
         </div>
 
-        {/* Copyright */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
           className="mt-12 pt-6 border-t border-neutral-800 text-center text-neutral-500"
         >
-          <p>© {new Date().getFullYear()} Mess Bazaar. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} MessMatch. All rights reserved.</p>
         </motion.div>
       </div>
     </footer>

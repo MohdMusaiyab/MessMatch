@@ -16,15 +16,14 @@ const Page = () => {
     setRole(session?.user?.role);
   }, [status, session]);
 
-  if (status === "loading" || role === undefined) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           className="w-12 h-12 border-t-2 border-r-2 border-yellow-500 rounded-full"
-        >
-        </motion.div>
+        />
       </div>
     );
   }

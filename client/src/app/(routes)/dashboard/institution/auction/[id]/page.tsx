@@ -5,10 +5,12 @@ import { useParams } from "next/navigation";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useToast } from "@/context/ToastContext";
 
 const AuctionDetail = () => {
   const { id } = useParams();
   const { data: session } = useSession();
+  const { toast } = useToast();
   const [auction, setAuction] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ const AuctionDetail = () => {
 
   const handlePlaceBid = async () => {
     if (!bidAmount || bidAmount <= 0) {
-      alert("Please enter a valid bid amount.");
+      toast.error("Please enter a valid bid amount.");
       return;
     }
 
@@ -55,14 +57,14 @@ const AuctionDetail = () => {
         { amount: bidAmount },
         { withCredentials: true }
       );
-      alert("Bid placed successfully!");
+      toast.success("Bid placed successfully!");
       setAuction((prev: any) => ({
         ...prev,
         userBid: { amount: bidAmount },
         totalBids: prev.totalBids + 1,
       }));
-    } catch (err) {
-      alert("Failed to place bid. Please try again.");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to place bid. Please try again.");
     } finally {
       setPlacingBid(false);
     }
@@ -70,7 +72,7 @@ const AuctionDetail = () => {
 
   const handleUpdateBid = async () => {
     if (!bidAmount || bidAmount <= 0) {
-      alert("Please enter a valid bid amount.");
+      toast.error("Please enter a valid bid amount.");
       return;
     }
 
@@ -81,13 +83,13 @@ const AuctionDetail = () => {
         { amount: bidAmount },
         { withCredentials: true }
       );
-      alert("Bid updated successfully!");
+      toast.success("Bid updated successfully!");
       setAuction((prev: any) => ({
         ...prev,
         userBid: { amount: response.data.data.amount },
       }));
-    } catch (err) {
-      alert("Failed to update bid. Please try again.");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to update bid. Please try again.");
     } finally {
       setUpdatingBid(false);
     }
@@ -95,26 +97,25 @@ const AuctionDetail = () => {
 
   const handleDeleteBid = async () => {
     if (!auction?.userBid) {
-      alert("No bid to delete.");
+      toast.error("No bid to delete.");
       return;
     }
 
     setDeletingBid(true);
     try {
-      console.log(auction);
       await axios.delete(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/delete-bid/${id}`,
         { withCredentials: true }
       );
-      alert("Bid deleted successfully!");
+      toast.success("Bid deleted successfully!");
       setAuction((prev: any) => ({
         ...prev,
         userBid: null,
         totalBids: Math.max(prev.totalBids - 1, 0),
       }));
       setBidAmount("");
-    } catch (err) {
-      alert("Failed to delete bid. Please try again.");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to delete bid. Please try again.");
     } finally {
       setDeletingBid(false);
     }
