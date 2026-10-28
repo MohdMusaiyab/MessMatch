@@ -477,8 +477,6 @@ export const getOthersSingleAuctionController = async (
   }
 };
 
-// ==================For Placing the Bid on an Auction====================
-
 export const placeBidController = async (req: Request, res: Response) => {
   const userId = req.userId;
   if (!userId) {
@@ -488,6 +486,15 @@ export const placeBidController = async (req: Request, res: Response) => {
     });
     return;
   }
+
+  if (req.role !== "CONTRACTOR") {
+    res.status(403).json({
+      message: "Only contractors can place bids on auctions",
+      success: false,
+    });
+    return;
+  }
+
   const { id } = req.params;
   const { amount } = req.body;
   if (!id) {
@@ -518,7 +525,16 @@ export const placeBidController = async (req: Request, res: Response) => {
       });
       return;
     }
-    if (auction?.isOpen === false) {
+
+    if (auction.creatorId === userId) {
+      res.status(403).json({
+        message: "Auction creators cannot bid on their own auctions",
+        success: false,
+      });
+      return;
+    }
+
+    if (auction.isOpen === false) {
       res.status(400).json({
         message: "Auction is Closed",
         success: false,
@@ -554,7 +570,14 @@ export const placeBidController = async (req: Request, res: Response) => {
       data: newBid,
     });
     return;
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      res.status(400).json({
+        message: "You have already placed a bid on this auction",
+        success: false,
+      });
+      return;
+    }
     console.error(error);
     res.status(500).json({
       message: "Internal Server Error",

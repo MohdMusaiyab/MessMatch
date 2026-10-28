@@ -2,77 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 export async function middleware(req: NextRequest) {
-  // Get the token from the request
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-  // Define protected routes
-  const protectedRoutes = ["/dashboard", "/explore", "/profile", "/payment"];
-
-  // Routes restricted for contractors (exact paths)
-  const contractorRestrictedRoutes = [
-    "/dashboard/institution",
-    "/dashboard/institution/auction",
-    "/dashboard/institution/auction/create",
-    "/dashboard/institution/auction/update",
-  ];
-
-  // Routes restricted for non-contractors (exact paths)
-  const nonContractorRestrictedRoutes = [
-    "/dashboard/contractor",
-    "/dashboard/contractor/my-auctions",
-    "/dashboard/contractor/menu/create-menu",
-    "/dashboard/contractor/menu/update-menu",
-  ];
-
-  // Get current pathname
   const pathname = req.nextUrl.pathname;
 
-  // Check if the user is accessing a protected route (using startsWith)
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const protectedPrefixes = ["/dashboard", "/explore", "/profile", "/chats"];
+  const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
 
-  if (isProtectedRoute) {
-    // If not authenticated, redirect to login
+  if (isProtected) {
     if (!token) {
       return NextResponse.redirect(new URL("/auth/login", req.url));
     }
 
-    // Check the user's role
     const userRole = token.role;
 
-    // Restrict access for contractors - exact path matching
-    if (userRole === "CONTRACTOR") {
-      // Check for exact matches in contractor restricted routes
-      if (contractorRestrictedRoutes.includes(pathname)) {
-        return NextResponse.redirect(new URL("/", req.url));
-      }
-
-      // Special handling for update routes with IDs
-      const updatePathMatch = pathname.match(
-        /^\/dashboard\/institution\/auction\/update\/[\w-]+$/
-      );
-      if (updatePathMatch) {
-        return NextResponse.redirect(new URL("/", req.url));
-      }
+    if (userRole === "CONTRACTOR" && pathname.startsWith("/dashboard/institution")) {
+      return NextResponse.redirect(new URL("/dashboard/contractor", req.url));
     }
 
-    // Restrict access for non-contractors - exact path matching
-    if (
-      userRole !== "CONTRACTOR" &&
-      nonContractorRestrictedRoutes.includes(pathname)
-    ) {
-      return NextResponse.redirect(new URL("/", req.url));
+    if (userRole !== "CONTRACTOR" && pathname.startsWith("/dashboard/contractor")) {
+      return NextResponse.redirect(new URL("/dashboard/institution", req.url));
     }
   }
 
-  // If authenticated or accessing a public route, continue
+  if (token && (pathname === "/auth/login" || pathname === "/auth/register")) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
   return NextResponse.next();
 }
 
-// Specify which paths the middleware should run on
 export const config = {
   matcher: [
-    "/:path*", // Match all routes
+    "/((?!_next/static|_next/image|favicon.ico|images|logo.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

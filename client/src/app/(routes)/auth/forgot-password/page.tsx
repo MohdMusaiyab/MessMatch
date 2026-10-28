@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import leftImage1 from "../../../../../public/images/image1.svg";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -61,11 +60,11 @@ const ForgotPasswordPage: React.FC = () => {
             className="relative w-full h-full flex items-center justify-center"
           >
             <Image
-              src={leftImage1}
+              src="/images/image1.svg"
               alt="Forgot Password Illustration"
-              width={500} // Adjust as needed
+              width={500}
               priority
-              height={500} // Adjust as needed
+              height={500}
             />
           </motion.div>
         </div>

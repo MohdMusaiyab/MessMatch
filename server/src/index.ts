@@ -11,13 +11,12 @@ import contractRoutes from "./routes/contractRoutes";
 import reviewRoutes from "./routes/reviewRoutes";
 import http from "http";
 import { Server } from "socket.io";
-import { PrismaClient } from "@prisma/client";
+import prisma from "./utils/prisma";
 import chatRoutes from "./routes/chatRoutes";
 import jwt from "jsonwebtoken";
 
 dotenv.config();
 
-const prisma = new PrismaClient();
 const app: Application = express();
 const server = http.createServer(app);
 
@@ -93,30 +92,62 @@ app.use(`${process.env.BASE_URL}/review`, reviewRoutes);
 app.use(`${process.env.BASE_URL}/chat`, chatRoutes);
 
 io.on("connection", (socket) => {
-  console.log("A user connected:", socket.id);
+  socket.on("joinRoom", async (chatId) => {
+    const userId = socket.data.userId;
+    if (!userId || !chatId) return;
 
-  socket.on("joinRoom", (chatId) => {
-    socket.join(chatId);
-    console.log(`User ${socket.id} joined chat ${chatId}`);
+    try {
+      const chat = await prisma.chat.findUnique({
+        where: { id: chatId },
+        select: { user1Id: true, user2Id: true },
+      });
+
+      if (chat && (chat.user1Id === userId || chat.user2Id === userId)) {
+        socket.join(chatId);
+      }
+    } catch (error) {
+      console.error("Error joining room:", error);
+    }
   });
 
   socket.on("leaveRoom", (chatId) => {
-    socket.leave(chatId);
-    console.log(`User ${socket.id} left chat ${chatId}`);
+    if (chatId) {
+      socket.leave(chatId);
+    }
   });
 
   socket.on("sendMessage", async (data) => {
-    const { chatId, senderId, content } = data;
+    const userId = socket.data.userId;
+    const { chatId, content } = data;
+
+    if (!userId || !chatId || !content || typeof content !== "string" || !content.trim()) {
+      return;
+    }
 
     try {
+      const chat = await prisma.chat.findUnique({
+        where: { id: chatId },
+        select: { user1Id: true, user2Id: true },
+      });
+
+      if (!chat || (chat.user1Id !== userId && chat.user2Id !== userId)) {
+        return;
+      }
+
       const message = await prisma.message.create({
         data: {
           chatId,
-          senderId,
-          content,
+          senderId: userId,
+          content: content.trim(),
         },
         include: {
-          sender: true,
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       });
 
@@ -126,9 +157,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("disconnect", () => {
-    console.log("A user disconnected:", socket.id);
-  });
+  socket.on("disconnect", () => {});
 });
 
 const PORT: number = parseInt(process.env.PORT || "4000", 10);

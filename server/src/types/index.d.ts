@@ -7,12 +7,14 @@ declare global {
     export interface Request {
       userId?: string;
       role?: string;
-      io?: Server; // Add the io property to the Request interface
+      contractorId?: string;
+      io?: Server;
     }
     export interface Response {
       userId?: string;
       role?: string;
-      io?: Server; // Add the io property to the Request interface
+      contractorId?: string;
+      io?: Server;
     }
   }
 }

@@ -7,7 +7,7 @@ import { Prisma, State } from "@prisma/client";
 export const updateUserController = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
-    const userRole = req.role; // Extract role from the request
+    const userRole = req.role;
     const {
       name,
       email,
@@ -17,13 +17,12 @@ export const updateUserController = async (req: Request, res: Response) => {
       contactNumber,
       securityQuestion,
       securityAnswer,
-      contractorFields, // For contractor-specific fields
+      contractorFields,
     } = req.body;
 
-    // Find the user in the database
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      include: { contractor: true }, // Include contractor if they exist
+      include: { contractor: true },
     });
 
     if (!user) {
@@ -34,23 +33,32 @@ export const updateUserController = async (req: Request, res: Response) => {
       return;
     }
 
-    // Prepare the update object for the User table
     const updateData: any = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
     if (state) updateData.state = state;
     if (address) updateData.address = address;
     if (contactNumber) updateData.contactNumber = contactNumber;
-    if (password) updateData.password = await hashPassword(password); // Hashing the password
+    if (password) {
+      if (typeof password !== "string" || password.length < 6) {
+        res.status(400).json({
+          message: "Password must be at least 6 characters long",
+          success: false,
+        });
+        return;
+      }
+      updateData.password = await hashPassword(password);
+    }
     if (securityQuestion) updateData.securityQuestion = securityQuestion;
-    if (securityAnswer)
-      updateData.securityAnswer = await hashPassword(securityAnswer);
+    if (securityAnswer) {
+      updateData.securityAnswer = await hashPassword(
+        String(securityAnswer).trim().toLowerCase()
+      );
+    }
 
-    // Role-based additional updates
     if (userRole === "CONTRACTOR" && contractorFields) {
       const { numberOfPeople, services } = contractorFields;
 
-      // Ensure contractor record exists
       if (!user.contractor) {
         res.status(400).json({
           message: "Contractor record not found for this user",
@@ -59,7 +67,6 @@ export const updateUserController = async (req: Request, res: Response) => {
         return;
       }
 
-      // Update contractor-specific fields
       await prisma.messContractor.update({
         where: { userId: userId },
         data: {
@@ -71,22 +78,22 @@ export const updateUserController = async (req: Request, res: Response) => {
       });
     }
 
-    // Update the user in the database
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: updateData,
     });
 
+    const { password: _, securityAnswer: __, ...sanitizedUser } = updatedUser;
+
     res.status(200).json({
       message: "User updated successfully",
       success: true,
-      data: updatedUser,
+      data: sanitizedUser,
     });
     return;
   } catch (error) {
     console.error(error);
 
-    // Handle Zod validation errors specifically
     if (error instanceof ZodError) {
       res.status(400).json({
         message: "Validation error",
@@ -96,7 +103,6 @@ export const updateUserController = async (req: Request, res: Response) => {
       return;
     }
 
-    // Generic error handling
     res.status(500).json({
       message: "Error in updating user",
       success: false,
@@ -104,7 +110,6 @@ export const updateUserController = async (req: Request, res: Response) => {
     return;
   }
 };
-// ====================For Getting a Single User Profile====================
 export const getUserController = async (req: Request, res: Response) => {
   const userId = req.userId; // The ID of the currently authenticated user
   if (!userId) {
@@ -329,45 +334,63 @@ export const getAuctionsAndContractorsController = async (
     const auctionWhere =
       auctionFilters.length > 0 ? { AND: auctionFilters } : {};
 
-    // Fetch auctions based on filters
     let auctions: any[] = [];
     let totalAuctions = 0;
 
-    // Max bids filter handled after fetching data
     if (maxBids) {
       const isMoreThan20 = maxBids === "20+";
       const maxBidsInt = isMoreThan20 ? null : parseInt(maxBids as string, 10);
 
-      const allAuctions = await prisma.auction.findMany({
-        where: auctionWhere,
-        include: {
-          bids: true, // Include bids for filtering
-          creator: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              contactNumber: true,
-              state: true, // Include creator's state in the response
+      let bidCondition: Prisma.AuctionWhereInput = {};
+      if (isMoreThan20) {
+        const matchingGroups = await prisma.bid.groupBy({
+          by: ["auctionId"],
+          _count: { id: true },
+          having: {
+            id: {
+              _count: { gt: 20 },
             },
           },
-        },
-      });
-
-      // Filter auctions based on the count of bids
-      if (isMoreThan20) {
-        auctions = allAuctions.filter((auction) => auction.bids.length > 20);
-      } else {
-        auctions = allAuctions.filter(
-          (auction) => auction.bids.length <= maxBidsInt!
-        );
+        });
+        bidCondition = { id: { in: matchingGroups.map((g) => g.auctionId) } };
+      } else if (maxBidsInt !== null && !isNaN(maxBidsInt)) {
+        const excludedGroups = await prisma.bid.groupBy({
+          by: ["auctionId"],
+          _count: { id: true },
+          having: {
+            id: {
+              _count: { gt: maxBidsInt },
+            },
+          },
+        });
+        bidCondition = { id: { notIn: excludedGroups.map((g) => g.auctionId) } };
       }
 
-      // Paginate filtered auctions
-      totalAuctions = auctions.length;
-      auctions = auctions.slice(skip, skip + parsedLimit);
+      const combinedAuctionWhere: Prisma.AuctionWhereInput = {
+        AND: [auctionWhere, bidCondition],
+      };
+
+      [auctions, totalAuctions] = await Promise.all([
+        prisma.auction.findMany({
+          where: combinedAuctionWhere,
+          include: {
+            bids: true,
+            creator: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                contactNumber: true,
+                state: true,
+              },
+            },
+          },
+          skip,
+          take: parsedLimit,
+        }),
+        prisma.auction.count({ where: combinedAuctionWhere }),
+      ]);
     } else {
-      // If no maxBids filter, fetch directly with pagination
       [auctions, totalAuctions] = await Promise.all([
         prisma.auction.findMany({
           where: auctionWhere,
@@ -379,7 +402,7 @@ export const getAuctionsAndContractorsController = async (
                 name: true,
                 email: true,
                 contactNumber: true,
-                state: true, // Include creator's state in the response
+                state: true,
               },
             },
           },

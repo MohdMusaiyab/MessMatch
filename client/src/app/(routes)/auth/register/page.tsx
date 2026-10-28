@@ -7,14 +7,12 @@ import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { State } from "@/app/types/States";
 import Image from "next/image";
-import leftSideDecoration from "../../../../../public/images/cornerDecorativeElement.svg";
 
-// Interfaces and security question map
 interface FormData {
   name: string;
   email: string;
   password: string;
-  role: "COLLEGE" | "CONTRACTOR" | "CORPORATE" | "ADMIN" | "OTHER";
+  role: "COLLEGE" | "CONTRACTOR" | "CORPORATE" | "OTHER";
   securityQuestion: string;
   securityAnswer: string;
   contactNumber: string;
@@ -122,10 +120,9 @@ const RegisterPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 relative overflow-hidden">
-      {/* Left side decoration - positioned absolutely */}
       <div className="absolute top-0 left-0 w-32 h-32 md:w-48 md:h-48 opacity-60 pointer-events-none">
         <Image
-          src={leftSideDecoration}
+          src="/images/cornerDecorativeElement.svg"
           alt="Decorative corner element"
           layout="fill"
           objectFit="contain"
@@ -133,10 +130,9 @@ const RegisterPage: React.FC = () => {
         />
       </div>
 
-      {/* Right side decoration - mirrored and positioned bottom right */}
       <div className="absolute bottom-0 right-0 w-32 h-32 md:w-48 md:h-48 opacity-60 pointer-events-none transform rotate-180">
         <Image
-          src={leftSideDecoration}
+          src="/images/cornerDecorativeElement.svg"
           alt="Decorative corner element"
           layout="fill"
           objectFit="contain"
@@ -240,7 +236,6 @@ const RegisterPage: React.FC = () => {
                     <option value="COLLEGE">College</option>
                     <option value="CONTRACTOR">Contractor</option>
                     <option value="CORPORATE">Corporate</option>
-                    <option value="ADMIN">Admin</option>
                     <option value="OTHER">Other</option>
                   </select>
                 </motion.div>

@@ -36,13 +36,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <WebSocketProvider>
-          <SessionProviderWrapper>
+        <SessionProviderWrapper>
+          <WebSocketProvider>
             <Header />
             {children}
             <Footer />
-          </SessionProviderWrapper>
-        </WebSocketProvider>
+          </WebSocketProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   );

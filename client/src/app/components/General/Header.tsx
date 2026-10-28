@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, LogOut } from "lucide-react";
-import logo from "../../../../public/logo.png";
 import Image from "next/image";
 
 const Header: React.FC = () => {
@@ -40,10 +39,10 @@ const Header: React.FC = () => {
             {/* Logo - Fixed Width */}
             <Link href="/" className="flex-shrink-0 w-32 md:w-40">
               <Image 
-                src={logo} 
+                src="/logo.png" 
                 alt="MessBazaar" 
-                width={160}  // Reduced from 250
-                height={64}   // Reduced proportionally
+                width={160}
+                height={64}
                 className="object-contain w-full h-auto"
                 priority
               />

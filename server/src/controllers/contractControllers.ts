@@ -82,42 +82,47 @@ export const fetDetailsForCreateContract = async (
 };
 
 export const createContractController = async (req: Request, res: Response) => {
-  const { auctionId } = req.params; // Get auctionId from URL params
-  const { terms } = req.body; // Get terms from request body
-  const loggedInUserId = req.userId; // Get logged-in user ID from the middleware
+  const { auctionId } = req.params;
+  const { terms } = req.body;
+  const loggedInUserId = req.userId;
   if (!loggedInUserId) {
-    res.status(400).json({
+    res.status(401).json({
       success: false,
-      message: "Please Login !",
+      message: "Please Login!",
+    });
+    return;
+  }
+
+  if (!terms || typeof terms !== "string" || !terms.trim()) {
+    res.status(400).json({
+      message: "Terms and conditions are required",
+      success: false,
     });
     return;
   }
 
   try {
-    // Step 1: Fetch the auction details
     const auction = await prisma.auction.findUnique({
       where: { id: auctionId },
       select: {
-        creatorId: true, // ID of the auction creator (institution)
-        winnerId: true, // ID of the winning contractor
+        creatorId: true,
+        winnerId: true,
       },
     });
 
-    // Check if the auction exists
     if (!auction) {
       res.status(404).json({ message: "Auction not found", success: false });
       return;
     }
 
-    // // Step 2: Ensure the logged-in user is the auction creator (institution)
-    // if (auction.creatorId !== loggedInUserId) {
-    //   return res.status(403).json({
-    //     message: "You are not authorized to create a contract for this auction",
-    //     success: false,
-    //   });
-    // }
+    if (auction.creatorId !== loggedInUserId) {
+      res.status(403).json({
+        message: "You are not authorized to create a contract for this auction",
+        success: false,
+      });
+      return;
+    }
 
-    // Step 3: Ensure the auction has a winner
     if (!auction.winnerId) {
       res.status(400).json({
         message: "This auction does not have a winner yet",
@@ -126,7 +131,6 @@ export const createContractController = async (req: Request, res: Response) => {
       return;
     }
 
-    // Step 4: Check if a contract already exists for this auction
     const existingContract = await prisma.contract.findUnique({
       where: { auctionId },
     });
@@ -139,20 +143,18 @@ export const createContractController = async (req: Request, res: Response) => {
       return;
     }
 
-    // Step 5: Create the contract
     const newContract = await prisma.contract.create({
       data: {
-        terms,
-        auction: { connect: { id: auctionId } }, // Link to the auction
-        contractor: { connect: { id: auction.winnerId } }, // Link to the winning contractor
-        institution: { connect: { id: auction.creatorId } }, // Link to the institution (auction creator)
-        status: "PENDING", // Default status
-        contractorAccepted: false, // Default value
-        institutionAccepted: false, // Default value
+        terms: terms.trim(),
+        auction: { connect: { id: auctionId } },
+        contractor: { connect: { id: auction.winnerId } },
+        institution: { connect: { id: auction.creatorId } },
+        status: "PENDING",
+        contractorAccepted: false,
+        institutionAccepted: false,
       },
     });
 
-    // Step 6: Return the created contract
     res.status(201).json({
       message: "Contract created successfully",
       success: true,

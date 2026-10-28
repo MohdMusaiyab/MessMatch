@@ -1,12 +1,18 @@
 import { stat } from "fs";
 import { z, ZodObject } from "zod";
 
-// Enums
 export const RoleEnum = z.enum([
   "COLLEGE",
   "CONTRACTOR",
   "CORPORATE",
   "ADMIN",
+  "OTHER",
+]);
+
+export const PublicRegistrationRoleEnum = z.enum([
+  "COLLEGE",
+  "CONTRACTOR",
+  "CORPORATE",
   "OTHER",
 ]);
 
@@ -201,11 +207,16 @@ export const VideoConferenceSchema = z.object({
   participants: z.array(UserSchema),
 });
 
-// Input Schemas (for creation)
-export const CreateUserSchema = (UserSchema as ZodObject<any>).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const CreateUserSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  password: z.string().min(6),
+  address: z.string(),
+  contactNumber: z.string(),
+  role: PublicRegistrationRoleEnum,
+  securityQuestion: SecurityQuestionEnum,
+  securityAnswer: z.string(),
+  state: StateTypeEnum,
 });
 
 export const LoginSchema = z.object({

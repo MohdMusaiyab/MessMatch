@@ -4,11 +4,12 @@ import {
   loginController,
   registerController,
 } from "../controllers/authControllers";
+import { authRateLimiter } from "../middlewares/rateLimiter";
 
 const authRoutes = express.Router();
 
-authRoutes.post("/register", registerController);
-authRoutes.post("/login", loginController);
-authRoutes.post("/forgot-password", forgotPasswordController);
+authRoutes.post("/register", authRateLimiter, registerController);
+authRoutes.post("/login", authRateLimiter, loginController);
+authRoutes.post("/forgot-password", authRateLimiter, forgotPasswordController);
 
 export default authRoutes;

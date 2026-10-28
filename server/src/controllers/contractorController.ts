@@ -4,22 +4,18 @@ import { CreateMenuSchema, MenuSchema } from "../schemas/schemas";
 import { ZodError } from "zod";
 import { Prisma, State } from "@prisma/client";
 import { ServiceType } from "@prisma/client";
-//For Creating a Menu
 export const createMenuController = async (req: Request, res: Response) => {
-  const userId = req.userId;
-  if (!userId) {
+  const contractorId = req.contractorId || req.userId;
+  if (!contractorId) {
     res.status(401).json({ message: "Please Login", success: false });
     return;
   }
   try {
-    //Parse the request body
-
     const menu = CreateMenuSchema.omit({ contractorId: true }).parse(req.body);
-    //Create the menu simply
     const newMenu = await prisma.menu.create({
       data: {
         ...menu,
-        contractorId: userId,
+        contractorId: contractorId,
       },
     });
 
@@ -44,17 +40,16 @@ export const createMenuController = async (req: Request, res: Response) => {
     return;
   }
 };
-// ===================For Getting you Own Menu's============
 export const getMyMenusController = async (req: Request, res: Response) => {
-  const userId = req.userId;
-  if (!userId) {
+  const contractorId = req.contractorId || req.userId;
+  if (!contractorId) {
     res.status(401).json({ message: "Unauthorized", success: false });
     return;
   }
   try {
     const menus = await prisma.menu.findMany({
       where: {
-        contractorId: userId,
+        contractorId: contractorId,
       },
     });
     if (menus.length === 0) {
@@ -148,10 +143,9 @@ export const getOthersSingleMenuController = async (
   }
 };
 
-// =================For Updating A Menu using its ID================
 export const updateMenuController = async (req: Request, res: Response) => {
   const menuId = req.params.id;
-  const userId = req.userId;
+  const contractorId = req.contractorId || req.userId;
   if (!menuId) {
     res.status(400).json({
       message: "Menu ID is required",
@@ -175,8 +169,7 @@ export const updateMenuController = async (req: Request, res: Response) => {
       });
       return;
     }
-    // Ensure the logged-in contractor is the owner of the menu
-    if (menu.contractorId !== userId) {
+    if (menu.contractorId !== contractorId) {
       res.status(403).json({
         message: "Forbidden: You do not have permission to update this menu",
         success: false,
@@ -243,9 +236,8 @@ export const getSingleMenuController = async (req: Request, res: Response) => {
   }
 };
 
-// ===============For Deleting Your Own Menu=======================
 export const deleteYourMenuController = async (req: Request, res: Response) => {
-  const userId = req?.userId;
+  const contractorId = req.contractorId || req?.userId;
   const { id } = req.params;
   if (!id) {
     res.status(400).json({
@@ -267,8 +259,7 @@ export const deleteYourMenuController = async (req: Request, res: Response) => {
       });
       return;
     }
-    // Check if the menu belongs to the authenticated user
-    if (menu.contractorId !== userId) {
+    if (menu.contractorId !== contractorId) {
       res.status(403).json({
         success: false,
         message: "You are not authorized to delete this menu.",
@@ -467,14 +458,12 @@ export const getFiltersController = async (req: Request, res: Response) => {
     return;
   }
 };
-// ============For Getting Latesst 3 Auctions where he had Placed Bid + 3 of his Latest Menu's================
-
 export const getLatestAuctionsController = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const contractorId = req.userId;
+    const contractorId = req.contractorId || req.userId;
     if (!contractorId) {
       res.status(401).json({
         message: "Unauthorized",
@@ -482,7 +471,6 @@ export const getLatestAuctionsController = async (
       });
       return;
     }
-    //Find the Menu's of the contractor latest 3
     const menus = await prisma.menu.findMany({
       where: {
         contractorId,
@@ -494,8 +482,6 @@ export const getLatestAuctionsController = async (
       take: 3,
     });
 
-    //Find the Auctions where he had placed bid
-    //We randmly fetch him 3 latest auctions
     const auctions = await prisma.auction.findMany({
       where: {},
       select: {

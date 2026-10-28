@@ -41,13 +41,21 @@ export const WebSocketProvider = ({
   };
 
   useEffect(() => {
+    const token = session?.accessToken;
+    if (!token) {
+      if (socket) {
+        socket.disconnect();
+        setSocket(null);
+        setIsConnected(false);
+      }
+      return;
+    }
+
     const wsUrl =
       process.env.NEXT_PUBLIC_WS_URL ||
       (process.env.NEXT_PUBLIC_BACKEND_URL
         ? process.env.NEXT_PUBLIC_BACKEND_URL.replace(/\/api\/v1\/?$/, "")
         : "http://localhost:4000");
-
-    const token = session?.accessToken;
 
     const socketInstance = io(wsUrl, {
       auth: { token },

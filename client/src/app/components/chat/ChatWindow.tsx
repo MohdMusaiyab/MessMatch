@@ -66,7 +66,27 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
 
     const handleReceiveMessage = (message: Message) => {
       if (message.chatId === chatId) {
-        setMessages((prev) => [...prev, message]);
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === message.id)) {
+            return prev;
+          }
+
+          const tempIndex = prev.findIndex(
+            (m) =>
+              m.id.startsWith("temp-") &&
+              m.content === message.content &&
+              m.sender.id === message.sender.id
+          );
+
+          if (tempIndex !== -1) {
+            const next = [...prev];
+            next[tempIndex] = message;
+            return next;
+          }
+
+          return [...prev, message];
+        });
+
         if (message.sender.id !== userId && !otherUserName) {
           setOtherUserName(message.sender.name);
         }
@@ -84,9 +104,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
+    const currentText = newMessage.trim();
     const tempMessage: Message = {
       id: `temp-${Date.now()}`,
-      content: newMessage,
+      content: currentText,
       createdAt: new Date().toISOString(),
       sender: { id: userId!, name: "You", email: "" },
       chatId: chatId,
@@ -97,7 +118,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     try {
       await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/send-message`,
-        { chatId, senderId: userId, content: newMessage },
+        { chatId, content: currentText },
         { withCredentials: true }
       );
     } catch (error) {

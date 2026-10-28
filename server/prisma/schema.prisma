@@ -129,12 +129,14 @@ model Menu {
   id           String         @id @default(uuid())
   contractorId String
   contractor   MessContractor @relation(fields: [contractorId], references: [id])
-  name         String // Menu name (e.g., "Breakfast Menu", "Wedding Menu")
-  items        String[] // Array of items in the menu
-  pricePerHead Float // Price per head for the menu
-  type         MenuType // Type of menu: VEG, NON_VEG, BOTH
+  name         String
+  items        String[]
+  pricePerHead Float
+  type         MenuType
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+
+  @@index([contractorId])
 }
 
 model Review {
@@ -143,14 +145,17 @@ model Review {
   reviewerId   String
   reviewer     User           @relation(fields: [reviewerId], references: [id], name: "ReviewsGiven")
   contractor   MessContractor @relation(fields: [contractorId], references: [id])
-  rating       Int // Rating out of 5
-  comment      String? // Optional comment
+  rating       Int
+  comment      String?
   createdAt    DateTime       @default(now())
+
+  @@index([contractorId])
+  @@index([reviewerId])
 }
 
 model Auction {
   id          String          @id @default(uuid())
-  creatorId   String // User who created the auction
+  creatorId   String
   creator     User            @relation(fields: [creatorId], references: [id], name: "AuctionsCreated")
   title       String
   description String
@@ -161,17 +166,23 @@ model Auction {
   contract    Contract?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
+
+  @@index([creatorId, isOpen])
+  @@index([isOpen])
 }
 
 model Bid {
-  id        String  @id @default(uuid())
+  id        String   @id @default(uuid())
   auctionId String
-  auction   Auction @relation(fields: [auctionId], references: [id])
+  auction   Auction  @relation(fields: [auctionId], references: [id])
   bidderId  String
-  bidder    User    @relation(fields: [bidderId], references: [id])
+  bidder    User     @relation(fields: [bidderId], references: [id])
   amount    Float
-
   createdAt DateTime @default(now())
+
+  @@unique([auctionId, bidderId])
+  @@index([auctionId])
+  @@index([bidderId])
 }
 
 model Chat {
@@ -182,6 +193,9 @@ model Chat {
   user2     User      @relation(fields: [user2Id], references: [id], name: "User2Chats")
   messages  Message[]
   createdAt DateTime  @default(now())
+
+  @@index([user1Id])
+  @@index([user2Id])
 }
 
 model Message {
@@ -192,6 +206,9 @@ model Message {
   sender    User     @relation(fields: [senderId], references: [id])
   content   String
   createdAt DateTime @default(now())
+
+  @@index([chatId, createdAt])
+  @@index([senderId])
 }
 
 model VideoConference {
@@ -204,19 +221,21 @@ model VideoConference {
 }
 
 model Contract {
-  id              String   @id @default(uuid())
-  terms           String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  auctionId       String   @unique
-  contractorId    String
-  institutionId   String
-  status          ContractStatus @default(PENDING)
-  contractorAccepted  Boolean @default(false)
-  institutionAccepted Boolean @default(false)
-  auction    Auction   @relation(fields: [auctionId], references: [id], onDelete: Cascade)
-  contractor MessContractor      @relation(fields: [contractorId], references: [id], name: "ContractorContracts")
-  institution User     @relation(fields: [institutionId], references: [id], name: "InstitutionContracts")
+  id                  String         @id @default(uuid())
+  terms               String
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  auctionId           String         @unique
+  contractorId        String
+  institutionId       String
+  status              ContractStatus @default(PENDING)
+  contractorAccepted  Boolean        @default(false)
+  institutionAccepted Boolean        @default(false)
+  auction             Auction        @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  contractor          MessContractor @relation(fields: [contractorId], references: [id], name: "ContractorContracts")
+  institution         User           @relation(fields: [institutionId], references: [id], name: "InstitutionContracts")
 
   @@unique([auctionId, contractorId, institutionId])
+  @@index([contractorId])
+  @@index([institutionId])
 }

@@ -160,16 +160,23 @@ const ContractDetailsPage = () => {
       );
 
       if (response.data.success) {
-        setContract((prevContract) =>
-          prevContract
-            ? {
-                ...prevContract,
-                status: response.data.data.status,
-                institutionAccepted: response.data.data.institutionAccepted,
-                contractorAccepted: response.data.data.contractorAccepted,
-              }
-            : null
-        );
+        const nextData = response.data.data;
+        setContract((prevContract) => {
+          if (!prevContract) return null;
+          if (
+            prevContract.status === nextData.status &&
+            prevContract.institutionAccepted === nextData.institutionAccepted &&
+            prevContract.contractorAccepted === nextData.contractorAccepted
+          ) {
+            return prevContract;
+          }
+          return {
+            ...prevContract,
+            status: nextData.status,
+            institutionAccepted: nextData.institutionAccepted,
+            contractorAccepted: nextData.contractorAccepted,
+          };
+        });
       }
     } catch (error) {
       console.error("Failed to fetch contract status:", error);
@@ -178,15 +185,14 @@ const ContractDetailsPage = () => {
 
   useEffect(() => {
     if (
-      contract &&
+      contract?.status &&
       contract.status !== "ACCEPTED" &&
       contract.status !== "TERMINATED"
     ) {
-      const intervalId = setInterval(pollContractStatus, 5000); // Poll every 5 seconds
-
+      const intervalId = setInterval(pollContractStatus, 5000);
       return () => clearInterval(intervalId);
     }
-  }, [contract]);
+  }, [contractId, contract?.status]);
 
   const StatusBadge: React.FC<StatusBadgeProps> = ({ accepted }) => (
     <span

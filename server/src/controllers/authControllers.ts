@@ -6,6 +6,14 @@ import prisma from "../utils/prisma";
 
 export const registerController = async (req: Request, res: Response) => {
   try {
+    if (req.body?.role === "ADMIN") {
+      res.status(403).json({
+        message: "Admin role cannot be self-assigned",
+        success: false,
+      });
+      return;
+    }
+
     const parsedBody = CreateUserSchema.parse(req.body);
     const {
       email,
@@ -19,23 +27,21 @@ export const registerController = async (req: Request, res: Response) => {
       state,
     } = parsedBody;
 
-    // Check if the user already exists
-    const user = await prisma.user.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: {
         email: email,
       },
     });
 
-    if (user) {
+    if (existingUser) {
       res.status(400).json({ message: "Email already exists", success: false });
       return;
     }
 
-    // Hash the password and security answer
     const hashedPassword = await hashPassword(password);
-    const hashedSecurityAnswer = await hashPassword(securityAnswer);
+    const normalizedAnswer = securityAnswer.trim().toLowerCase();
+    const hashedSecurityAnswer = await hashPassword(normalizedAnswer);
 
-    // Create the new user with security question and hashed answer
     const newUser = await prisma.user.create({
       data: {
         email,
@@ -49,6 +55,7 @@ export const registerController = async (req: Request, res: Response) => {
         state,
       },
     });
+
     if (role === "CONTRACTOR") {
       await prisma.messContractor.create({
         data: {
@@ -86,10 +93,9 @@ export const registerController = async (req: Request, res: Response) => {
 
 export const loginController = async (req: Request, res: Response) => {
   try {
-    //Parsing the body according to the schema
-
     const parsedBody = LoginSchema.parse(req.body);
     const { email, password } = parsedBody;
+
     const user = await prisma.user.findUnique({
       where: {
         email: email,
@@ -97,15 +103,17 @@ export const loginController = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      res.status(400).json({ message: "User does not exists", success: false });
+      res.status(400).json({ message: "Invalid credentials", success: false });
       return;
     }
+
     const isPasswordValid = await comparePassword(password, user.password);
     if (!isPasswordValid) {
       res.status(401).json({ message: "Invalid credentials", success: false });
       return;
     }
-    const { password: _, ...userWithoutPassword } = user; // Exclude password from the response
+
+    const { password: _, securityAnswer: __, ...userWithoutPassword } = user;
     res.status(200).json({
       message: "Login successful",
       user: userWithoutPassword,
@@ -126,17 +134,33 @@ export const loginController = async (req: Request, res: Response) => {
     }
 
     console.error("Error in login:", error);
-    res
-      .status(500)
-      .json({ message: "Something went wrong! Try again.", success: false });
+    res.status(500).json({
+      message: "Something went wrong! Try again.",
+      success: false,
+    });
     return;
   }
 };
 
-//For the forgot password functionality
 export const forgotPasswordController = async (req: Request, res: Response) => {
   try {
     const { email, securityQuestion, securityAnswer, newPassword } = req.body;
+
+    if (!email || !securityQuestion || !securityAnswer || !newPassword) {
+      res.status(400).json({
+        message: "All fields are required",
+        success: false,
+      });
+      return;
+    }
+
+    if (typeof newPassword !== "string" || newPassword.length < 6) {
+      res.status(400).json({
+        message: "Password must be at least 6 characters long",
+        success: false,
+      });
+      return;
+    }
 
     const user = await prisma.user.findUnique({
       where: {
@@ -145,26 +169,33 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      res.status(400).json({ message: "User does not exists", success: false });
+      await comparePassword("dummy", "$2a$10$e79e6k4HqL2Q9r8kQ7W0nOBW9hO3sJ1jG7E8g9H0k1L2M3N4O5P6Q");
+      res.status(400).json({
+        message: "Invalid email, security question, or answer",
+        success: false,
+      });
       return;
     }
 
     if (user.securityQuestion !== securityQuestion) {
-      res
-        .status(400)
-        .json({ message: "Invalid security question", success: false });
+      res.status(400).json({
+        message: "Invalid email, security question, or answer",
+        success: false,
+      });
       return;
     }
 
+    const normalizedAnswer = String(securityAnswer).trim().toLowerCase();
     const isAnswerValid = await comparePassword(
-      securityAnswer,
+      normalizedAnswer,
       user.securityAnswer
     );
 
     if (!isAnswerValid) {
-      res
-        .status(400)
-        .json({ message: "Invalid security answer", success: false });
+      res.status(400).json({
+        message: "Invalid email, security question, or answer",
+        success: false,
+      });
       return;
     }
 
@@ -179,15 +210,17 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
       },
     });
 
-    res
-      .status(200)
-      .json({ message: "Password updated successfully", success: true });
+    res.status(200).json({
+      message: "Password updated successfully",
+      success: true,
+    });
     return;
   } catch (error) {
     console.error("Error in forgot password:", error);
-    res
-      .status(500)
-      .json({ message: "Something went wrong! Try again.", success: false });
+    res.status(500).json({
+      message: "Something went wrong! Try again.",
+      success: false,
+    });
     return;
   }
 };
