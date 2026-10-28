@@ -38,7 +38,7 @@ const handler = NextAuth({
             `${backendUrl}/auth/login`,
             { email, password },
             {
-              timeout: 10000,
+              timeout: 30000,
               headers: {
                 "Content-Type": "application/json",
               },

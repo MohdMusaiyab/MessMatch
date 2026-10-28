@@ -31,7 +31,7 @@ const Hero = () => {
       setActiveFeature((prev) => (prev + 1) % features.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [features.length]);
 
   return (
     <div className="relative bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 py-24">

@@ -86,9 +86,11 @@ const RegisterPage: React.FC = () => {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
         requestData
       );
-      setSuccess(response.data.message || "Registration successful!");
+      setSuccess(response.data.message || "Registration successful! Redirecting to login...");
       setLoading(false);
-      router.push("/auth/login");
+      setTimeout(() => {
+        router.push("/auth/login");
+      }, 1500);
     } catch (err) {
       setLoading(false);
 

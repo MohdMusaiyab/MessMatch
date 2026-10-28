@@ -6,7 +6,7 @@ import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import Image from "next/image";
 
 const Header: React.FC = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -62,11 +62,20 @@ const Header: React.FC = () => {
               >
                 Dashboard
               </Link>
+              {session && (
+                <Link
+                  href="/chats"
+                  className="text-neutral-300 hover:text-yellow-500 transition-colors px-3 py-2"
+                >
+                  Chats
+                </Link>
+              )}
             </nav>
 
-            {/* Right Section */}
             <div className="flex items-center space-x-4 ml-auto">
-              {session ? (
+              {status === "loading" ? (
+                <div className="w-24 h-9 bg-neutral-800/60 animate-pulse rounded-lg hidden md:block" />
+              ) : session ? (
                 <div className="relative group hidden md:block">
                   <button className="flex items-center space-x-2 px-4 py-2 bg-neutral-800 border border-neutral-700 rounded-lg hover:border-yellow-500/50 transition-colors">
                     <span className="text-neutral-200 truncate max-w-[120px]">
@@ -75,8 +84,19 @@ const Header: React.FC = () => {
                     <ChevronDown className="h-4 w-4 text-neutral-400 group-hover:text-yellow-500 transition-colors" />
                   </button>
 
-                  {/* Dropdown */}
                   <div className="absolute right-0 mt-2 w-48 py-2 bg-neutral-900 border border-neutral-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                    <Link
+                      href="/dashboard"
+                      className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors"
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/chats"
+                      className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors"
+                    >
+                      Chats
+                    </Link>
                     <Link
                       href="/profile"
                       className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors"
@@ -84,7 +104,7 @@ const Header: React.FC = () => {
                       Profile
                     </Link>
                     <button
-                      onClick={() => signOut()}
+                      onClick={() => signOut({ callbackUrl: "/auth/login" })}
                       className="w-full flex items-center px-4 py-2 text-neutral-300 hover:text-yellow-500 hover:bg-neutral-800/50 transition-colors"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
@@ -147,6 +167,13 @@ const Header: React.FC = () => {
                 {session ? (
                   <>
                     <Link
+                      href="/chats"
+                      className="block text-lg text-neutral-300 hover:text-yellow-500 transition-colors"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Chats
+                    </Link>
+                    <Link
                       href="/profile"
                       className="block text-lg text-neutral-300 hover:text-yellow-500 transition-colors"
                       onClick={() => setIsMobileMenuOpen(false)}
@@ -155,7 +182,7 @@ const Header: React.FC = () => {
                     </Link>
                     <button
                       onClick={() => {
-                        signOut();
+                        signOut({ callbackUrl: "/auth/login" });
                         setIsMobileMenuOpen(false);
                       }}
                       className="block text-lg text-neutral-300 hover:text-yellow-500 transition-colors"

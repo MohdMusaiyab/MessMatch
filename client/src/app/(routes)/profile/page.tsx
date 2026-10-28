@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -40,12 +41,18 @@ interface User {
 }
 
 const ProfilePage = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loadingUser, setLoadingUser] = useState<boolean>(true);
   const [errorUser, setErrorUser] = useState<string | null>(null);
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth/login");
+      return;
+    }
+
     const fetchUserProfile = async () => {
       if (session) {
         try {
@@ -71,7 +78,7 @@ const ProfilePage = () => {
     };
 
     fetchUserProfile();
-  }, [session]);
+  }, [session, status, router]);
   if (errorUser) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">

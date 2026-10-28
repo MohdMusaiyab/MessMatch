@@ -20,10 +20,13 @@ const ForgotPasswordPage: React.FC = () => {
   const [securityAnswer, setSecurityAnswer] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [message, setMessage] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/forgot-password`,
@@ -36,7 +39,9 @@ const ForgotPasswordPage: React.FC = () => {
       );
       if (response.data.success) {
         setMessage(response.data.message);
-        router.push("/auth/login");
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 1200);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -44,6 +49,8 @@ const ForgotPasswordPage: React.FC = () => {
       } else {
         setMessage("An unexpected error occurred. Please try again later.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -167,11 +174,12 @@ const ForgotPasswordPage: React.FC = () => {
               </div>
               <motion.button
                 type="submit"
+                disabled={loading}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-white font-semibold py-3 rounded-md hover:shadow-lg hover:shadow-yellow-600/20 transition-all duration-300"
+                className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-white font-semibold py-3 rounded-md hover:shadow-lg hover:shadow-yellow-600/20 transition-all duration-300 disabled:opacity-50"
               >
-                Reset Password
+                {loading ? "Resetting Password..." : "Reset Password"}
               </motion.button>
               <p className="text-neutral-300 text-sm mt-4 text-center">
                 Remember your password?{" "}

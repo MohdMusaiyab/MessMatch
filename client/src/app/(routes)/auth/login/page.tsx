@@ -40,12 +40,11 @@ export default function SignIn() {
       redirect: false,
     });
 
-    setLoading(false);
-
     if (res?.error) {
-      setError(res.error);
+      setLoading(false);
+      setError(res.error === "CredentialsSignin" ? "Invalid email or password" : res.error);
     } else {
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }
   };
 
@@ -59,12 +58,12 @@ export default function SignIn() {
       redirect: false,
     });
 
-    setLoading(false);
-
     if (res?.error) {
-      setError(res.error);
+      setLoading(false);
+      setError("Guest login failed. Check server connection and database setup.");
     } else {
-      router.push("/dashboard");
+      setShowGuestModal(false);
+      window.location.href = "/dashboard";
     }
   };
 
@@ -220,15 +219,17 @@ export default function SignIn() {
 
                   <button
                     onClick={() => handleGuestLogin("contractor")}
-                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg transition"
+                    disabled={loading}
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg transition disabled:opacity-50"
                   >
-                    Login as Mess Contractor
+                    {loading ? "Signing in..." : "Login as Mess Contractor"}
                   </button>
                   <button
                     onClick={() => handleGuestLogin("institution")}
-                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg transition"
+                    disabled={loading}
+                    className="w-full bg-yellow-600 hover:bg-yellow-700 text-white p-3 rounded-lg transition disabled:opacity-50"
                   >
-                    Login as Institution
+                    {loading ? "Signing in..." : "Login as Institution"}
                   </button>
                   <button
                     onClick={() => setShowGuestModal(false)}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Menu as MenuIcon, X, BookOpen, MessageCircle, Gavel } from 'lucide-react';
+import { Menu as MenuIcon, X, BookOpen, MessageCircle, Gavel, LayoutDashboard } from 'lucide-react';
 
 const SideBarDashBoard = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -11,9 +11,9 @@ const SideBarDashBoard = () => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setIsExpanded(false);
-        setSidebarWidth(150); // Smaller width for mobile
+        setSidebarWidth(150);
       } else {
-        setSidebarWidth(280); // Normal width for larger screens
+        setSidebarWidth(280);
       }
     };
 
@@ -24,9 +24,10 @@ const SideBarDashBoard = () => {
   }, []);
 
   const menuItems = [
+    { href: '/dashboard/contractor', icon: LayoutDashboard, label: 'Overview' },
     { href: '/dashboard/contractor/menu', icon: BookOpen, label: 'My Menu' },
-    { href: '/chats', icon: MessageCircle, label: 'My Chats' },
     { href: '/dashboard/contractor/my-auctions', icon: Gavel, label: 'My Auctions' },
+    { href: '/chats', icon: MessageCircle, label: 'My Chats' },
   ];
 
   return (
@@ -35,7 +36,6 @@ const SideBarDashBoard = () => {
       animate={{ width: isExpanded ? sidebarWidth : 64 }}
       className="relative h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 border-r border-yellow-900/20 shadow-xl flex-shrink-0 md:relative fixed z-40"
     >
-      {/* Toggle Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="absolute -right-3 top-6 bg-yellow-600 rounded-full p-1.5 hover:bg-yellow-500 transition-colors duration-300 z-50"
@@ -43,7 +43,6 @@ const SideBarDashBoard = () => {
         {isExpanded ? <X size={16} /> : <MenuIcon size={16} />}
       </button>
 
-      {/* Logo Section */}
       <div className="p-6">
         <motion.div
           initial={false}
@@ -54,7 +53,6 @@ const SideBarDashBoard = () => {
         </motion.div>
       </div>
 
-      {/* Navigation Links */}
       <nav className="overflow-hidden">
         <ul className="space-y-2 px-2">
           {menuItems.map((item, index) => (
@@ -66,7 +64,7 @@ const SideBarDashBoard = () => {
             >
               <Link 
                 href={item.href}
-                className={!isExpanded ? 'pointer-events-none' : ''}
+                title={item.label}
               >
                 <motion.div
                   whileHover={{ x: 6 }}
