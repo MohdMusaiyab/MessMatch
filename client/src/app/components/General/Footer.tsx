@@ -7,8 +7,9 @@ import { Github, Twitter, Linkedin, Mail } from "lucide-react";
 const Footer = () => {
   const navLinks = [
     { name: "Home", href: "/" },
-    { name: "About", href: "/about" },
+    { name: "Explore", href: "/explore" },
     { name: "Services", href: "/services" },
+    { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
 
@@ -16,42 +17,50 @@ const Footer = () => {
     {
       icon: <Github className="w-5 h-5" />,
       href: "https://github.com/mohdMusaiyab/",
+      label: "GitHub",
     },
     {
       icon: <Twitter className="w-5 h-5" />,
       href: "https://x.com/mohd_musaiyab",
+      label: "Twitter",
     },
     {
       icon: <Linkedin className="w-5 h-5" />,
       href: "https://www.linkedin.com/in/mohd-musaiyab/",
+      label: "LinkedIn",
     },
-    { icon: <Mail className="w-5 h-5" />, href: "mailto:musaiyab2003@gmail.com" },
+    {
+      icon: <Mail className="w-5 h-5" />,
+      href: "mailto:musaiyab2003@gmail.com",
+      label: "Email",
+    },
   ];
 
   return (
-    <footer className="bg-gradient-to-b from-neutral-900 to-neutral-950 text-neutral-300 py-12 border-t border-yellow-900/20">
+    <footer className="bg-neutral-950 text-neutral-300 py-14 border-t border-neutral-800">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
-          {/* Company Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="col-span-1 md:col-span-2"
           >
-            <h5 className="text-xl font-semibold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent mb-4">
+            <h5 className="text-2xl font-black bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 bg-clip-text text-transparent mb-4">
               MessMatch
             </h5>
-            <p className="text-neutral-400 mb-6 max-w-md">
-              Connecting quality mess contractors with institutions for seamless
-              catering solutions.
+            <p className="text-neutral-400 mb-6 max-w-md text-sm leading-relaxed">
+              The marketplace connecting universities, corporate parks, and accredited mess contractors for transparent dining auctions and culinary excellence.
             </p>
             <div className="flex space-x-4">
               {socialLinks.map((social, index) => (
                 <motion.a
                   key={index}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
                   whileHover={{ scale: 1.1, color: "#EAB308" }}
-                  className="text-neutral-400 hover:text-yellow-500 transition-colors duration-300"
+                  className="text-neutral-400 hover:text-yellow-400 transition-colors duration-200 p-2 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-yellow-500/40"
                 >
                   {social.icon}
                 </motion.a>
@@ -59,19 +68,20 @@ const Footer = () => {
             </div>
           </motion.div>
 
-          {/* Quick Links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.1 }}
           >
-            <h6 className="text-white font-semibold mb-4">Quick Links</h6>
-            <ul className="space-y-3">
+            <h6 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+              Navigation
+            </h6>
+            <ul className="space-y-2.5 text-sm">
               {navLinks.map((link, index) => (
                 <li key={index}>
                   <Link
                     href={link.href}
-                    className="text-neutral-400 hover:text-yellow-500 transition-colors duration-300"
+                    className="text-neutral-400 hover:text-yellow-400 transition-colors duration-200"
                   >
                     {link.name}
                   </Link>
@@ -80,17 +90,24 @@ const Footer = () => {
             </ul>
           </motion.div>
 
-          {/* Contact Info */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.2 }}
           >
-            <h6 className="text-white font-semibold mb-4">Contact Us</h6>
-            <div className="space-y-3 text-neutral-400">
-              <p>MessMatch</p>
+            <h6 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">
+              Platform & Support
+            </h6>
+            <div className="space-y-2.5 text-sm text-neutral-400">
+              <p>New Delhi, India</p>
               <p>musaiyab2003@gmail.com</p>
-              <p>+91 1234567890</p>
+              <p>+91 98765 43210</p>
+              <div className="pt-2">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Systems Operational
+                </span>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -98,10 +115,11 @@ const Footer = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-12 pt-6 border-t border-neutral-800 text-center text-neutral-500"
+          transition={{ delay: 0.3 }}
+          className="mt-12 pt-6 border-t border-neutral-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 gap-4"
         >
           <p>© {new Date().getFullYear()} MessMatch. All rights reserved.</p>
+          <p>Built for institutional dining transparency and student satisfaction.</p>
         </motion.div>
       </div>
     </footer>
