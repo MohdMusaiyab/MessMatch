@@ -1,4 +1,3 @@
-// src/types/next-auth.d.ts
 import "next-auth";
 import "next-auth/jwt";
 
@@ -10,12 +9,14 @@ declare module "next-auth" {
       email: string;
       role: string;
     };
+    accessToken?: string;
   }
   interface User {
     id: string;
     name: string;
     email: string;
     role: string;
+    accessToken?: string;
   }
 }
 
@@ -25,5 +26,6 @@ declare module "next-auth/jwt" {
     name: string;
     email: string;
     role: string;
+    accessToken?: string;
   }
 }

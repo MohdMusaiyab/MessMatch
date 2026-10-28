@@ -1,7 +1,8 @@
-"use client"; // Mark as a client component
+"use client";
 
 import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
+import "@/lib/api";
 
 export default function SessionProviderWrapper({
   children,

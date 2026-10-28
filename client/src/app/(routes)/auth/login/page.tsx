@@ -19,7 +19,6 @@ export default function SignIn() {
 
   useEffect(() => {
     if (session) {
-      // Redirect to dashboard instead of home
       router.push("/dashboard");
     }
   }, [session, router]);
@@ -54,18 +53,9 @@ export default function SignIn() {
     setLoading(true);
     setError("");
 
-    const email =
-      role === "contractor"
-        ? process.env.NEXT_PUBLIC_CONTRACTOR_EMAIL
-        : process.env.NEXT_PUBLIC_INSTITUTION_EMAIL;
-    const password =
-      role === "contractor"
-        ? process.env.NEXT_PUBLIC_CONTRACTOR_PASSWORD
-        : process.env.NEXT_PUBLIC_INSTITUTION_PASSWORD;
-
     const res = await signIn("credentials", {
-      email,
-      password,
+      demoRole: role,
+      isDemo: "true",
       redirect: false,
     });
 
@@ -80,13 +70,11 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left Side */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         className="hidden lg:flex flex-col w-2/3 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 p-12 justify-center relative overflow-hidden"
       >
-        {/* Decorative Elements */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-yellow-500/20 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-0 w-[30rem] h-[30rem] bg-gradient-to-tl from-yellow-600/10 to-transparent rounded-full blur-3xl" />
 
@@ -101,17 +89,14 @@ export default function SignIn() {
         </div>
       </motion.div>
 
-      {/* Right Side - Login Form */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         className="flex-1 flex items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-950 relative overflow-hidden"
       >
-        {/* Corner Triangles */}
         <div className="absolute top-0 right-0 w-0 h-0 border-t-[100px] border-r-[100px] border-t-yellow-500/20 border-r-transparent" />
         <div className="absolute bottom-0 left-0 w-0 h-0 border-b-[100px] border-l-[100px] border-b-yellow-500/20 border-l-transparent" />
 
-        {/* Glow Effects */}
         <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-yellow-500/5" />
 
         <div className="w-full max-w-md p-8 relative z-10">
@@ -219,11 +204,11 @@ export default function SignIn() {
             {showGuestModal && (
               <div
                 className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-                onClick={() => setShowGuestModal(false)} // Close when clicking backdrop
+                onClick={() => setShowGuestModal(false)}
               >
                 <div
                   className="bg-neutral-900 p-6 rounded-xl shadow-2xl w-[90%] max-w-sm space-y-4 border border-yellow-900/30 relative"
-                  onClick={(e) => e.stopPropagation()} // Prevent click bubbling
+                  onClick={(e) => e.stopPropagation()}
                 >
                   <h3 className="text-white text-lg font-semibold text-center">
                     Continue as Guest
