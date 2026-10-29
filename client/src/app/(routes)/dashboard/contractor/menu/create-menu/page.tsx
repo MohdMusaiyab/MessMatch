@@ -1,17 +1,20 @@
 "use client";
 import React, { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, Utensils } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
 const CreateMenuPage: React.FC = () => {
+  const router = useRouter();
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [items, setItems] = useState<string[]>([""]);
   const [pricePerHead, setPricePerHead] = useState<number | string>("");
   const [type, setType] = useState<"VEG" | "NON_VEG" | "BOTH">("VEG");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddItem = () => {
     setItems([...items, ""]);
@@ -29,6 +32,7 @@ const CreateMenuPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const res = await axios.post(
@@ -44,10 +48,7 @@ const CreateMenuPage: React.FC = () => {
 
       if (res.status === 201) {
         toast.success("Menu created successfully!");
-        setName("");
-        setItems([""]);
-        setPricePerHead("");
-        setType("VEG");
+        router.push("/dashboard/contractor/menu");
       } else {
         toast.error("Failed to create menu.");
       }
@@ -57,6 +58,8 @@ const CreateMenuPage: React.FC = () => {
       } else {
         toast.error("An unexpected error occurred.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -167,12 +170,13 @@ const CreateMenuPage: React.FC = () => {
           </div>
 
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+            whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
             type="submit"
-            className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-lg hover:shadow-yellow-500/20"
+            disabled={isSubmitting}
+            className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-lg hover:shadow-yellow-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Menu
+            {isSubmitting ? "Creating Menu..." : "Create Menu"}
           </motion.button>
         </motion.form>
       </div>

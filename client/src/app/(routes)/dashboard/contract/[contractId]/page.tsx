@@ -211,19 +211,21 @@ const ContractDetailsPage = () => {
 
   const canToggleStatus = () => {
     if (!contract || !session?.user) return false;
+    if (contract.status === "ACCEPTED" || contract.status === "TERMINATED") return false;
 
     if (session.user.role === "CONTRACTOR") {
-      return (
-        session.user.id === contract.contractor.userId &&
-        contract.status !== "ACCEPTED"
-      );
+      return session.user.id === contract.contractor.userId;
     }
 
-    return (
-      session.user.id === contract.institution.id &&
-      contract.status !== "ACCEPTED"
-    );
+    return session.user.id === contract.institution.id;
   };
+
+  const isPartyToContract = Boolean(
+    session?.user &&
+      contract &&
+      (session.user.id === contract.institution.id ||
+        session.user.id === contract.contractor.userId)
+  );
 
   const canTerminateContract = () => {
     if (!contract || !session?.user) return false;
@@ -415,10 +417,10 @@ const ContractDetailsPage = () => {
                   {contract?.terms}
                 </p>
               </div>
-              {contract?.status === "PENDING" && (
+              {contract?.status === "PENDING" && isPartyToContract && (
                 <button
                   onClick={() => setShowUpdateTermsModal(true)}
-                  className="px-6 py-3 rounded-lg font-medium bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-all duration-200"
+                  className="px-6 py-3 rounded-lg font-medium bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-all duration-200 mt-4 inline-block"
                 >
                   Update Terms
                 </button>

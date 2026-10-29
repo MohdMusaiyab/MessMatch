@@ -4,6 +4,7 @@ import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Building2, Utensils, ArrowLeft } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
 
 interface Contract {
   id: string;
@@ -65,6 +66,7 @@ const CreateContractPage = () => {
   const [error, setError] = useState("");
   const { auctionId } = useParams();
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchContractDetails = async () => {
@@ -98,6 +100,7 @@ const CreateContractPage = () => {
       );
   
       if (response.data.success) {
+        toast.success("Contract created and issued successfully!");
         if ("id" in response.data.data) {
           router.push(`/dashboard/contract/${response.data.data.id}`);
           return;
@@ -106,10 +109,14 @@ const CreateContractPage = () => {
           return;
         }
       } else {
-        setError(response.data.message || "Failed to create contract");
+        const msg = response.data.message || "Failed to create contract";
+        setError(msg);
+        toast.error(msg);
       }
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to create contract");
+      const msg = err?.response?.data?.message || "Failed to create contract";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setCreatingContract(false);
     }

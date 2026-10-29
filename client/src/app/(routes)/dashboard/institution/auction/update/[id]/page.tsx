@@ -52,6 +52,10 @@ const AuctionDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+  const [isUpdatingAuction, setIsUpdatingAuction] = useState<boolean>(false);
+  const [isTogglingAuction, setIsTogglingAuction] = useState<boolean>(false);
+  const [acceptingBidId, setAcceptingBidId] = useState<string | null>(null);
+  const [isRemovingWinner, setIsRemovingWinner] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAuction = async () => {
@@ -76,6 +80,7 @@ const AuctionDetail = () => {
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsUpdatingAuction(true);
     try {
       const response = await axios.put<{ message: string; data: Auction }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/update/${id}`,
@@ -87,10 +92,13 @@ const AuctionDetail = () => {
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to update auction. Please try again later.");
       setError("Failed to update auction. Please try again later.");
+    } finally {
+      setIsUpdatingAuction(false);
     }
   };
 
   const handleCloseAuction = async () => {
+    setIsTogglingAuction(true);
     try {
       const response = await axios.delete<{ message: string; data: Auction }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/delete/${id}`,
@@ -101,10 +109,13 @@ const AuctionDetail = () => {
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to close auction. Please try again later.");
       setError("Failed to close auction. Please try again later.");
+    } finally {
+      setIsTogglingAuction(false);
     }
   };
 
   const handleOpenAuction = async () => {
+    setIsTogglingAuction(true);
     try {
       const response = await axios.put<{ message: string; data: Auction }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/open-auction/${id}`,
@@ -116,10 +127,13 @@ const AuctionDetail = () => {
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to open auction. Please try again later.");
       setError("Failed to open auction. Please try again later.");
+    } finally {
+      setIsTogglingAuction(false);
     }
   };
 
   const handleAcceptBid = async (bidId: string) => {
+    setAcceptingBidId(bidId);
     try {
       const response = await axios.put<{
         message: string;
@@ -152,13 +166,15 @@ const AuctionDetail = () => {
   
       toast.success(response.data.message || "Bid accepted successfully!");
     } catch (err: any) {
-      console.error("Accept bid error:", err);
       toast.error(err?.response?.data?.message || "Failed to accept bid. Please try again later.");
       setError("Failed to accept bid. Please try again later.");
+    } finally {
+      setAcceptingBidId(null);
     }
   };
 
   const handleRemoveWinner = async () => {
+    setIsRemovingWinner(true);
     try {
       const response = await axios.put<{ message: string }>(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/remove-winner`,
@@ -181,6 +197,8 @@ const AuctionDetail = () => {
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to remove winner. Please try again later.");
       setError("Failed to remove winner. Please try again later.");
+    } finally {
+      setIsRemovingWinner(false);
     }
   };
 
@@ -257,26 +275,29 @@ const AuctionDetail = () => {
             <div className="flex flex-wrap gap-4">
               <button
                 type="submit"
-                className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-950 px-6 py-3 rounded-md hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 font-medium"
+                disabled={isUpdatingAuction}
+                className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-950 px-6 py-3 rounded-md hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Update Auction
+                {isUpdatingAuction ? "Updating Auction..." : "Update Auction"}
               </button>
               {auction.isOpen ? (
                 <button
                   type="button"
                   onClick={handleCloseAuction}
-                  className="bg-red-500/10 text-red-500 border border-red-500/20 px-6 py-3 rounded-md hover:bg-red-500/20 transition-all duration-300 font-medium"
+                  disabled={isTogglingAuction}
+                  className="bg-red-500/10 text-red-500 border border-red-500/20 px-6 py-3 rounded-md hover:bg-red-500/20 transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Close Auction
+                  {isTogglingAuction ? "Closing Auction..." : "Close Auction"}
                 </button>
               ) : (
                 !auction.contract && (
                   <button
                     type="button"
                     onClick={handleOpenAuction}
-                    className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-6 py-3 rounded-md hover:bg-emerald-500/20 transition-all duration-300 font-medium"
+                    disabled={isTogglingAuction}
+                    className="bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-6 py-3 rounded-md hover:bg-emerald-500/20 transition-all duration-300 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Open Auction Again
+                    {isTogglingAuction ? "Opening Auction..." : "Open Auction Again"}
                   </button>
                 )
               )}
@@ -338,9 +359,10 @@ const AuctionDetail = () => {
                     {isCreator && (
                       <button
                         onClick={handleRemoveWinner}
-                        className="bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded-md hover:bg-red-500/20 transition-all duration-300 text-sm"
+                        disabled={isRemovingWinner}
+                        className="bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded-md hover:bg-red-500/20 transition-all duration-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        Remove Winner
+                        {isRemovingWinner ? "Removing..." : "Remove Winner"}
                       </button>
                     )}
                     {!auction.contract && (
@@ -397,9 +419,10 @@ const AuctionDetail = () => {
                   {isCreator && !auction.contract && !auction.winner && (
                     <button
                       onClick={() => handleAcceptBid(bid.id)}
-                      className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-950 px-4 py-2 rounded-md hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 font-medium whitespace-nowrap"
+                      disabled={acceptingBidId !== null}
+                      className="bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-950 px-4 py-2 rounded-md hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Accept Bid
+                      {acceptingBidId === bid.id ? "Accepting..." : "Accept Bid"}
                     </button>
                   )}
                 </div>

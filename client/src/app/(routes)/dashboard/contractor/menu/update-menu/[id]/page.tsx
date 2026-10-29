@@ -20,6 +20,7 @@ const UpdateMenuPage = () => {
   const { toast } = useToast();
   const [menu, setMenu] = useState<Menu | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Menu>>({
     name: "",
@@ -68,6 +69,7 @@ const UpdateMenuPage = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsUpdating(true);
     try {
       const updatedFormData = {
         ...formData,
@@ -83,6 +85,8 @@ const UpdateMenuPage = () => {
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Failed to update menu. Please try again.");
       setError(error.response?.data?.message || "Failed to update menu. Please try again.");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -178,12 +182,13 @@ const UpdateMenuPage = () => {
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: isUpdating ? 1 : 1.02 }}
+              whileTap={{ scale: isUpdating ? 1 : 0.98 }}
               type="submit"
-              className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-lg hover:shadow-yellow-500/20"
+              disabled={isUpdating}
+              className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-500 hover:to-yellow-600 text-white font-medium py-3 px-6 rounded-md transition-all duration-300 shadow-lg hover:shadow-yellow-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Update Menu
+              {isUpdating ? "Updating Menu..." : "Update Menu"}
             </motion.button>
           </motion.form>
         )}

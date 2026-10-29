@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { useToast } from "@/context/ToastContext";
 
 export const UpdateTermsModal = ({
   contractId,
@@ -12,6 +13,7 @@ export const UpdateTermsModal = ({
   onClose: () => void;
   onUpdate: (newTerms: string) => void;
 }) => {
+  const { toast } = useToast();
   const [terms, setTerms] = useState(currentTerms);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,14 +31,18 @@ export const UpdateTermsModal = ({
       );
 
       if (response.data.success) {
-        onUpdate(terms); // Update the UI with new terms
-        onClose(); // Close the modal
+        onUpdate(terms);
+        toast.success("Contract terms updated successfully!");
+        onClose();
       } else {
-        setError(response.data.message || "Failed to update terms.");
+        const msg = response.data.message || "Failed to update terms.";
+        setError(msg);
+        toast.error(msg);
       }
-    } catch (error) {
-      console.error("Error updating terms:", error);
-      setError("Failed to update terms. Please try again later.");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Failed to update terms. Please try again later.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

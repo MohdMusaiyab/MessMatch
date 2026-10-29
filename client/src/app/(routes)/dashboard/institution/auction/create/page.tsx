@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useToast } from "@/context/ToastContext";
 
 const CreateAuctionPage = () => {
   const router = useRouter();
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -25,7 +27,7 @@ const CreateAuctionPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setLoading(true); // Set loading before making the request
+    setLoading(true);
 
     const requestData = { ...formData };
 
@@ -37,16 +39,16 @@ const CreateAuctionPage = () => {
       );
 
       if (response.status === 201) {
-        // Delay for UX so the loading effect is visible
-        setTimeout(() => {
-          router.push("/dashboard/institution/auction");
-        }, 1500); // 1.5s delay before redirecting
+        toast.success("Auction created successfully!");
+        router.push("/dashboard/institution/auction");
       } else {
         throw new Error(response.data.message || "Failed to create auction");
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong.");
-      setLoading(false); // Stop loading if an error occurs
+      const msg = err.response?.data?.message || "Something went wrong.";
+      setError(msg);
+      toast.error(msg);
+      setLoading(false);
     }
   };
 
