@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { ShieldAlert } from "lucide-react";
+import { isDemoAccount } from "@/lib/demo";
 
 interface Menu {
   id: string;
@@ -79,6 +81,7 @@ const ProfilePage = () => {
 
     fetchUserProfile();
   }, [session, status, router]);
+
   if (errorUser) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
@@ -86,6 +89,7 @@ const ProfilePage = () => {
       </div>
     );
   }
+
   if (loadingUser) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
@@ -108,6 +112,8 @@ const ProfilePage = () => {
     );
   }
 
+  const isDemo = Boolean(session?.user?.isDemo || isDemoAccount(user.email));
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -128,9 +134,17 @@ const ProfilePage = () => {
           animate={{ y: 0, opacity: 1 }}
           className="backdrop-blur-md bg-neutral-900/50 rounded-xl p-6 border border-yellow-900/20 shadow-xl mb-8"
         >
-          <h2 className="text-2xl font-semibold text-neutral-300 mb-6">
-            Your Information
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-neutral-300">
+              Your Information
+            </h2>
+            {isDemo && (
+              <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-yellow-400 bg-yellow-500/10 rounded-full border border-yellow-500/30">
+                Demo Account
+              </span>
+            )}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="col-span-1">
               <InfoItem label="Name" value={user.name} />
@@ -151,12 +165,30 @@ const ProfilePage = () => {
               <InfoItem label="State" value={user.state} />
             </div>
           </div>
-          <Link
-            href="/profile/update"
-            className="inline-block mt-6 px-6 py-2.5 bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-100 rounded-lg font-medium transition-all duration-300 hover:from-yellow-500 hover:to-yellow-600 hover:shadow-lg"
-          >
-            Update Profile
-          </Link>
+
+          {isDemo ? (
+            <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+              <div className="flex items-center gap-3">
+                <ShieldAlert className="w-5 h-5 text-yellow-400 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-white">Demonstration Account</p>
+                  <p className="text-xs text-neutral-400">
+                    Profile credentials, email, and password updates are locked on demo accounts to preserve evaluation access for all users.
+                  </p>
+                </div>
+              </div>
+              <span className="self-start sm:self-center px-3 py-1 text-xs font-semibold uppercase tracking-wider text-yellow-400 bg-yellow-500/20 rounded-md border border-yellow-500/30 shrink-0">
+                Read-Only
+              </span>
+            </div>
+          ) : (
+            <Link
+              href="/profile/update"
+              className="inline-block mt-6 px-6 py-2.5 bg-gradient-to-r from-yellow-600 to-yellow-700 text-neutral-100 rounded-lg font-medium transition-all duration-300 hover:from-yellow-500 hover:to-yellow-600 hover:shadow-lg"
+            >
+              Update Profile
+            </Link>
+          )}
         </motion.div>
 
         {user.role === "CONTRACTOR" && user.contractor && (
@@ -195,7 +227,7 @@ const ProfilePage = () => {
                     <p className="text-neutral-300 mb-2">
                       Price per head:{" "}
                       <span className="text-yellow-500">
-                        ${menu.pricePerHead}
+                        ₹{menu.pricePerHead}
                       </span>
                     </p>
                     <p className="text-neutral-400 mb-2 line-clamp-2">
@@ -235,14 +267,14 @@ const ProfilePage = () => {
                     whileHover={{ scale: 1.02 }}
                     className="backdrop-blur-sm bg-neutral-900/30 rounded-lg p-4 border border-yellow-900/20"
                   >
-                    <h1 className="text-lg font-medium text-yellow-500 hover:text-yellow-400 transition-colors duration-300">
+                    <h3 className="text-lg font-medium text-yellow-500 hover:text-yellow-400 transition-colors duration-300">
                       {auction.title}
-                    </h1>
+                    </h3>
                     <p className="text-neutral-400 mt-2 mb-4 line-clamp-2">
                       {auction.description}
                     </p>
                     <Link
-                      href={`dashboard/institution/auction/update/${auction.id}`}
+                      href={`/dashboard/institution/auction/update/${auction.id}`}
                       className="text-yellow-500 hover:text-yellow-400 transition-colors duration-300"
                     >
                       View Auction →

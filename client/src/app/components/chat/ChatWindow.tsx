@@ -36,16 +36,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ chatId }) => {
     const fetchMessages = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get<{ data: Message[] }>(
+        const response = await axios.get<{
+          data: Message[];
+          otherUser?: { id: string; name: string; email: string };
+        }>(
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/chat/${chatId}`,
           { withCredentials: true }
         );
-        setMessages(response.data.data);
+        setMessages(response.data.data || []);
         
-        // Extract other user's name from first message that isn't from current user
-        const otherUserMessage = response.data.data.find(msg => msg.sender.id !== userId);
-        if (otherUserMessage) {
-          setOtherUserName(otherUserMessage.sender.name);
+        if (response.data.otherUser?.name) {
+          setOtherUserName(response.data.otherUser.name);
+        } else {
+          const otherUserMessage = response.data.data?.find(msg => msg.sender.id !== userId);
+          if (otherUserMessage) {
+            setOtherUserName(otherUserMessage.sender.name);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch messages:", error);

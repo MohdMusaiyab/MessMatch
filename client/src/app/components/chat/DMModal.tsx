@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 interface DMModalProps {
-  recipientId: string; // ID of the user you're messaging
+  recipientId: string;
 }
 
 const DMModal: React.FC<DMModalProps> = ({ recipientId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
-  const senderId = session?.user?.id; // Logged-in user's ID
+  const senderId = session?.user?.id;
 
   const handleCreateChat = async () => {
     if (!senderId || !recipientId) return;
@@ -20,7 +20,6 @@ const DMModal: React.FC<DMModalProps> = ({ recipientId }) => {
     setIsLoading(true);
 
     try {
-      // Call the createChatController
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/create-chat`,
         { user1Id: senderId, user2Id: recipientId },
@@ -28,10 +27,9 @@ const DMModal: React.FC<DMModalProps> = ({ recipientId }) => {
       );
 
       if (response.data.success) {
-        // Smooth navigation with a slight delay
-        setTimeout(() => {
-          router.push(`/chats`);
-        }, 500); // 0.5-second delay for smoother UX
+        const chatId = response.data.data?.id;
+        const targetUrl = chatId ? `/chats?chatId=${chatId}` : "/chats";
+        router.push(targetUrl);
       }
     } catch (error) {
       console.error("Failed to create chat:", error);

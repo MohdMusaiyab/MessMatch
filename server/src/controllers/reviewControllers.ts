@@ -31,6 +31,20 @@ export const addReviewController = async (req: Request, res: Response) => {
       res.status(400).json({ message: "Comment is required", success: false });
       return;
     }
+    if (userId === profileId) {
+      res.status(400).json({
+        message: "You cannot review your own profile.",
+        success: false,
+      });
+      return;
+    }
+    if (req.role === "CONTRACTOR") {
+      res.status(403).json({
+        message: "Only institutions can leave reviews for contractors.",
+        success: false,
+      });
+      return;
+    }
     const contractor = await prisma.messContractor.findFirst({
       where: {
         userId: profileId,

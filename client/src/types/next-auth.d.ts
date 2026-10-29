@@ -8,6 +8,7 @@ declare module "next-auth" {
       name: string;
       email: string;
       role: string;
+      isDemo?: boolean;
     };
     accessToken?: string;
   }
@@ -16,6 +17,7 @@ declare module "next-auth" {
     name: string;
     email: string;
     role: string;
+    isDemo?: boolean;
     accessToken?: string;
   }
 }
@@ -26,6 +28,7 @@ declare module "next-auth/jwt" {
     name: string;
     email: string;
     role: string;
+    isDemo?: boolean;
     accessToken?: string;
   }
 }

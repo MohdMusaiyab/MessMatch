@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import axios from "axios";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -41,6 +42,7 @@ interface User {
 
 const UserProfilePage = () => {
   const { id } = useParams();
+  const { data: session } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,21 +65,16 @@ const UserProfilePage = () => {
           }
         } catch (err) {
           if (axios.isAxiosError(err)) {
-            // Handle Axios-specific errors
             if (err.response) {
-              // Server responded with an error (e.g., 4xx or 5xx)
               setError(
                 err.response.data.message || "An error occurred while fetching user information."
               );
             } else if (err.request) {
-              // No response received (e.g., network error)
               setError("Network error. Please check your internet connection.");
             } else {
-              // Other Axios errors (e.g., configuration issues)
               setError("An unexpected error occurred. Please try again later.");
             }
           } else {
-            // Handle non-Axios errors
             setError("An unexpected error occurred. Please try again later.");
           }
         } finally {
@@ -106,13 +103,7 @@ const UserProfilePage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-red-400 bg-red-900/20 px-6 py-4 rounded-lg border border-red-500/20"
-        >
-          {error}
-        </motion.div>
+        <div className="text-red-500 text-xl">{error}</div>
       </div>
     );
   }
@@ -132,16 +123,18 @@ const UserProfilePage = () => {
       className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 py-12 px-4 sm:px-6"
     >
       <div className="max-w-4xl mx-auto">
-        <motion.h1
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          className="text-4xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent"
-        >
-          {user.name}&apos;s Profile
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <motion.h1
+            initial={{ y: -20 }}
+            animate={{ y: 0 }}
+            className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent"
+          >
+            {user.name}&apos;s Profile
+          </motion.h1>
+          {session?.user?.id && session.user.id !== user.id && (
             <DMModal recipientId={id as string} />
-          </div>
-        </motion.h1>
+          )}
+        </div>
 
         <motion.div
           initial={{ y: 20, opacity: 0 }}
@@ -197,7 +190,7 @@ const UserProfilePage = () => {
                           <p className="text-neutral-300 mb-2">
                             Price per head:{" "}
                             <span className="text-yellow-500">
-                              ${menu.pricePerHead}
+                              ₹{menu.pricePerHead}
                             </span>
                           </p>
                           <p className="text-neutral-400 mb-2">
@@ -266,8 +259,8 @@ const InfoItem = ({
   label: string;
   value: string | undefined;
 }) => (
-  <div>
-    <span className="text-neutral-400 block mb-1">{label}</span>
+  <div className="bg-neutral-900/30 backdrop-blur-sm rounded-lg p-4 border border-yellow-900/20">
+    <span className="text-neutral-400 text-sm block mb-1">{label}</span>
     <span className="text-neutral-300">{value}</span>
   </div>
 );

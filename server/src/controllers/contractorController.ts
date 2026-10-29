@@ -486,6 +486,9 @@ export const getLatestAuctionsController = async (
       where: {},
       select: {
         id: true,
+        title: true,
+        description: true,
+        isOpen: true,
         createdAt: true,
         creator: {
           select: {

@@ -142,7 +142,7 @@ const Page = () => {
                     <p className="text-neutral-300 mt-2">
                       Price per head:{" "}
                       <span className="text-yellow-500">
-                        ${menu.pricePerHead.toFixed(2)}
+                        ₹{menu.pricePerHead.toFixed(2)}
                       </span>
                     </p>
                     <p className="text-neutral-400 mb-4">Type: {menu.type}</p>

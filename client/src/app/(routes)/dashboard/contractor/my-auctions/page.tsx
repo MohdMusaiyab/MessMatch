@@ -19,11 +19,15 @@ const MyBids = () => {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/auction/my-bids`,
           { withCredentials: true }
         );
-        setBids(response.data.data);
+        setBids(response.data.data || []);
       } catch (err: any) {
-        const errorMessage =
-          err.response?.data?.message || "Something went wrong.";
-        setError(errorMessage);
+        if (err.response?.status === 404) {
+          setBids([]);
+        } else {
+          const errorMessage =
+            err.response?.data?.message || "Something went wrong.";
+          setError(errorMessage);
+        }
       } finally {
         setLoading(false);
       }

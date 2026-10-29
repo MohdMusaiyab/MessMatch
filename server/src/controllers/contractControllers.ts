@@ -72,6 +72,8 @@ export const fetDetailsForCreateContract = async (
       message: "No existing contracts found. You can create a new contract.",
       winnerId: auction.winnerId,
       creatorId: auction.creatorId,
+      winnerName: auction.winner?.user?.name || null,
+      winnerEmail: auction.winner?.user?.email || null,
     });
     return;
   } catch (error) {
@@ -227,6 +229,14 @@ export const getSingleContractDetails = async (req: Request, res: Response) => {
       });
       return;
     }
+    const userId = req.userId;
+    if (userId !== contract.institution.id && userId !== contract.contractor.userId) {
+      res.status(403).json({
+        success: false,
+        message: "You are not authorized to view this contract.",
+      });
+      return;
+    }
     res.status(200).json({
       success: true,
       message: "Contract details found.",
@@ -277,9 +287,15 @@ export const toggleStatusController = async (req: Request, res: Response) => {
       });
       return;
     }
+    if (contract.status === "TERMINATED") {
+      res.status(400).json({
+        success: false,
+        message: "Cannot modify a terminated contract.",
+      });
+      return;
+    }
     let updatedContract;
     if (userId === contract.institutionId) {
-      // Toggle institution acceptance
       updatedContract = await prisma.contract.update({
         where: { id: contractId },
         data: { institutionAccepted: !contract.institutionAccepted },
@@ -300,12 +316,16 @@ export const toggleStatusController = async (req: Request, res: Response) => {
       updatedContract.institutionAccepted &&
       updatedContract.contractorAccepted
     ) {
-      await prisma.contract.update({
+      updatedContract = await prisma.contract.update({
         where: { id: contractId },
         data: { status: "ACCEPTED" },
       });
+    } else if (contract.status === "ACCEPTED") {
+      updatedContract = await prisma.contract.update({
+        where: { id: contractId },
+        data: { status: "PENDING" },
+      });
     }
-    //When this happens then on /contract/:contractId page , things will be changed ,show option to terminate and no update button then, till then user can have changes
     res.status(200).json({
       success: true,
       message: "Contract acceptance status updated.",
@@ -344,6 +364,12 @@ export const getContractStatusController = async (
         status: true,
         institutionAccepted: true,
         contractorAccepted: true,
+        institutionId: true,
+        contractor: {
+          select: {
+            userId: true,
+          },
+        },
       },
     });
 
@@ -355,9 +381,25 @@ export const getContractStatusController = async (
       return;
     }
 
+    const userId = req.userId;
+    if (
+      userId !== contractStatus.institutionId &&
+      userId !== contractStatus.contractor?.userId
+    ) {
+      res.status(403).json({
+        success: false,
+        message: "You are not authorized to access this contract status.",
+      });
+      return;
+    }
+
     res.status(200).json({
       success: true,
-      data: contractStatus,
+      data: {
+        status: contractStatus.status,
+        institutionAccepted: contractStatus.institutionAccepted,
+        contractorAccepted: contractStatus.contractorAccepted,
+      },
     });
     return;
   } catch (error) {
@@ -501,16 +543,17 @@ export const getMyContractsController = async (req: Request, res: Response) => {
           {
             institutionId: userId,
           },
-          { contractor: { userId: userId } }, // Access userId inside contractor
+          { contractor: { userId: userId } },
         ],
       },
       select: {
+        id: true,
+        status: true,
         auction: {
           select: {
             title: true,
           },
         },
-        id: true,
       },
     });
     res.status(200).json({
@@ -556,12 +599,26 @@ export const updateTermsController = async (req: Request, res: Response) => {
         status: true,
         contractorAccepted: true,
         institutionAccepted: true,
+        institutionId: true,
+        contractor: {
+          select: {
+            userId: true,
+          },
+        },
       },
     });
     if (!contract) {
       res.status(404).json({
         success: false,
         message: "Contract not found.",
+      });
+      return;
+    }
+    const userId = req.userId;
+    if (userId !== contract.institutionId && userId !== contract.contractor?.userId) {
+      res.status(403).json({
+        success: false,
+        message: "You are not authorized to update terms for this contract.",
       });
       return;
     }

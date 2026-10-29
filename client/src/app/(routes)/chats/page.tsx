@@ -1,26 +1,36 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import ChatList from "@/app/components/chat/ChatList";
 import ChatWindow from "@/app/components/chat/ChatWindow";
 import { motion } from "framer-motion";
 
-const ChatPage = () => {
-  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+const ChatContent = () => {
+  const searchParams = useSearchParams();
+  const initialChatId = searchParams.get("chatId");
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(initialChatId);
   const [isMobileView, setIsMobileView] = useState(false);
-  const [showChatList, setShowChatList] = useState(true);
+  const [showChatList, setShowChatList] = useState(!initialChatId);
 
-  // Handle responsive layout
   useEffect(() => {
     const handleResize = () => {
       setIsMobileView(window.innerWidth < 768);
     };
 
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Set up chat selection logic
+  useEffect(() => {
+    if (initialChatId) {
+      setSelectedChatId(initialChatId);
+      if (window.innerWidth < 768) {
+        setShowChatList(false);
+      }
+    }
+  }, [initialChatId]);
+
   const handleChatSelect = (chatId: string) => {
     setSelectedChatId(chatId);
     if (isMobileView) {
@@ -30,7 +40,6 @@ const ChatPage = () => {
 
   return (
     <div className="h-screen flex flex-col md:flex-row bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
-      {/* Mobile Header with Toggle */}
       {isMobileView && (
         <div className="bg-neutral-800 p-4 flex justify-between items-center border-b border-yellow-900/20">
           <button
@@ -46,13 +55,11 @@ const ChatPage = () => {
           <h1 className="text-neutral-200 font-semibold">
             {selectedChatId && !showChatList ? "Chat" : "Your Conversations"}
           </h1>
-          <div className="w-4"></div> {/* Spacer for alignment */}
+          <div className="w-4"></div>
         </div>
       )}
 
-      {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Chat List Section - conditionally shown on mobile */}
         {(!isMobileView || showChatList) && (
           <motion.div
             initial={{ x: isMobileView ? -300 : 0, opacity: 0 }}
@@ -64,12 +71,11 @@ const ChatPage = () => {
               <h2 className="text-lg font-semibold text-neutral-200">Conversations</h2>
             </div>
             <div className="flex-1 overflow-y-auto p-4">
-              <ChatList onSelectChat={handleChatSelect} />
+              <ChatList onSelectChat={handleChatSelect} selectedChatId={selectedChatId} />
             </div>
           </motion.div>
         )}
 
-        {/* Chat Window Section - conditionally shown on mobile */}
         {(!isMobileView || !showChatList) && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -101,6 +107,20 @@ const ChatPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const ChatPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="h-screen flex items-center justify-center bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
+          <div className="w-8 h-8 border-4 border-yellow-500/20 border-t-yellow-500 rounded-full animate-spin"></div>
+        </div>
+      }
+    >
+      <ChatContent />
+    </Suspense>
   );
 };
 

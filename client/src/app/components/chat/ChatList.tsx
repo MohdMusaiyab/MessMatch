@@ -19,14 +19,16 @@ interface Chat {
 
 interface ChatListProps {
   onSelectChat: (chatId: string) => void;
+  selectedChatId?: string | null;
 }
 
-const ChatList: React.FC<ChatListProps> = ({ onSelectChat }) => {
-  const [chats, setChats] = useState<Chat[]>([]); // All chats fetched from the backend
-  const [filteredChats, setFilteredChats] = useState<Chat[]>([]); // Chats filtered by search query
-  const [searchQuery, setSearchQuery] = useState(""); // Search query state
+const ChatList: React.FC<ChatListProps> = ({ onSelectChat, selectedChatId }) => {
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [filteredChats, setFilteredChats] = useState<Chat[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [activeChat, setActiveChat] = useState<string | null>(null);
+  const [localActiveChat, setLocalActiveChat] = useState<string | null>(null);
+  const activeChat = selectedChatId ?? localActiveChat;
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
@@ -68,7 +70,7 @@ const ChatList: React.FC<ChatListProps> = ({ onSelectChat }) => {
   }, [searchQuery, chats]);
 
   const handleChatSelect = (chatId: string) => {
-    setActiveChat(chatId);
+    setLocalActiveChat(chatId);
     onSelectChat(chatId);
   };
 

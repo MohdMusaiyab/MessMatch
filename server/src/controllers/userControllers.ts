@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { hashPassword } from "../utils/auth";
 import prisma from "../utils/prisma";
 import { Prisma, State } from "@prisma/client";
+import { isDemoAccount } from "../utils/demo";
 
 export const updateUserController = async (req: Request, res: Response) => {
   try {
@@ -28,6 +29,22 @@ export const updateUserController = async (req: Request, res: Response) => {
     if (!user) {
       res.status(404).json({
         message: "User not found",
+        success: false,
+      });
+      return;
+    }
+
+    if (isDemoAccount(user.email)) {
+      res.status(403).json({
+        message: "Demo account profile is locked to preserve shared evaluation credentials.",
+        success: false,
+      });
+      return;
+    }
+
+    if (email && isDemoAccount(email) && email.toLowerCase().trim() !== user.email.toLowerCase().trim()) {
+      res.status(400).json({
+        message: "Cannot reassign profile to a reserved demo email.",
         success: false,
       });
       return;
@@ -460,11 +477,24 @@ export const getAuctionsAndContractorsController = async (
       });
     }
 
+    const formattedAuctions = auctions.map((auction) => {
+      const bidCount = auction.bids ? auction.bids.length : 0;
+      let highestBid: number | null = null;
+      if (auction.bids && auction.bids.length > 0) {
+        highestBid = Math.max(...auction.bids.map((b: any) => b.amount));
+      }
+      return {
+        ...auction,
+        bidCount,
+        highestBid,
+      };
+    });
+
     res.status(200).json({
       success: true,
       message: "Auctions and contractors fetched successfully",
       data: {
-        auctions,
+        auctions: formattedAuctions,
         contractors,
       },
       pagination: {

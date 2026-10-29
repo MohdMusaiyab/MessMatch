@@ -719,6 +719,11 @@ export const deleteYourBidController = async (req: Request, res: Response) => {
             id: true,
             isOpen: true,
             winnerId: true,
+            winner: {
+              select: {
+                userId: true,
+              },
+            },
           },
         },
       },
@@ -739,22 +744,18 @@ export const deleteYourBidController = async (req: Request, res: Response) => {
       });
       return;
     }
-    //Handlng the Case if the Bidder is Winner
-    //Alos Handle the Case where Bid is to be deleted and so is the Contract assoicated with it if any
-    if (existingBid.auction.winnerId === userId) {
+    if (existingBid.auction.winner?.userId === userId) {
       await prisma.auction.update({
         where: { id: existingBid.auction.id },
         data: { winnerId: null },
       });
     }
-    //Also Check if the Contract Exists for this Auction
     const contract = await prisma.contract.findUnique({
       where: {
         auctionId: existingBid.auction.id,
       },
     });
     if (contract) {
-      // If a contract exists, delete it
       await prisma.contract.delete({
         where: {
           auctionId: existingBid.auction.id,
@@ -807,16 +808,17 @@ export const getMyBidsController = async (req: Request, res: Response) => {
             id: true,
             title: true,
             description: true,
-            winnerId: true, // Include winnerId from auction
+            winnerId: true,
           },
         },
       },
     });
 
     if (!myBids.length) {
-      res.status(404).json({
-        message: "You Have Not Placed any bid till now.",
-        success: false,
+      res.status(200).json({
+        message: "No bids found.",
+        success: true,
+        data: [],
       });
       return;
     }
@@ -1018,6 +1020,9 @@ export const acceptBidAcontroller = async (req: Request, res: Response) => {
     res.status(200).json({
       message: "Bid accepted successfully",
       success: true,
+      data: {
+        winnerId: contractor.id,
+      },
     });
     return;
   } catch (error) {
@@ -1104,6 +1109,7 @@ export const removeWinnerController = async (req: Request, res: Response) => {
       },
       data: {
         winnerId: null,
+        isOpen: true,
       },
     });
 

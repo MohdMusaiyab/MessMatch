@@ -3,6 +3,7 @@ import { CreateUserSchema, LoginSchema } from "../schemas/schemas";
 import { comparePassword, hashPassword } from "../utils/auth";
 import { ZodError } from "zod";
 import prisma from "../utils/prisma";
+import { isDemoAccount } from "../utils/demo";
 
 export const registerController = async (req: Request, res: Response) => {
   try {
@@ -26,6 +27,14 @@ export const registerController = async (req: Request, res: Response) => {
       contactNumber,
       state,
     } = parsedBody;
+
+    if (isDemoAccount(email)) {
+      res.status(400).json({
+        message: "This email is reserved for demo accounts",
+        success: false,
+      });
+      return;
+    }
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -157,6 +166,14 @@ export const forgotPasswordController = async (req: Request, res: Response) => {
     if (typeof newPassword !== "string" || newPassword.length < 6) {
       res.status(400).json({
         message: "Password must be at least 6 characters long",
+        success: false,
+      });
+      return;
+    }
+
+    if (isDemoAccount(email)) {
+      res.status(403).json({
+        message: "Password reset is disabled for demonstration accounts.",
         success: false,
       });
       return;

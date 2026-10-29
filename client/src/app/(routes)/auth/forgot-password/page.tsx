@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { isDemoAccount } from "@/lib/demo";
 
 const SecurityQuestions = [
   { value: "MOTHERS_MAIDEN_NAME", label: "Mother's Maiden Name" },
@@ -25,8 +26,14 @@ const ForgotPasswordPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
     setMessage("");
+
+    if (isDemoAccount(email)) {
+      setMessage("Password reset is disabled for demonstration accounts.");
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await axios.post(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/forgot-password`,
@@ -56,9 +63,7 @@ const ForgotPasswordPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950">
-      {/* Two-Column Layout */}
       <div className="flex flex-col lg:flex-row min-h-screen">
-        {/* Left Section with Image */}
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -76,7 +81,6 @@ const ForgotPasswordPage: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* Right Section (Form) */}
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6 ">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -87,22 +91,21 @@ const ForgotPasswordPage: React.FC = () => {
               Reset Password
             </h1>
 
-            {/* Error Message Display */}
             {message && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={`w-full p-4 mb-6 rounded-lg ${
                   message.includes("success")
-                    ? "bg-yellow-500/10"
-                    : "bg-red-500/10"
+                    ? "bg-yellow-500/10 border border-yellow-500/20"
+                    : "bg-red-500/10 border border-red-500/20"
                 }`}
               >
                 <p
-                  className={`text-center ${
+                  className={`text-center text-sm ${
                     message.includes("success")
-                      ? "text-yellow-500"
-                      : "text-red-500"
+                      ? "text-yellow-400"
+                      : "text-red-400"
                   }`}
                 >
                   {message}
@@ -112,7 +115,7 @@ const ForgotPasswordPage: React.FC = () => {
 
             <form
               onSubmit={handleSubmit}
-              className="bg-gradient-to-b from-neutral-900 to-neutral-950 p-8 rounded-lg border border-yellow-900/20 backdrop-blur-sm shadow-xl"
+              className="bg-gradient-to-b from-neutral-900 to-neutral-950 p-8 rounded-2xl border border-yellow-900/20 backdrop-blur-sm shadow-xl"
             >
               <div className="mb-6">
                 <label className="block text-sm font-medium text-neutral-300 mb-2">
@@ -175,9 +178,9 @@ const ForgotPasswordPage: React.FC = () => {
               <motion.button
                 type="submit"
                 disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-white font-semibold py-3 rounded-md hover:shadow-lg hover:shadow-yellow-600/20 transition-all duration-300 disabled:opacity-50"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full bg-gradient-to-r from-yellow-500 via-yellow-600 to-yellow-700 hover:from-yellow-400 hover:to-yellow-600 text-neutral-950 font-bold py-3.5 rounded-xl shadow-lg shadow-yellow-500/20 transition-all duration-200 disabled:opacity-50"
               >
                 {loading ? "Resetting Password..." : "Reset Password"}
               </motion.button>
@@ -185,7 +188,7 @@ const ForgotPasswordPage: React.FC = () => {
                 Remember your password?{" "}
                 <Link
                   href="/auth/login"
-                  className="text-yellow-500  hover:underline"
+                  className="text-yellow-400 hover:text-yellow-300 transition-colors"
                 >
                   Login
                 </Link>

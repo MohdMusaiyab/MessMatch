@@ -78,7 +78,24 @@ export const getASingleChatController = async (req: Request, res: Response) => {
   try {
     const chat = await prisma.chat.findUnique({
       where: { id: chatId },
-      select: { user1Id: true, user2Id: true },
+      select: {
+        user1Id: true,
+        user2Id: true,
+        user1: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        user2: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
     });
 
     if (!chat) {
@@ -115,10 +132,17 @@ export const getASingleChatController = async (req: Request, res: Response) => {
       },
     }));
 
+    const otherUser = chat.user1Id === userId ? chat.user2 : chat.user1;
+
     res.status(200).json({
       success: true,
       message: "Messages fetched successfully",
       data: formattedMessages,
+      otherUser: {
+        id: otherUser.id,
+        name: otherUser.name,
+        email: otherUser.email,
+      },
     });
     return;
   } catch (error) {
@@ -133,7 +157,7 @@ export const getASingleChatController = async (req: Request, res: Response) => {
 
 export const createChatController = async (req: Request, res: Response) => {
   const user1Id = req.userId;
-  const { user2Id } = req.body;
+  const user2Id = req.body.user2Id || req.body.recipientId;
 
   if (!user1Id) {
     res.status(401).json({ success: false, message: "Unauthorized" });

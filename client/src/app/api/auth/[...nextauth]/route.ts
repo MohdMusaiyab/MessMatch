@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 import { SignJWT } from "jose";
+import { isDemoAccount } from "@/lib/demo";
 
 const handler = NextAuth({
   providers: [
@@ -56,6 +57,7 @@ const handler = NextAuth({
             name: user.name,
             email: user.email,
             role: user.role,
+            isDemo: isDemoAccount(user.email),
           };
         } catch (error) {
           if (axios.isAxiosError(error) && error.response) {
@@ -79,6 +81,7 @@ const handler = NextAuth({
         token.name = user.name;
         token.email = user.email;
         token.role = user.role;
+        token.isDemo = isDemoAccount(user.email);
       }
 
       if (token.id && process.env.NEXTAUTH_SECRET) {
@@ -88,6 +91,7 @@ const handler = NextAuth({
           name: token.name,
           email: token.email,
           role: token.role,
+          isDemo: token.isDemo,
         })
           .setProtectedHeader({ alg: "HS256" })
           .setIssuedAt()
@@ -105,6 +109,7 @@ const handler = NextAuth({
           name: token.name as string,
           email: token.email as string,
           role: token.role as string,
+          isDemo: Boolean(token.isDemo),
         };
         session.accessToken = token.accessToken as string;
       }

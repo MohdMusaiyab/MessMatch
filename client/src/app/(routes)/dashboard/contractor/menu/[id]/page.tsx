@@ -115,7 +115,7 @@ const Page: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <DollarSign className="w-5 h-5 text-yellow-500 flex-shrink-0" />
                   <span className="text-neutral-300">
-                    Price Per Head: ${menuData.pricePerHead}
+                    Price Per Head: ₹{menuData.pricePerHead}
                   </span>
                 </div>
                 <div className="flex items-center gap-4">

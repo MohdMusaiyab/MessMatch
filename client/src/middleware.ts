@@ -15,17 +15,37 @@ export async function middleware(req: NextRequest) {
 
     const userRole = token.role;
 
-    if (userRole === "CONTRACTOR" && pathname.startsWith("/dashboard/institution")) {
-      return NextResponse.redirect(new URL("/dashboard/contractor", req.url));
+    if (pathname === "/dashboard") {
+      const target = userRole === "CONTRACTOR" ? "/dashboard/contractor" : "/dashboard/institution";
+      return NextResponse.redirect(new URL(target, req.url));
     }
 
-    if (userRole !== "CONTRACTOR" && pathname.startsWith("/dashboard/contractor")) {
-      return NextResponse.redirect(new URL("/dashboard/institution", req.url));
+    const isPublicAuctionView =
+      pathname.startsWith("/dashboard/institution/auction/") &&
+      !pathname.startsWith("/dashboard/institution/auction/create") &&
+      !pathname.startsWith("/dashboard/institution/auction/update");
+
+    const isPublicMenuView =
+      pathname.startsWith("/dashboard/contractor/menu/") &&
+      !pathname.startsWith("/dashboard/contractor/menu/create-menu") &&
+      !pathname.startsWith("/dashboard/contractor/menu/update-menu");
+
+    if (userRole === "CONTRACTOR") {
+      if (pathname.startsWith("/dashboard/institution") && !isPublicAuctionView) {
+        return NextResponse.redirect(new URL("/dashboard/contractor", req.url));
+      }
+    }
+
+    if (userRole !== "CONTRACTOR") {
+      if (pathname.startsWith("/dashboard/contractor") && !isPublicMenuView) {
+        return NextResponse.redirect(new URL("/dashboard/institution", req.url));
+      }
     }
   }
 
   if (token && (pathname === "/auth/login" || pathname === "/auth/register")) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    const target = token.role === "CONTRACTOR" ? "/dashboard/contractor" : "/dashboard/institution";
+    return NextResponse.redirect(new URL(target, req.url));
   }
 
   return NextResponse.next();

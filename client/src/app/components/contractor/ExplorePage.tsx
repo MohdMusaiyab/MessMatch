@@ -240,13 +240,18 @@ const ExplorePage = () => {
                         <div className="flex justify-between items-center py-2 border-t border-yellow-900/10">
                           <span className="text-neutral-500">Total Bids</span>
                           <span className="text-neutral-300">
-                            {auction.bidCount}
+                            {auction.bidCount ?? ((auction as any).bids ? (auction as any).bids.length : 0)}
                           </span>
                         </div>
                         <div className="flex justify-between items-center py-2 border-t border-yellow-900/10">
                           <span className="text-neutral-500">Highest Bid</span>
                           <span className="text-yellow-500 font-medium">
-                            {formatCurrency(auction.highestBid)}
+                            {formatCurrency(
+                              auction.highestBid ??
+                              ((auction as any).bids?.length
+                                ? Math.max(...(auction as any).bids.map((b: any) => b.amount))
+                                : null)
+                            )}
                           </span>
                         </div>
                         {auction.highestBidder && (

@@ -28,9 +28,11 @@ const ReviewComponent = ({ profileId }: { profileId: string }) => {
   const [isFetchingReviews, setIsFetchingReviews] = useState(true);
   const modalRef = useRef<HTMLDivElement>(null);
 
-  // Check if the current user has already left a review
   const hasUserReviewed = reviews.some(
     (review) => review.reviewer?.id === session?.user?.id
+  );
+  const canLeaveReview = Boolean(
+    session?.user && session.user.id !== profileId && session.user.role !== "CONTRACTOR"
   );
 
   // Fetch all reviews for the contractor
@@ -232,8 +234,7 @@ const ReviewComponent = ({ profileId }: { profileId: string }) => {
 
   return (
     <div className="space-y-6 relative">
-      {/* Add Review Button - Only show if user hasn't reviewed yet or is editing */}
-      {(!hasUserReviewed || editingReviewId) && session?.user && (
+      {canLeaveReview && (!hasUserReviewed || editingReviewId) && (
         <button
           onClick={() => setShowAddReviewModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all"

@@ -380,7 +380,7 @@ const AuctionDetail = () => {
                       <span className="text-yellow-500 font-semibold">
                         Bid Amount:
                       </span>
-                      <span>{bid.amount}</span>
+                      <span>₹{bid.amount}</span>
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="text-yellow-500 font-semibold">

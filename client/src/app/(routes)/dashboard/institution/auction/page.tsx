@@ -45,13 +45,30 @@ const MyAuctions = () => {
   return (
     <div className="min-h-screen bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 py-8">
       <div className="container mx-auto px-4 lg:px-8">
-        <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
-          My Auctions
-        </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-yellow-200 bg-clip-text text-transparent">
+            My Auctions
+          </h1>
+          <Link
+            href="/dashboard/institution/auction/create"
+            className="self-start sm:self-auto px-5 py-2.5 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white text-sm font-semibold rounded-lg transition-all shadow-md shadow-yellow-900/20"
+          >
+            Create New Auction
+          </Link>
+        </div>
         
         {auctions.length === 0 ? (
-          <div className="backdrop-blur-lg bg-neutral-900/50 rounded-xl border border-yellow-900/20 p-6">
-            <p className="text-neutral-300">No auctions found.</p>
+          <div className="backdrop-blur-lg bg-neutral-900/50 rounded-xl border border-yellow-900/20 p-8 text-center max-w-lg mx-auto">
+            <h3 className="text-lg font-semibold text-neutral-200 mb-2">No Auctions Created</h3>
+            <p className="text-neutral-400 text-sm mb-6 leading-relaxed">
+              You have not created any tenders yet. Publish a tender to invite competitive meal package bids from verified catering contractors.
+            </p>
+            <Link
+              href="/dashboard/institution/auction/create"
+              className="inline-block px-6 py-2.5 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white text-sm font-semibold rounded-lg transition-all"
+            >
+              Post First Tender
+            </Link>
           </div>
         ) : (
           <div className="grid gap-6">
